@@ -1,0 +1,197 @@
+/**
+ * HUMAN TASKS:
+ * 1. Verify touch target sizes meet 44x44px minimum on all interactive elements
+ * 2. Test color contrast ratios meet WCAG 2.1 AA standards
+ * 3. Validate focus indicators are visible across all browsers
+ * 4. Test component behaviors with screen readers
+ */
+
+/**
+ * Core component styles for Mint Replica Lite
+ * Requirements addressed:
+ * - Mobile-First Design (Technical Specification/1.1 System Overview)
+ *   Implements responsive components with minimum touch targets of 44x44 points
+ * - User Interface Design (Technical Specification/8.1 User Interface Design)
+ *   Defines consistent component styles with proper spacing and interactions
+ * - Accessibility Features (Technical Specification/8.1.8 Accessibility Features)
+ *   Ensures WCAG 2.1 compliance with proper focus management and touch targets
+ */
+
+@import './variables.css';
+@import './typography.css';
+
+/* Button Base Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: 0.375rem;
+  font-weight: var(--font-weight-medium);
+  min-height: 44px;
+  min-width: 44px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background-color: var(--color-primary-500);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-600);
+}
+
+/* Card Component */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+/* Form Input */
+.input {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 0.375rem;
+  min-height: 44px;
+}
+
+.input:focus {
+  border-color: var(--color-primary-500);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--color-primary-500);
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: var(--spacing-4);
+  max-width: calc(100% - var(--spacing-8));
+  max-height: calc(100vh - var(--spacing-8));
+  overflow-y: auto;
+}
+
+/* Progress Bar */
+.progress-bar {
+  width: 100%;
+  height: 0.5rem;
+  background-color: var(--color-neutral-200);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--color-primary-500);
+  transition: width 0.3s ease;
+}
+
+/* Loading Spinner */
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-neutral-200);
+  border-top-color: var(--color-primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+/* Responsive Breakpoints */
+@media (min-width: var(--breakpoint-sm)) {
+  .modal-content {
+    max-width: 28rem;
+  }
+}
+
+@media (min-width: var(--breakpoint-md)) {
+  .modal-content {
+    max-width: 32rem;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+  
+  .progress-bar-fill,
+  .btn,
+  .modal {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    background-color: var(--color-primary-700);
+    outline: 2px solid var(--color-primary-900);
+  }
+  
+  .input:focus {
+    outline: 2px solid var(--color-primary-900);
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .card,
+  .modal-content {
+    background-color: var(--color-neutral-800);
+  }
+  
+  .table td,
+  .table th {
+    border-color: var(--color-neutral-700);
+  }
+  
+  .input {
+    background-color: var(--color-neutral-900);
+    border-color: var(--color-neutral-700);
+    color: var(--color-neutral-100);
+  }
+}
