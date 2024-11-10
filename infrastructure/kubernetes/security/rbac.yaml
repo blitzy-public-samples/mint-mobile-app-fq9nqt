@@ -1,0 +1,220 @@
+# Human Tasks:
+# 1. Review and validate role permissions align with security requirements
+# 2. Ensure service accounts are created in the correct namespaces
+# 3. Verify cluster role bindings for admin access
+# 4. Configure monitoring for RBAC policy violations
+# 5. Rotate service account tokens periodically
+
+# Technical Specification Requirements Addressed:
+# - 5.4 Security Architecture/Security Components/IAM: Implements Identity & Access Management 
+#   through Kubernetes RBAC with granular permission controls
+# - 9.1.2 Authorization Model: Defines role-based access control policies and permissions 
+#   following principle of least privilege
+# - 10.1 Deployment Environment: Establishes security controls for cloud-native deployment 
+#   model with environment-specific role bindings
+
+apiVersion: v1
+kind: List
+items:
+  # Cluster-wide admin role for platform administrators
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: mintreplica-admin
+      labels:
+        app: mintreplica-lite
+        type: security
+        role: admin
+    rules:
+      - apiGroups: ["*"]
+        resources: ["pods", "services", "deployments", "configmaps", "secrets", 
+                   "networkpolicies", "persistentvolumes", "persistentvolumeclaims"]
+        verbs: ["*"]
+      - apiGroups: ["policy"]
+        resources: ["podsecuritypolicies"]
+        verbs: ["use"]
+
+  # Service-specific role for API service
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: api-service
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: api
+    rules:
+      - apiGroups: [""]
+        resources: ["secrets", "configmaps"]
+        verbs: ["get", "list"]
+      - apiGroups: ["networking.k8s.io"]
+        resources: ["networkpolicies"]
+        verbs: ["get", "list"]
+      - apiGroups: ["policy"]
+        resources: ["podsecuritypolicies"]
+        verbs: ["use"]
+
+  # Service account for API service
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: api-service
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: api
+
+  # Role binding for API service
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: api-service-binding
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: api
+    subjects:
+      - kind: ServiceAccount
+        name: api-service
+        namespace: mintreplica-prod
+    roleRef:
+      kind: Role
+      name: api-service
+      apiGroup: rbac.authorization.k8s.io
+
+  # Database service role
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: database-service
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: database
+    rules:
+      - apiGroups: [""]
+        resources: ["secrets", "configmaps", "persistentvolumeclaims"]
+        verbs: ["get", "list"]
+      - apiGroups: ["policy"]
+        resources: ["podsecuritypolicies"]
+        verbs: ["use"]
+
+  # Service account for database
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: database-service
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: database
+
+  # Role binding for database service
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: database-service-binding
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: database
+    subjects:
+      - kind: ServiceAccount
+        name: database-service
+        namespace: mintreplica-prod
+    roleRef:
+      kind: Role
+      name: database-service
+      apiGroup: rbac.authorization.k8s.io
+
+  # Monitoring service role
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: monitoring-service
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: monitoring
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "services", "endpoints"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: [""]
+        resources: ["configmaps"]
+        verbs: ["get"]
+      - apiGroups: ["policy"]
+        resources: ["podsecuritypolicies"]
+        verbs: ["use"]
+
+  # Service account for monitoring
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: monitoring-service
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: monitoring
+
+  # Role binding for monitoring service
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: monitoring-service-binding
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: monitoring
+    subjects:
+      - kind: ServiceAccount
+        name: monitoring-service
+        namespace: mintreplica-prod
+    roleRef:
+      kind: Role
+      name: monitoring-service
+      apiGroup: rbac.authorization.k8s.io
+
+  # Default service account restrictions
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: default-restrictions
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+    rules:
+      - apiGroups: [""]
+        resources: ["configmaps"]
+        verbs: ["get"]
+      - apiGroups: ["policy"]
+        resources: ["podsecuritypolicies"]
+        verbs: ["use"]
+
+  # Role binding for default service account
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: default-restrictions-binding
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+    subjects:
+      - kind: ServiceAccount
+        name: default
+        namespace: mintreplica-prod
+    roleRef:
+      kind: Role
+      name: default-restrictions
+      apiGroup: rbac.authorization.k8s.io
