@@ -1,0 +1,117 @@
+# Human Tasks:
+# 1. Ensure SSL certificates are generated and placed in ${CERT_PATH}
+# 2. Set NODE_NAME environment variable in Kubernetes deployment
+# 3. Create /var/log/mint-replica directory with proper permissions
+# 4. Configure proper file permissions (0600) for SSL key files
+# 5. Verify Logstash connectivity and authentication
+
+# Filebeat Configuration for Mint Replica Lite
+# Version: 8.0+
+# Requirements addressed:
+# - Logging Tools (7.5): ELK Stack 8.0+ integration for log aggregation
+# - Security Monitoring (9.3.2): Real-time log collection via CloudWatch Logs
+# - Audit Logging (9.2/9.2.2): Audit logging with PII protection
+
+filebeat.inputs:
+  # Container logs collection
+  - type: container
+    paths:
+      - /var/log/containers/*.log
+    processors:
+      - add_kubernetes_metadata:
+          host: ${NODE_NAME}
+          matchers:
+            - logs_path:
+                logs_path: /var/log/containers/
+
+  # Application-specific logs
+  - type: log
+    paths:
+      - /var/log/mint-replica/*.log
+    json.keys_under_root: true
+    fields:
+      type: application
+
+# Data processors for enrichment and security
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  # PII and sensitive data protection
+  - drop_fields:
+      fields: [password, token, authorization, credit_card]
+      ignore_missing: true
+
+# Secure output configuration to Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+  ssl.enabled: true
+  ssl.certificate_authorities: ["${CERT_PATH}/ca.crt"]
+  ssl.certificate: "${CERT_PATH}/filebeat.crt"]
+  ssl.key: "${CERT_PATH}/filebeat.key"
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat.log
+  keepfiles: 7
+  permissions: "0644"
+
+# Index template settings
+setup.template.settings:
+  index.number_of_shards: 3
+  index.number_of_replicas: 2
+  index.codec: best_compression
+
+# Kibana integration
+setup.kibana:
+  host: "kibana:5601"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["${CERT_PATH}/ca.crt"]
+
+# Monitoring configuration
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  ssl.enabled: true
+  ssl.certificate_authorities: ["${CERT_PATH}/ca.crt"]
+
+# Performance settings
+filebeat.registry.flush: 5s
+filebeat.shutdown_timeout: 30s
+filebeat.spool_size: 2048
+filebeat.idle_timeout: "5s"
+filebeat.registry.file.permissions: 0600
+filebeat.harvester.buffer_size: 16384
+filebeat.harvester.max_bytes: 10485760
+
+# Security settings
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: true
+    reload.period: 10s
+
+# APM integration
+apm-server:
+  host: "localhost:8200"
+  ssl:
+    enabled: true
+    certificate_authorities: ["${CERT_PATH}/ca.crt"]
+    certificate: "${CERT_PATH}/apm.crt"
+    key: "${CERT_PATH}/apm.key"
+
+# General settings
+name: "mint-replica-filebeat"
+tags: ["mint-replica", "production"]
+fields:
+  env: "production"
+  application: "mint-replica-lite"
+
+# Queue settings
+queue.mem:
+  events: 4096
+  flush.min_events: 512
+  flush.timeout: "5s"
