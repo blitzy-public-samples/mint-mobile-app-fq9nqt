@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Human Tasks:
+1. Verify the icon displays correctly on Android 8.0+ devices
+2. Test the icon appearance in both light and dark themes
+3. Validate the icon scales properly across different device densities
+4. Ensure the icon meets Google Play Store requirements for adaptive icons
+
+Requirements addressed:
+- Mobile-first Design (1.1): Implements platform-specific design guidelines for optimal user experience through adaptive icon support
+- UI Design Standards (8.1.1): Follows Material Design guidelines for adaptive launcher icons on Android platform
+-->
+<adaptive-icon
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- 
+    Background layer using the mint-themed gradient background
+    Supports both light and dark themes through color values defined in drawable
+    -->
+    <background android:drawable="@drawable/ic_launcher_background"/>
+    
+    <!-- 
+    Foreground layer containing the app's primary icon design
+    Implements financial symbolism with proper scaling and positioning
+    -->
+    <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+</adaptive-icon>
