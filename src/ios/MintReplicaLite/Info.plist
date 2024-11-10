@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- MARK: Core App Information -->
+    <!-- Requirement: Mobile Applications - Native iOS application configuration -->
+    <key>CFBundleIdentifier</key>
+    <string>com.mintreplica.lite</string>
+    <key>CFBundleName</key>
+    <string>MintReplicaLite</string>
+    <key>CFBundleDisplayName</key>
+    <string>Mint Replica</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${AppConstants.appVersion}</string>
+    <key>CFBundleVersion</key>
+    <string>${AppConstants.buildNumber}</string>
+    
+    <!-- MARK: Device and System Requirements -->
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    
+    <!-- MARK: Scene Configuration -->
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+        <key>UISceneConfigurations</key>
+        <dict>
+            <key>UIWindowSceneSessionRoleApplication</key>
+            <array>
+                <dict>
+                    <key>UISceneConfigurationName</key>
+                    <string>Default Configuration</string>
+                    <key>UISceneDelegateClassName</key>
+                    <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+                </dict>
+            </array>
+        </dict>
+    </dict>
+    
+    <!-- MARK: Device Capabilities -->
+    <!-- Requirement: Core Features - Biometric authentication -->
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>armv7</string>
+        <string>biometrics</string>
+    </array>
+    
+    <!-- MARK: Supported Orientations -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- MARK: Privacy Permissions -->
+    <!-- Requirement: Security Architecture - Security permissions and privacy declarations -->
+    <key>NSFaceIDUsageDescription</key>
+    <string>Secure access to your financial data using Face ID</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Required for document scanning and check deposits</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Required for uploading receipts and documents</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Required for finding nearby ATMs and bank branches</string>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>This allows us to provide personalized financial insights and recommendations</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Required for voice memo attachments to transactions</string>
+    
+    <!-- MARK: Network Security -->
+    <!-- Requirement: Security Architecture - Transport security configuration -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>api.mintreplica.com</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <false/>
+                <key>NSExceptionRequiresForwardSecrecy</key>
+                <true/>
+                <key>NSExceptionMinimumTLSVersion</key>
+                <string>TLSv1.3</string>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+    
+    <!-- MARK: Export Compliance -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+    
+    <!-- MARK: Background Modes -->
+    <!-- Requirement: Core Features - Secure data synchronization -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+    
+    <!-- MARK: URL Schemes -->
+    <!-- Requirement: Core Features - Financial institution connections -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>mintreplicalite</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>
