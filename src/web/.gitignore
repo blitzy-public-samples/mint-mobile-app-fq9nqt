@@ -1,0 +1,112 @@
+# Dependencies
+# Prevents committing third-party code that should be installed via package manager
+node_modules/
+
+# Production build output
+# Prevents committing compiled code that should be built during deployment
+dist/
+build/
+
+# Build artifacts
+# Prevents committing compiled code and build artifacts
+*.log
+coverage/
+
+# Environment files
+# Critical - Prevents committing files containing API keys, credentials and other secrets
+.env
+.env.local
+.env.*.local
+
+# IDE configuration
+# Prevents committing IDE-specific settings that may contain sensitive paths
+.idea/
+.vscode/
+
+# Editor files
+# Prevents committing temporary editor files
+*.swp
+*.swo
+*~
+
+# Debug logs
+# Prevents committing debug logs that may contain sensitive data
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+# Prevents committing OS-specific metadata files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# SSL/TLS certificates
+# Critical - Prevents committing private keys and certificates
+*.pem
+*.key
+*.crt
+*.cer
+
+# Test coverage reports
+# Prevents committing test artifacts that should be generated during CI
+coverage/
+.nyc_output/
+
+# Cache directories
+# Prevents committing cache files
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+
+# Temporary files
+# Prevents committing temporary files
+*.tmp
+*.temp
+.temp/
+.tmp/
+
+# TypeScript build info
+# Prevents committing TypeScript compilation artifacts
+*.tsbuildinfo
+
+# Yarn
+# Prevents committing yarn specific files that should be regenerated
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Storybook build outputs
+storybook-static/
+
+# Bundle analyzer outputs
+stats.html
+stats.json
