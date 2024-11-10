@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Test Report</title>
+    <!-- Bootstrap v5.3.0 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js v4.3.0 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
+        .metric-card {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+        .threshold-indicator {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        .threshold-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        .threshold-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #856404;
+        }
+        .threshold-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm">
+        <div class="container py-4">
+            <h1 class="h3 mb-0">Performance Test Report</h1>
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Test Run ID:</small>
+                    <div id="testRunId"></div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Date/Time:</small>
+                    <div id="timestamp"></div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Environment:</small>
+                    <div id="environment"></div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Duration:</small>
+                    <div id="duration"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Summary Section -->
+    <section class="container my-4">
+        <div class="row g-3">
+            <!-- Response Time -->
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <h6 class="text-muted mb-2">Average Response Time</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 id="avgResponseTime" class="mb-0"></h3>
+                        <div id="responseTimeIndicator" class="threshold-indicator"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Peak Response Time -->
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <h6 class="text-muted mb-2">Peak Response Time</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 id="peakResponseTime" class="mb-0"></h3>
+                        <div id="peakResponseIndicator" class="threshold-indicator"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Requests per Second -->
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <h6 class="text-muted mb-2">Requests per Second</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 id="requestsPerSecond" class="mb-0"></h3>
+                        <div id="throughputIndicator" class="threshold-indicator"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Error Rate -->
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <h6 class="text-muted mb-2">Error Rate</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 id="errorRate" class="mb-0"></h3>
+                        <div id="errorRateIndicator" class="threshold-indicator"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="container my-4">
+        <div class="row g-4">
+            <!-- Response Time Distribution -->
+            <div class="col-md-6">
+                <div class="bg-white p-3 rounded">
+                    <h5>Response Time Distribution</h5>
+                    <div class="chart-container">
+                        <canvas id="responseTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Throughput Over Time -->
+            <div class="col-md-6">
+                <div class="bg-white p-3 rounded">
+                    <h5>Throughput Over Time</h5>
+                    <div class="chart-container">
+                        <canvas id="throughputChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Resource Utilization -->
+            <div class="col-12">
+                <div class="bg-white p-3 rounded">
+                    <h5>Resource Utilization</h5>
+                    <div class="chart-container">
+                        <canvas id="resourceUtilizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Details Section -->
+    <section class="container my-4">
+        <!-- Endpoint Metrics -->
+        <div class="bg-white p-3 rounded mb-4">
+            <h5>Endpoint Metrics</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>Method</th>
+                            <th>Avg Response Time</th>
+                            <th>Max Response Time</th>
+                            <th>Success Rate</th>
+                            <th>Error Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="endpointMetricsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Error Analysis -->
+        <div class="bg-white p-3 rounded">
+            <h5>Error Analysis</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Error Type</th>
+                            <th>Count</th>
+                            <th>First Occurrence</th>
+                            <th>Last Occurrence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="errorAnalysisBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Performance thresholds from global configuration
+        const PERFORMANCE_THRESHOLDS = {
+            responseTime: 200,
+            throughput: 1000,
+            errorRate: 0.01
+        };
+
+        // Chart colors from global configuration
+        const CHART_COLORS = {
+            primary: '#007bff',
+            secondary: '#6c757d',
+            success: '#28a745',
+            danger: '#dc3545'
+        };
+
+        // Format metrics for display
+        function formatMetrics(metrics) {
+            return {
+                responseTime: metrics.map(t => Math.round(t)),
+                throughput: metrics.map(t => t.toFixed(2)),
+                memory: metrics.map(m => `${(m / 1024 / 1024).toFixed(2)} MB`),
+                percentiles: calculatePercentiles(metrics),
+                errorRate: (metrics.filter(m => m.error).length / metrics.length * 100).toFixed(2)
+            };
+        }
+
+        // Render performance charts
+        function renderPerformanceCharts(performanceData) {
+            // Response Time Distribution Chart
+            new Chart(document.getElementById('responseTimeChart'), {
+                type: 'line',
+                data: {
+                    labels: performanceData.timestamps,
+                    datasets: [{
+                        label: 'p50',
+                        data: performanceData.responseTime.p50,
+                        borderColor: CHART_COLORS.primary,
+                        fill: false
+                    }, {
+                        label: 'p90',
+                        data: performanceData.responseTime.p90,
+                        borderColor: CHART_COLORS.secondary,
+                        fill: false
+                    }, {
+                        label: 'p95',
+                        data: performanceData.responseTime.p95,
+                        borderColor: CHART_COLORS.success,
+                        fill: false
+                    }, {
+                        label: 'p99',
+                        data: performanceData.responseTime.p99,
+                        borderColor: CHART_COLORS.danger,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Response Time (ms)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Throughput Chart
+            new Chart(document.getElementById('throughputChart'), {
+                type: 'bar',
+                data: {
+                    labels: performanceData.timestamps,
+                    datasets: [{
+                        label: 'Requests/sec',
+                        data: performanceData.throughput.requests_per_second,
+                        backgroundColor: CHART_COLORS.primary
+                    }, {
+                        label: 'Success Rate',
+                        data: performanceData.throughput.success_rate,
+                        backgroundColor: CHART_COLORS.success
+                    }, {
+                        label: 'Error Rate',
+                        data: performanceData.throughput.error_rate,
+                        backgroundColor: CHART_COLORS.danger
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Requests per Second'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Resource Utilization Chart
+            new Chart(document.getElementById('resourceUtilizationChart'), {
+                type: 'line',
+                data: {
+                    labels: performanceData.timestamps,
+                    datasets: [{
+                        label: 'CPU Usage',
+                        data: performanceData.resources.cpu_usage,
+                        borderColor: CHART_COLORS.primary,
+                        fill: true,
+                        backgroundColor: `${CHART_COLORS.primary}20`
+                    }, {
+                        label: 'Memory Usage',
+                        data: performanceData.resources.memory_usage,
+                        borderColor: CHART_COLORS.secondary,
+                        fill: true,
+                        backgroundColor: `${CHART_COLORS.secondary}20`
+                    }, {
+                        label: 'Network I/O',
+                        data: performanceData.resources.network_io,
+                        borderColor: CHART_COLORS.success,
+                        fill: true,
+                        backgroundColor: `${CHART_COLORS.success}20`
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Utilization %'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize report with data
+        function initializeReport(reportData) {
+            // Set header information
+            document.getElementById('testRunId').textContent = reportData.testRunId;
+            document.getElementById('timestamp').textContent = new Date(reportData.timestamp).toLocaleString();
+            document.getElementById('environment').textContent = reportData.environment;
+            document.getElementById('duration').textContent = `${reportData.duration}s`;
+
+            // Set summary metrics
+            document.getElementById('avgResponseTime').textContent = `${reportData.summary.avgResponseTime}ms`;
+            document.getElementById('peakResponseTime').textContent = `${reportData.summary.peakResponseTime}ms`;
+            document.getElementById('requestsPerSecond').textContent = reportData.summary.requestsPerSecond;
+            document.getElementById('errorRate').textContent = `${reportData.summary.errorRate}%`;
+
+            // Set threshold indicators
+            setThresholdIndicator('responseTimeIndicator', reportData.summary.avgResponseTime, PERFORMANCE_THRESHOLDS.responseTime);
+            setThresholdIndicator('throughputIndicator', reportData.summary.requestsPerSecond, PERFORMANCE_THRESHOLDS.throughput);
+            setThresholdIndicator('errorRateIndicator', reportData.summary.errorRate / 100, PERFORMANCE_THRESHOLDS.errorRate);
+
+            // Render charts
+            renderPerformanceCharts(reportData.performance);
+
+            // Populate endpoint metrics table
+            const endpointMetricsBody = document.getElementById('endpointMetricsBody');
+            reportData.endpoints.forEach(endpoint => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${endpoint.url}</td>
+                    <td>${endpoint.method}</td>
+                    <td>${endpoint.avgResponseTime}ms</td>
+                    <td>${endpoint.maxResponseTime}ms</td>
+                    <td>${endpoint.successRate}%</td>
+                    <td>${endpoint.errorCount}</td>
+                `;
+                endpointMetricsBody.appendChild(row);
+            });
+
+            // Populate error analysis table
+            const errorAnalysisBody = document.getElementById('errorAnalysisBody');
+            reportData.errors.forEach(error => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${error.type}</td>
+                    <td>${error.count}</td>
+                    <td>${new Date(error.firstOccurrence).toLocaleString()}</td>
+                    <td>${new Date(error.lastOccurrence).toLocaleString()}</td>
+                `;
+                errorAnalysisBody.appendChild(row);
+            });
+        }
+
+        // Helper function to set threshold indicators
+        function setThresholdIndicator(elementId, value, threshold) {
+            const element = document.getElementById(elementId);
+            if (value <= threshold * 0.8) {
+                element.className = 'threshold-indicator threshold-success';
+                element.textContent = 'Good';
+            } else if (value <= threshold) {
+                element.className = 'threshold-indicator threshold-warning';
+                element.textContent = 'Warning';
+            } else {
+                element.className = 'threshold-indicator threshold-danger';
+                element.textContent = 'Critical';
+            }
+        }
+
+        // Calculate percentiles helper function
+        function calculatePercentiles(values) {
+            const sorted = [...values].sort((a, b) => a - b);
+            return {
+                p50: sorted[Math.floor(sorted.length * 0.5)],
+                p90: sorted[Math.floor(sorted.length * 0.9)],
+                p95: sorted[Math.floor(sorted.length * 0.95)],
+                p99: sorted[Math.floor(sorted.length * 0.99)]
+            };
+        }
+    </script>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
