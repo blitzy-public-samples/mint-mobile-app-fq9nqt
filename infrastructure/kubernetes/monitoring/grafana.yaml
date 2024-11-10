@@ -1,0 +1,253 @@
+# Human Tasks:
+# 1. Create AWS EBS gp2 storage class if not already present
+# 2. Configure AWS IAM roles for CloudWatch Logs access
+# 3. Create TLS certificate secret 'grafana-tls' for secure ingress
+# 4. Set up external DNS for grafana.mintreplica.com
+# 5. Configure SMTP settings for Grafana alerting
+# 6. Review and adjust resource limits based on usage patterns
+
+# Technical Specification Requirements Addressed:
+# - 7.5 Development and Deployment Tools: Implements Grafana 8.0+ with high availability
+# - 9.3.2 Security Monitoring: Configures security dashboards and CloudWatch integration
+# - 10.2.1 AWS Service Configuration: Sets up infrastructure monitoring dashboards
+
+apiVersion: v1
+kind: List
+items:
+  # Grafana configuration
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: grafana-config
+      namespace: monitoring
+      labels:
+        app: grafana
+        component: monitoring
+    data:
+      grafana.ini: |
+        [server]
+        root_url = https://grafana.mintreplica.com
+        
+        [security]
+        admin_user = admin
+        allow_embedding = true
+        cookie_secure = true
+        
+        [auth]
+        disable_login_form = false
+        oauth_auto_login = false
+        
+        [auth.basic]
+        enabled = true
+        
+        [analytics]
+        reporting_enabled = false
+        check_for_updates = true
+        
+        [dashboards]
+        versions_to_keep = 20
+        
+        [users]
+        allow_sign_up = false
+        auto_assign_org_role = Editor
+        
+        [alerting]
+        enabled = true
+        execute_alerts = true
+        
+        [unified_alerting]
+        enabled = true
+        
+        [log]
+        mode = console
+        level = info
+        
+        [metrics]
+        enabled = true
+        
+        [database]
+        wal = true
+
+      datasources.yaml: |
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            url: http://prometheus:80
+            isDefault: true
+            editable: false
+            jsonData:
+              timeInterval: "15s"
+              queryTimeout: "30s"
+              httpMethod: "POST"
+              
+          - name: CloudWatch
+            type: cloudwatch
+            access: proxy
+            jsonData:
+              authType: default
+              defaultRegion: ${AWS_REGION}
+              
+  # Persistent storage for Grafana
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: grafana-storage
+      namespace: monitoring
+      labels:
+        app: grafana
+        component: monitoring
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: gp2
+
+  # Grafana deployment
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: grafana
+      namespace: monitoring
+      labels:
+        app: grafana
+        component: monitoring
+    spec:
+      replicas: 2
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
+          maxSurge: 1
+      selector:
+        matchLabels:
+          app: grafana
+          component: monitoring
+      template:
+        metadata:
+          labels:
+            app: grafana
+            component: monitoring
+        spec:
+          securityContext:
+            fsGroup: 472
+            supplementalGroups:
+              - 0
+          containers:
+            - name: grafana
+              image: grafana/grafana:8.0.0  # Version specified in requirements
+              ports:
+                - containerPort: 3000
+                  name: http
+                  protocol: TCP
+              env:
+                - name: GF_INSTALL_PLUGINS
+                  value: "grafana-piechart-panel,grafana-worldmap-panel"
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "1Gi"
+                limits:
+                  cpu: "1000m"
+                  memory: "2Gi"
+              volumeMounts:
+                - name: grafana-storage
+                  mountPath: /var/lib/grafana
+                - name: grafana-config
+                  mountPath: /etc/grafana
+                  readOnly: true
+              livenessProbe:
+                httpGet:
+                  path: /api/health
+                  port: 3000
+                initialDelaySeconds: 30
+                timeoutSeconds: 5
+              readinessProbe:
+                httpGet:
+                  path: /api/health
+                  port: 3000
+                initialDelaySeconds: 15
+                timeoutSeconds: 5
+              securityContext:
+                runAsUser: 472
+                runAsNonRoot: true
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+          volumes:
+            - name: grafana-storage
+              persistentVolumeClaim:
+                claimName: grafana-storage
+            - name: grafana-config
+              configMap:
+                name: grafana-config
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                        - key: app
+                          operator: In
+                          values:
+                            - grafana
+                    topologyKey: kubernetes.io/hostname
+
+  # Grafana service
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: grafana
+      namespace: monitoring
+      labels:
+        app: grafana
+        component: monitoring
+    spec:
+      type: ClusterIP
+      ports:
+        - port: 80
+          targetPort: 3000
+          protocol: TCP
+          name: http
+      selector:
+        app: grafana
+        component: monitoring
+
+  # Grafana ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: grafana-ingress
+      namespace: monitoring
+      labels:
+        app: grafana
+        component: monitoring
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    spec:
+      rules:
+        - host: grafana.mintreplica.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: grafana
+                    port:
+                      number: 80
+      tls:
+        - hosts:
+            - grafana.mintreplica.com
+          secretName: grafana-tls
