@@ -1,0 +1,135 @@
+# Human Tasks:
+# 1. Ensure AWS WAFv2 service is enabled in your AWS account
+# 2. Verify that you have necessary IAM permissions to create WAF resources
+# 3. Configure AWS CloudWatch Logs retention policy according to your compliance requirements
+# 4. Review rate limits and adjust according to your application's traffic patterns
+# 5. Consider additional WAF rules based on your security requirements
+
+# Addresses requirements from Technical Specification:
+# - WAF Implementation (Section 5.4 Security Architecture)
+# - API Security (Section 9.3.1 API Security)
+# - Security Monitoring (Section 9.3.2 Security Monitoring)
+
+AWSTemplateFormatVersion: '2010-05-15'
+Description: WAF configuration for Mint Replica Lite API Gateway
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment
+    AllowedValues:
+      - production
+      - staging
+      - development
+
+Mappings:
+  EnvironmentConfig:
+    production:
+      rateLimit: 2000
+      logRetention: 90
+      metricsSampling: 100
+    staging:
+      rateLimit: 1000
+      logRetention: 30
+      metricsSampling: 50
+    development:
+      rateLimit: 500
+      logRetention: 7
+      metricsSampling: 20
+
+Conditions:
+  IsProduction: !Equals 
+    - !Ref Environment
+    - 'production'
+
+Resources:
+  WebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: MintReplicaLiteWAF
+      Description: WAF rules for Mint Replica Lite API protection
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      Rules:
+        - Name: RateLimitRule
+          Priority: 1
+          Statement:
+            RateBasedStatement:
+              Limit: !FindInMap [EnvironmentConfig, !Ref Environment, rateLimit]
+              AggregateKeyType: IP
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimitMetric
+          
+        - Name: SQLInjectionRule
+          Priority: 2
+          Statement:
+            SqlInjectionMatchStatement:
+              FieldToMatch:
+                Body: {}
+              TextTransformations:
+                - Priority: 1
+                  Type: URL_DECODE
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: SQLInjectionMetric
+          
+        - Name: XSSRule
+          Priority: 3
+          Statement:
+            XssMatchStatement:
+              FieldToMatch:
+                Body: {}
+              TextTransformations:
+                - Priority: 1
+                  Type: HTML_ENTITY_DECODE
+          Action:
+            Block: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: XSSMetric
+      
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: MintReplicaLiteWAFMetrics
+
+  WafLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/waf/mintreplicalite
+      RetentionInDays: !FindInMap [EnvironmentConfig, !Ref Environment, logRetention]
+
+  WafLoggingConfiguration:
+    Type: AWS::WAFv2::LoggingConfiguration
+    Properties:
+      ResourceArn: !GetAtt WebACL.Arn
+      LogDestinationConfigs:
+        - !GetAtt WafLogGroup.Arn
+      RedactedFields:
+        - JsonBody:
+            InvalidFallbackBehavior: EVALUATE_AS_STRING
+            MatchPattern:
+              All: {}
+            MatchScope: VALUE
+
+Outputs:
+  WafWebAclArn:
+    Description: ARN of the WAF Web ACL
+    Value: !GetAtt WebACL.Arn
+    Export:
+      Name: WafWebAclArn
+  
+  WafWebAclId:
+    Description: ID of the WAF Web ACL
+    Value: !Ref WebACL
+    Export:
+      Name: WafWebAclId
