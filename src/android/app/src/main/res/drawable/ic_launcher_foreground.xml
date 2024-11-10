@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Human Tasks:
+1. Verify icon visibility against different background colors
+2. Test icon scaling on various device densities (ldpi to xxxhdpi)
+3. Validate icon meets Google Play Store requirements
+-->
+
+<!-- 
+Requirements addressed:
+- Mobile UI Design (8.1.1): Implements app branding and icon design following Material Design guidelines
+- Accessibility Features (8.1.8): Ensures icon visibility and contrast standards with scalable vector graphics
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108"
+    android:tint="@color/primary">
+
+    <group
+        android:scaleX="0.6"
+        android:scaleY="0.6"
+        android:pivotX="54"
+        android:pivotY="54">
+
+        <!-- Dollar sign symbol representing financial app -->
+        <path
+            android:fillColor="@color/primary"
+            android:pathData="M 54,28 L 54,80 C 54,82.2 52.2,84 50,84 L 46,84 C 43.8,84 42,82.2 42,80 L 42,28 C 42,25.8 43.8,24 46,24 L 50,24 C 52.2,24 54,25.8 54,28 Z" />
+
+        <!-- Circle outline for financial symbol -->
+        <path
+            android:fillColor="@color/primary"
+            android:pathData="M 66,54 C 66,61.7 59.7,68 52,68 C 44.3,68 38,61.7 38,54 C 38,46.3 44.3,40 52,40 C 59.7,40 66,46.3 66,54 Z M 60,54 C 60,49.6 56.4,46 52,46 C 47.6,46 44,49.6 44,54 C 44,58.4 47.6,62 52,62 C 56.4,62 60,58.4 60,54 Z" />
+    </group>
+</vector>
