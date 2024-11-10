@@ -1,0 +1,85 @@
+# Version: fastlane-match 2.210.0
+
+# Human Tasks:
+# 1. Set up AWS S3 bucket with server-side encryption for certificate storage
+# 2. Configure AWS IAM role with appropriate S3 bucket permissions
+# 3. Set up the following environment variables in CI system:
+#    - MATCH_GIT_URL: Git repository URL for certificate storage
+#    - MATCH_S3_BUCKET: AWS S3 bucket name for certificate storage
+#    - APPLE_ID: Apple Developer account email
+#    - MATCH_PASSWORD: Password for certificate encryption
+# 4. Ensure Apple Developer Program membership is active
+# 5. Verify proper code signing certificates are generated in Apple Developer Portal
+
+# Requirement: CI/CD Pipeline - Configures automated code signing and provisioning profile management for iOS deployment
+# Requirement: Security Architecture - Implements secure certificate and provisioning profile synchronization
+# Requirement: Deployment Architecture - Manages iOS code signing for development, staging, and production environments
+
+# Git repository URL for storing certificates and profiles
+# Using environment variable for security
+git_url(ENV["MATCH_GIT_URL"])
+
+# Storage mode set to S3 for enhanced security and scalability
+storage_mode("s3")
+
+# AWS S3 configuration for certificate storage
+s3_region("us-east-1")
+s3_bucket(ENV["MATCH_S3_BUCKET"])
+
+# Type of provisioning profile to sync (development, appstore, adhoc)
+type("development")
+
+# Force read-only mode in CI environment to prevent accidental certificate modifications
+readonly(true)
+
+# App identifier from Appfile for consistent configuration
+app_identifier(["com.mintreplica.lite"])
+
+# Apple ID for authentication with Apple Developer Portal
+# Using environment variable for security
+username(ENV["APPLE_ID"])
+
+# Additional security configurations
+# Requirement: Security Architecture - Security Components
+force_for_new_devices(true)
+skip_confirmation(true)
+skip_docs(true)
+platform("ios")
+
+# Template name for certificate organization
+template_name("Mint Replica Lite")
+
+# Enable verbose logging for debugging in CI environment
+verbose(true)
+
+# Configure S3 object prefix for better organization
+s3_object_prefix("mint-replica-lite/")
+
+# Enable automatic keychain cleanup after certificate installation
+cleanup_keychain(true)
+
+# Set shallow clone for git repository to improve performance
+shallow_clone(true)
+
+# Configure keychain settings
+keychain_name("match_keychain")
+keychain_password(ENV["MATCH_PASSWORD"])
+
+# Set certificate validity duration
+certificate_validity_duration(365)
+
+# Enable notifications for certificate expiry
+notifications(true)
+
+# Configure parallel downloads for better performance
+parallel_downloads(true)
+
+# Set batch mode for CI environment
+batch_mode(true)
+
+# Configure fail-on-error behavior for CI pipeline
+fail_on_name_taken(true)
+
+# Set up additional security measures
+generate_apple_certs(true)
+skip_provisioning_profiles(false)
