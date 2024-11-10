@@ -1,0 +1,39 @@
+{
+  // NestJS CLI configuration for Mint Replica Lite backend service
+  // Requirements addressed:
+  // - Backend Framework (Technical Specification/7.2.2): NestJS 9.0+ with TypeScript support
+  // - Development Environment (Technical Specification/A.1.1): TypeScript-based backend configuration
+  // - System Architecture (Technical Specification/5.1): Microservices pattern support
+
+  // @nestjs/cli ^9.0.0
+  // @nestjs/schematics ^9.0.0
+  
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "monorepo": true,
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": false,
+    "tsConfigPath": "tsconfig.json",
+    "assets": [
+      "**/*.proto",
+      "**/*.json",
+      "**/*.yaml",
+      "**/*.yml"
+    ],
+    "watchAssets": true,
+    "plugins": [
+      {
+        "name": "@nestjs/swagger",
+        "options": {
+          "classValidatorShim": true,
+          "introspectComments": true
+        }
+      }
+    ]
+  },
+  "generateOptions": {
+    "spec": true,
+    "flat": false
+  }
+}
