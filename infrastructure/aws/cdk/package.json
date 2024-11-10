@@ -1,0 +1,47 @@
+{
+  "name": "@mintreplica/infrastructure",
+  "version": "1.0.0",
+  "private": true,
+  "bin": {
+    "cdk": "bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "deploy": "cdk deploy",
+    "destroy": "cdk destroy",
+    "diff": "cdk diff",
+    "synth": "cdk synth"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.0.0",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^16.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^4.8.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/test"],
+    "testMatch": ["**/*.test.ts"],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    }
+  },
+  "// Requirements": [
+    "Infrastructure as Code - AWS CDK 2.0+ for infrastructure management with TypeScript support",
+    "Cloud Platform - AWS cloud infrastructure configuration and deployment using CDK for VPC, EKS, RDS, and other services",
+    "Container Orchestration - EKS cluster and container deployment configuration using CDK constructs"
+  ]
+}
