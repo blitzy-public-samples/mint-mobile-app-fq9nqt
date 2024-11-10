@@ -1,0 +1,166 @@
+# Technical Specification/A.1.1 Development Environment Setup
+# Docker Compose configuration for test environment orchestration
+version: '3.8'
+
+# Technical Specification/9.3 Security Protocols - Network isolation
+networks:
+  test_network:
+    driver: bridge
+    internal: true
+    enable_ipv6: false
+    name: test_network
+
+# Technical Specification/8.2 Database Design - Persistent storage configuration
+volumes:
+  postgres_test_data:
+    name: postgres_test_data
+  redis_test_data:
+    name: redis_test_data
+  test-results:
+    name: test-results
+
+# Service definitions
+services:
+  # Technical Specification/A.1.1 Development Environment Setup - Test runner configuration
+  test_runner:
+    build:
+      context: ../../
+      dockerfile: test/docker/Dockerfile.test
+    container_name: mint_test_runner
+    environment:
+      - NODE_ENV=test
+      - TEST_DB_HOST=test_db
+      - TEST_DB_PORT=5432
+      - TEST_REDIS_HOST=test_redis
+      - TEST_REDIS_PORT=6379
+      - TEST_DB_SSL=true
+      - TEST_LOG_LEVEL=debug
+    volumes:
+      - ../..:/app:ro
+      - test-results:/app/reports
+    depends_on:
+      test_db:
+        condition: service_healthy
+      test_redis:
+        condition: service_healthy
+    command: npm run test
+    networks:
+      - test_network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ulimits:
+      nproc: 4096
+      nofile:
+        soft: 20000
+        hard: 40000
+
+  # Technical Specification/8.2 Database Design - Test database configuration
+  test_db:
+    image: postgres:14-alpine
+    container_name: mint_test_db
+    environment:
+      - POSTGRES_DB=mint_replica_test
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_SSL=on
+      - POSTGRES_INITDB_ARGS=--data-checksums
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - test_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "test_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+    command: 
+      - "postgres"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "temp_file_limit=10GB"
+      - "-c"
+      - "log_min_duration_statement=200ms"
+      - "-c"
+      - "idle_in_transaction_session_timeout=10s"
+      - "-c"
+      - "lock_timeout=1s"
+      - "-c"
+      - "statement_timeout=60s"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.max=10000"
+      - "-c"
+      - "pg_stat_statements.track=all"
+
+  # Technical Specification/A.1.1 Development Environment Setup - Cache configuration
+  test_redis:
+    image: redis:6-alpine
+    container_name: mint_test_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_test_data:/data
+    networks:
+      - test_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: [
+      "redis-server",
+      "--appendonly", "yes",
+      "--maxmemory", "512mb",
+      "--maxmemory-policy", "allkeys-lru",
+      "--save", "300", "10",
+      "--save", "60", "10000",
+      "--loglevel", "warning",
+      "--stop-writes-on-bgsave-error", "yes",
+      "--rdbcompression", "yes",
+      "--rdbchecksum", "yes",
+      "--requirepass", "test_redis_password"
+    ]
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+# Human Tasks Required:
+# 1. Configure test database credentials in environment files
+# 2. Set up SSL certificates for database connections
+# 3. Configure Redis password in environment files
+# 4. Verify volume mount permissions
+# 5. Configure resource limits based on host capacity
+# 6. Set up logging paths for test outputs
+# 7. Configure network security policies
+# 8. Update healthcheck parameters if needed
+# 9. Verify port availability on host machine
+# 10. Set up monitoring and metrics collection
