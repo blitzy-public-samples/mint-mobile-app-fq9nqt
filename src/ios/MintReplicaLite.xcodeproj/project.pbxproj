@@ -1,0 +1,442 @@
+// !$*UTF8*$!
+{
+    archiveVersion = 1;
+    classes = {
+    };
+    objectVersion = 56;
+    objects = {
+
+/* Begin PBXBuildFile section */
+        /* Core App Files */
+        A1B2C3D4E5F6G7H8 /* MintReplicaLiteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6G7H9 /* MintReplicaLiteApp.swift */; };
+        B2C3D4E5F6G7H8I9 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6G7H8I0 /* Info.plist */; };
+        
+        /* Core Modules */
+        C3D4E5F6G7H8I9J0 /* APIEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F6G7H8I9J1 /* APIEndpoints.swift */; };
+        D4E5F6G7H8I9J0K1 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6G7H8I9J0K2 /* AppConstants.swift */; };
+        
+        /* Data Layer */
+        E5F6G7H8I9J0K1L2 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6G7H8I9J0K1L3 /* APIError.swift */; };
+        F6G7H8I9J0K1L2M3 /* APIResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6G7H8I9J0K1L2M4 /* APIResponse.swift */; };
+        G7H8I9J0K1L2M3N4 /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = G7H8I9J0K1L2M3N5 /* APIRequest.swift */; };
+        
+        /* Core Utils */
+        H8I9J0K1L2M3N4O5 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = H8I9J0K1L2M3N4O6 /* KeychainManager.swift */; };
+        I9J0K1L2M3N4O5P6 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = I9J0K1L2M3N4O5P7 /* NetworkMonitor.swift */; };
+        J0K1L2M3N4O5P6Q7 /* CurrencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = J0K1L2M3N4O5P6Q8 /* CurrencyFormatter.swift */; };
+        
+        /* Domain Models */
+        K1L2M3N4O5P6Q7R8 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = K1L2M3N4O5P6Q7R9 /* Account.swift */; };
+        L2M3N4O5P6Q7R8S9 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = L2M3N4O5P6Q7R8S0 /* Transaction.swift */; };
+        M3N4O5P6Q7R8S9T0 /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3N4O5P6Q7R8S9T1 /* Budget.swift */; };
+        
+        /* UI Components */
+        N4O5P6Q7R8S9T0U1 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = N4O5P6Q7R8S9T0U2 /* LoadingView.swift */; };
+        O5P6Q7R8S9T0U1V2 /* TransactionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = O5P6Q7R8S9T0U1V3 /* TransactionRow.swift */; };
+        P6Q7R8S9T0U1V2W3 /* BudgetProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = P6Q7R8S9T0U1V2W4 /* BudgetProgressBar.swift */; };
+        
+        /* Frameworks */
+        Q7R8S9T0U1V2W3X4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Q7R8S9T0U1V2W3X5 /* SwiftUI.framework */; };
+        R8S9T0U1V2W3X4Y5 /* Combine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = R8S9T0U1V2W3X4Y6 /* Combine.framework */; };
+        S9T0U1V2W3X4Y5Z6 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = S9T0U1V2W3X4Y5Z7 /* CoreData.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+        /* Core App Files */
+        A1B2C3D4E5F6G7H9 /* MintReplicaLiteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MintReplicaLiteApp.swift; sourceTree = "<group>"; };
+        B2C3D4E5F6G7H8I0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+        
+        /* Core Modules */
+        C3D4E5F6G7H8I9J1 /* APIEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIEndpoints.swift; sourceTree = "<group>"; };
+        D4E5F6G7H8I9J0K2 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+        
+        /* Data Layer */
+        E5F6G7H8I9J0K1L3 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+        F6G7H8I9J0K1L2M4 /* APIResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIResponse.swift; sourceTree = "<group>"; };
+        G7H8I9J0K1L2M3N5 /* APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
+        
+        /* Core Utils */
+        H8I9J0K1L2M3N4O6 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+        I9J0K1L2M3N4O5P7 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+        J0K1L2M3N4O5P6Q8 /* CurrencyFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatter.swift; sourceTree = "<group>"; };
+        
+        /* Domain Models */
+        K1L2M3N4O5P6Q7R9 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+        L2M3N4O5P6Q7R8S0 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
+        M3N4O5P6Q7R8S9T1 /* Budget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Budget.swift; sourceTree = "<group>"; };
+        
+        /* UI Components */
+        N4O5P6Q7R8S9T0U2 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+        O5P6Q7R8S9T0U1V3 /* TransactionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRow.swift; sourceTree = "<group>"; };
+        P6Q7R8S9T0U1V2W4 /* BudgetProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetProgressBar.swift; sourceTree = "<group>"; };
+        
+        /* Frameworks */
+        Q7R8S9T0U1V2W3X5 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+        R8S9T0U1V2W3X4Y6 /* Combine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Combine.framework; path = System/Library/Frameworks/Combine.framework; sourceTree = SDKROOT; };
+        S9T0U1V2W3X4Y5Z7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+        T0U1V2W3X4Y5Z678 /* Frameworks */ = {
+            isa = PBXFrameworksBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+                Q7R8S9T0U1V2W3X4 /* SwiftUI.framework in Frameworks */,
+                R8S9T0U1V2W3X4Y5 /* Combine.framework in Frameworks */,
+                S9T0U1V2W3X4Y5Z6 /* CoreData.framework in Frameworks */,
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+        /* Main Groups */
+        U1V2W3X4Y5Z67890 = {
+            isa = PBXGroup;
+            children = (
+                V2W3X4Y5Z6789012 /* MintReplicaLite */,
+                W3X4Y5Z67890123 /* Frameworks */,
+                X4Y5Z678901234 /* Products */,
+            );
+            sourceTree = "<group>";
+        };
+        
+        /* App Group */
+        V2W3X4Y5Z6789012 /* MintReplicaLite */ = {
+            isa = PBXGroup;
+            children = (
+                Y5Z6789012345678 /* Core */,
+                Z67890123456789 /* Data */,
+                A7B8C9D0E1F23456 /* Domain */,
+                B8C9D0E1F2345678 /* Presentation */,
+                C9D0E1F23456789 /* Resources */,
+                A1B2C3D4E5F6G7H9 /* MintReplicaLiteApp.swift */,
+                B2C3D4E5F6G7H8I0 /* Info.plist */,
+            );
+            path = MintReplicaLite;
+            sourceTree = "<group>";
+        };
+        
+        /* Core Group */
+        Y5Z6789012345678 /* Core */ = {
+            isa = PBXGroup;
+            children = (
+                D1E2F3G4H5I67890 /* Constants */,
+                E2F3G4H5I678901 /* Utils */,
+                F3G4H5I6789012 /* Extensions */,
+                G4H5I67890123 /* Protocols */,
+            );
+            path = Core;
+            sourceTree = "<group>";
+        };
+        
+        /* Data Group */
+        Z67890123456789 /* Data */ = {
+            isa = PBXGroup;
+            children = (
+                H5I6789012345 /* Network */,
+                I6789012345678 /* Persistence */,
+                J7890123456789 /* Repositories */,
+            );
+            path = Data;
+            sourceTree = "<group>";
+        };
+        
+        /* Domain Group */
+        A7B8C9D0E1F23456 /* Domain */ = {
+            isa = PBXGroup;
+            children = (
+                K8901234567890 /* Models */,
+                L9012345678901 /* UseCases */,
+            );
+            path = Domain;
+            sourceTree = "<group>";
+        };
+        
+        /* Presentation Group */
+        B8C9D0E1F2345678 /* Presentation */ = {
+            isa = PBXGroup;
+            children = (
+                M0123456789012 /* Components */,
+                N1234567890123 /* Screens */,
+                O2345678901234 /* Theme */,
+                P3456789012345 /* Navigation */,
+            );
+            path = Presentation;
+            sourceTree = "<group>";
+        };
+        
+        /* Resources Group */
+        C9D0E1F23456789 /* Resources */ = {
+            isa = PBXGroup;
+            children = (
+                Q4567890123456 /* Assets.xcassets */,
+                R5678901234567 /* Colors.xcassets */,
+                S6789012345678 /* Localizable.strings */,
+            );
+            path = Resources;
+            sourceTree = "<group>";
+        };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+        T7890123456789 /* MintReplicaLite */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = U8901234567890;
+            buildPhases = (
+                V9012345678901 /* Sources */,
+                W0123456789012 /* Frameworks */,
+                X1234567890123 /* Resources */,
+            );
+            buildRules = (
+            );
+            dependencies = (
+            );
+            name = MintReplicaLite;
+            productName = MintReplicaLite;
+            productReference = Y2345678901234;
+            productType = "com.apple.product-type.application";
+        };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+        Z3456789012345 /* Project object */ = {
+            isa = PBXProject;
+            attributes = {
+                LastSwiftUpdateCheck = 1420;
+                LastUpgradeCheck = 1420;
+                ORGANIZATIONNAME = "Mint Replica";
+                TargetAttributes = {
+                    T7890123456789 = {
+                        CreatedOnToolsVersion = 14.2;
+                        DevelopmentTeam = "XXXXXXXXXX";
+                    };
+                };
+            };
+            buildConfigurationList = A4567890123456;
+            compatibilityVersion = "Xcode 14.0";
+            developmentRegion = en;
+            hasScannedForEncodings = 0;
+            knownRegions = (
+                en,
+                Base,
+            );
+            mainGroup = U1V2W3X4Y5Z67890;
+            productRefGroup = X4Y5Z678901234;
+            projectDirPath = "";
+            projectRoot = "";
+            targets = (
+                T7890123456789 /* MintReplicaLite */,
+            );
+        };
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+        /* Debug Configuration */
+        B5678901234567 /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                CLANG_ANALYZER_NONNULL = YES;
+                CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CLANG_ENABLE_OBJC_WEAK = YES;
+                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+                CLANG_WARN_BOOL_CONVERSION = YES;
+                CLANG_WARN_CONSTANT_CONVERSION = YES;
+                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+                CLANG_WARN_EMPTY_BODY = YES;
+                CLANG_WARN_ENUM_CONVERSION = YES;
+                CLANG_WARN_INFINITE_RECURSION = YES;
+                CLANG_WARN_INT_CONVERSION = YES;
+                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+                CLANG_WARN_STRICT_PROTOTYPES = YES;
+                CLANG_WARN_SUSPICIOUS_MOVE = YES;
+                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+                CLANG_WARN_UNREACHABLE_CODE = YES;
+                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+                COPY_PHASE_STRIP = NO;
+                DEBUG_INFORMATION_FORMAT = dwarf;
+                ENABLE_STRICT_OBJC_MSGSEND = YES;
+                ENABLE_TESTABILITY = YES;
+                GCC_C_LANGUAGE_STANDARD = gnu11;
+                GCC_DYNAMIC_NO_PIC = NO;
+                GCC_NO_COMMON_BLOCKS = YES;
+                GCC_OPTIMIZATION_LEVEL = 0;
+                GCC_PREPROCESSOR_DEFINITIONS = (
+                    "DEBUG=1",
+                    "$(inherited)",
+                );
+                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+                GCC_WARN_UNDECLARED_SELECTOR = YES;
+                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+                GCC_WARN_UNUSED_FUNCTION = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+                MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+                MTL_FAST_MATH = YES;
+                ONLY_ACTIVE_ARCH = YES;
+                SDKROOT = iphoneos;
+                SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+                SWIFT_VERSION = 5.5;
+            };
+            name = Debug;
+        };
+        
+        /* Release Configuration */
+        C6789012345678 /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                CLANG_ANALYZER_NONNULL = YES;
+                CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CLANG_ENABLE_OBJC_WEAK = YES;
+                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+                CLANG_WARN_BOOL_CONVERSION = YES;
+                CLANG_WARN_CONSTANT_CONVERSION = YES;
+                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+                CLANG_WARN_EMPTY_BODY = YES;
+                CLANG_WARN_ENUM_CONVERSION = YES;
+                CLANG_WARN_INFINITE_RECURSION = YES;
+                CLANG_WARN_INT_CONVERSION = YES;
+                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+                CLANG_WARN_STRICT_PROTOTYPES = YES;
+                CLANG_WARN_SUSPICIOUS_MOVE = YES;
+                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+                CLANG_WARN_UNREACHABLE_CODE = YES;
+                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+                COPY_PHASE_STRIP = NO;
+                DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+                ENABLE_NS_ASSERTIONS = NO;
+                ENABLE_STRICT_OBJC_MSGSEND = YES;
+                GCC_C_LANGUAGE_STANDARD = gnu11;
+                GCC_NO_COMMON_BLOCKS = YES;
+                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+                GCC_WARN_UNDECLARED_SELECTOR = YES;
+                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+                GCC_WARN_UNUSED_FUNCTION = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+                MTL_ENABLE_DEBUG_INFO = NO;
+                MTL_FAST_MATH = YES;
+                SDKROOT = iphoneos;
+                SWIFT_COMPILATION_MODE = wholemodule;
+                SWIFT_OPTIMIZATION_LEVEL = "-O";
+                SWIFT_VERSION = 5.5;
+                VALIDATE_PRODUCT = YES;
+            };
+            name = Release;
+        };
+        
+        /* Target Debug Configuration */
+        D7890123456789 /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                DEVELOPMENT_TEAM = "XXXXXXXXXX";
+                ENABLE_PREVIEWS = YES;
+                GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_FILE = MintReplicaLite/Info.plist;
+                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                LD_RUNPATH_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "@executable_path/Frameworks",
+                );
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = "com.mintreplica.lite";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+                SUPPORTS_MACCATALYST = NO;
+                SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_VERSION = 5.5;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+            name = Debug;
+        };
+        
+        /* Target Release Configuration */
+        E8901234567890 /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                DEVELOPMENT_TEAM = "XXXXXXXXXX";
+                ENABLE_PREVIEWS = YES;
+                GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_FILE = MintReplicaLite/Info.plist;
+                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+                LD_RUNPATH_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "@executable_path/Frameworks",
+                );
+                MARKETING_VERSION = 1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = "com.mintreplica.lite";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+                SUPPORTS_MACCATALYST = NO;
+                SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_VERSION = 5.5;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+            name = Release;
+        };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+        A4567890123456 /* Build configuration list for PBXProject "MintReplicaLite" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                B5678901234567 /* Debug */,
+                C6789012345678 /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+        U8901234567890 /* Build configuration list for PBXNativeTarget "MintReplicaLite" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                D7890123456789 /* Debug */,
+                E8901234567890 /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+/* End XCConfigurationList section */
+    };
+    rootObject = Z3456789012345 /* Project object */;
+}
