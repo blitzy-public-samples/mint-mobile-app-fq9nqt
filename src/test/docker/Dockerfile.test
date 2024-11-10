@@ -1,0 +1,101 @@
+# Stage 1: Builder
+# Technical Specification/A.1.1 Development Environment Setup - Build stage for compiling TypeScript and installing dependencies
+FROM node:16-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ git
+
+# Copy package files
+COPY src/test/package.json src/test/package-lock.json ./
+
+# Install dependencies with specific versions
+RUN npm ci --quiet
+
+# Copy source code and test files
+COPY src/test/ ./
+COPY tsconfig.json ./
+
+# Install TypeScript compiler and compile code
+RUN npm install -g typescript@4.8.0 \
+    && tsc -p tsconfig.json
+
+# Stage 2: Test
+# Technical Specification/A.1.1 Development Environment Setup - Test execution stage with minimal runtime dependencies
+FROM node:16-alpine AS test
+
+# Set working directory
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apk add --no-cache curl python3 
+
+# Copy built files and configurations from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY src/test/jest.config.js ./
+COPY src/test/.env.test ./
+
+# Create directories for test artifacts
+RUN mkdir -p /app/reports/coverage \
+    /app/reports/junit \
+    /app/reports/performance \
+    /app/reports/security \
+    && chmod -R 777 /app/reports
+
+# Set environment variables
+# Technical Specification/A.1.1 Development Environment Setup - Test environment configuration
+ENV NODE_ENV=test \
+    TEST_ENV=test \
+    PORT=4000 \
+    TEST_DB_HOST=localhost \
+    TEST_DB_PORT=5432 \
+    TEST_METRICS_PORT=9090 \
+    TEST_LOG_LEVEL=debug
+
+# Expose ports for test server and metrics
+EXPOSE 4000 9090
+
+# Set up volume mounts for test results and node_modules
+VOLUME ["/app/reports", "/app/node_modules"]
+
+# Add healthcheck
+# Technical Specification/A.1.1 Development Environment Setup - Container health monitoring
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD node healthcheck.js || exit 1
+
+# Set default command to run tests
+# Technical Specification/A.1.2 Code Quality Standards - Test execution with coverage requirements
+ENTRYPOINT ["npm"]
+CMD ["run", "test"]
+
+# Security hardening
+# Technical Specification/9.3 Security Protocols - Container security controls
+RUN addgroup -S testgroup && adduser -S testuser -G testgroup \
+    && chown -R testuser:testgroup /app \
+    && chmod -R 755 /app \
+    && echo "testuser:x:1000:1000:Test User:/app:/sbin/nologin" >> /etc/passwd
+
+# Switch to non-root user
+USER testuser
+
+# Labels for container metadata
+LABEL maintainer="Mint Replica Lite Team" \
+      version="1.0.0" \
+      description="Test environment for Mint Replica Lite" \
+      org.opencontainers.image.source="https://github.com/mintreplica/mintreplica-lite" \
+      org.opencontainers.image.licenses="MIT"
+
+# Human Tasks Required (in comments):
+# 1. Configure test database credentials in .env.test
+# 2. Set up SSL certificates if SSL is enabled
+# 3. Configure Redis instance for test environment
+# 4. Verify network access to required test services
+# 5. Set up proper test API endpoints
+# 6. Configure test logging paths
+# 7. Update security settings and encryption keys
+# 8. Set up Plaid sandbox credentials
+# 9. Verify monitoring endpoints are accessible
+# 10. Ensure proper permissions for volume mounts
