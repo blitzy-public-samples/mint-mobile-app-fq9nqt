@@ -1,0 +1,187 @@
+/**
+ * HUMAN TASKS:
+ * 1. Verify color contrast ratios meet WCAG 2.1 AA standards (minimum 4.5:1 for normal text)
+ * 2. Test CSS variables with screen readers and assistive technologies
+ * 3. Validate responsive breakpoints on actual devices
+ */
+
+/**
+ * Core CSS custom properties for Mint Replica Lite
+ * Requirements addressed:
+ * - Mobile-First Design (Technical Specification/1.1 System Overview)
+ * - User Interface Design (Technical Specification/8.1 User Interface Design)
+ * - Accessibility Features (Technical Specification/8.1.8 Accessibility Features)
+ */
+
+:root {
+  /* Color Palette - Primary */
+  --color-primary-50: #E6F6FF;
+  --color-primary-100: #BAE3FF;
+  --color-primary-200: #7CC4FA;
+  --color-primary-300: #47A3F3;
+  --color-primary-400: #2186EB;
+  --color-primary-500: #0967D2;
+  --color-primary-600: #0552B5;
+  --color-primary-700: #03449E;
+  --color-primary-800: #01337D;
+  --color-primary-900: #002159;
+
+  /* Color Palette - Neutral */
+  --color-neutral-50: #F5F7FA;
+  --color-neutral-100: #E4E7EB;
+  --color-neutral-200: #CBD2D9;
+  --color-neutral-300: #9AA5B1;
+  --color-neutral-400: #7B8794;
+  --color-neutral-500: #616E7C;
+  --color-neutral-600: #52606D;
+  --color-neutral-700: #3E4C59;
+  --color-neutral-800: #323F4B;
+  --color-neutral-900: #1F2933;
+
+  /* Color Palette - Success */
+  --color-success-50: #E3F9E5;
+  --color-success-100: #C1F2C7;
+  --color-success-200: #91E697;
+  --color-success-300: #51CA58;
+  --color-success-400: #31B237;
+  --color-success-500: #18981D;
+  --color-success-600: #0F8613;
+  --color-success-700: #0A6F0D;
+  --color-success-800: #035F07;
+  --color-success-900: #014807;
+
+  /* Color Palette - Warning */
+  --color-warning-50: #FFF9E6;
+  --color-warning-100: #FFEDB3;
+  --color-warning-200: #FFE083;
+  --color-warning-300: #FFD24D;
+  --color-warning-400: #FFC726;
+  --color-warning-500: #FFBB00;
+  --color-warning-600: #E6A800;
+  --color-warning-700: #CC9600;
+  --color-warning-800: #B38300;
+  --color-warning-900: #996F00;
+
+  /* Color Palette - Error */
+  --color-error-50: #FFE3E3;
+  --color-error-100: #FFBDBD;
+  --color-error-200: #FF9B9B;
+  --color-error-300: #F86A6A;
+  --color-error-400: #EF4E4E;
+  --color-error-500: #E12D39;
+  --color-error-600: #CF1124;
+  --color-error-700: #AB091E;
+  --color-error-800: #8A041A;
+  --color-error-900: #610316;
+
+  /* Typography - Font Families */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Typography - Font Sizes */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-md: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+
+  /* Typography - Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Typography - Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Spacing Scale */
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-10: 2.5rem;   /* 40px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-16: 4rem;     /* 64px */
+  --spacing-20: 5rem;     /* 80px */
+
+  /* Breakpoints */
+  --breakpoint-xs: 320px;    /* Small mobile devices */
+  --breakpoint-sm: 640px;    /* Large mobile devices */
+  --breakpoint-md: 768px;    /* Tablets */
+  --breakpoint-lg: 1024px;   /* Small laptops */
+  --breakpoint-xl: 1280px;   /* Large laptops */
+  --breakpoint-2xl: 1536px;  /* Desktop monitors */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Z-Index Scale */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+
+  /* Border Radius */
+  --radius-sm: 0.125rem;  /* 2px */
+  --radius-md: 0.25rem;   /* 4px */
+  --radius-lg: 0.5rem;    /* 8px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-slow: 350ms;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark Mode Overrides - To be enabled via class or media query */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Adjust color variables for dark mode while maintaining contrast ratios */
+    --color-neutral-50: #1F2933;
+    --color-neutral-100: #323F4B;
+    --color-neutral-200: #3E4C59;
+    --color-neutral-300: #52606D;
+    --color-neutral-400: #616E7C;
+    --color-neutral-500: #7B8794;
+    --color-neutral-600: #9AA5B1;
+    --color-neutral-700: #CBD2D9;
+    --color-neutral-800: #E4E7EB;
+    --color-neutral-900: #F5F7FA;
+  }
+}
+
+/* High Contrast Mode - For improved accessibility */
+@media (prefers-contrast: high) {
+  :root {
+    --color-primary-500: #0552B5;
+    --color-success-500: #035F07;
+    --color-warning-500: #B38300;
+    --color-error-500: #8A041A;
+  }
+}
+
+/* Reduced Motion - For users who prefer minimal animations */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
+  }
+}
