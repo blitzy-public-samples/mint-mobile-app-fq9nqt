@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Human Tasks:
+1. Verify the icon displays correctly on Android 8.0+ devices
+2. Test the icon appearance in different launcher shapes (circle, square, rounded square, etc.)
+3. Validate the icon scales appropriately across different screen densities
+4. Ensure proper contrast between foreground and background layers
+-->
+
+<!-- 
+Requirements addressed:
+- Mobile UI Design (8.1.1 Design System Key): Implements adaptive icon design following Material Design guidelines
+- Mobile-first Design (1.1 System Architecture): Provides platform-specific design implementation for optimal Android user experience
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 
+    Background layer using the mint-themed gradient background
+    Supports Android API 26+ adaptive icon specifications
+    -->
+    <background android:drawable="@drawable/ic_launcher_background"/>
+    
+    <!-- 
+    Foreground layer containing the financial app symbol
+    Implements safe zone guidelines for proper display across different launcher shapes
+    -->
+    <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+</adaptive-icon>
