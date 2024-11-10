@@ -1,0 +1,40 @@
+# Human Tasks:
+# 1. Verify that all team groups (@project-leads, @backend-team, etc.) are properly configured in GitHub
+# 2. Ensure all team members are assigned to their appropriate teams in GitHub
+# 3. Review and adjust code ownership rules if team structures change
+# 4. Configure branch protection rules to enforce code owner reviews
+
+# Default owners for everything in the repo
+# Requirement: Security Architecture - Implements identity and access management controls
+# Requirement: Development Standards - Enforces code review standards
+* @project-leads
+
+# Backend source code ownership
+/src/backend/** @backend-team
+
+# iOS app source code ownership 
+/src/ios/** @ios-team
+
+# Android app source code ownership
+/src/android/** @android-team
+
+# Web app source code ownership
+/src/web/** @web-team
+
+# Infrastructure and DevOps ownership
+/infrastructure/** @devops-team
+
+# Test files ownership
+/src/**/test/** @qa-team
+
+# Documentation ownership
+*.md @docs-team
+
+# Security-related code ownership
+/src/**/security/** @security-team
+
+# GitHub configuration files ownership
+/.github/** @devops-team @security-team
+
+# The CODEOWNERS file itself requires both DevOps and Security approval
+/.github/CODEOWNERS @devops-team @security-team
