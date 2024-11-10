@@ -1,0 +1,288 @@
+# GitHub Actions workflow for Mint Replica Lite Test Suite
+# Requirements addressed:
+# - Continuous Integration (Technical Specification/7.5 Development and Deployment Tools)
+# - Test Coverage (Technical Specification/A.1.2 Code Quality Standards)
+# - Security Testing (Technical Specification/9.3.5 Secure Development)
+
+name: Test Suite
+
+# Trigger workflow on push, pull request, and manual dispatch
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+env:
+  NODE_ENV: test
+  TEST_DB_NAME: mint_replica_test
+  TEST_DB_USER: test_user
+  TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+  TEST_REDIS_URL: redis://localhost:6379
+  TEST_JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
+  TEST_LOG_LEVEL: info
+  TEST_ENABLE_SSL: false
+  TEST_ENABLE_AUTH: true
+
+jobs:
+  # Unit Tests Job
+  unit-tests:
+    name: Unit Tests
+    runs-on: ${{ matrix.platform }}
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+        platform: [ubuntu-latest, macos-latest]
+        include:
+          - node-version: 16.x
+            platform: ubuntu-latest
+            experimental: false
+      fail-fast: false
+      max-parallel: 4
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+        env:
+          CI: true
+
+      - name: Upload Coverage Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-unit-${{ matrix.platform }}-${{ matrix.node-version }}
+          path: reports/coverage
+          retention-days: 14
+
+  # Integration Tests Job
+  integration-tests:
+    name: Integration Tests
+    needs: unit-tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: ${{ env.TEST_DB_NAME }}
+          POSTGRES_USER: ${{ env.TEST_DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Setup Test Database
+        run: npm run db:setup:test
+
+      - name: Run Integration Tests
+        run: npm run test:integration
+        env:
+          CI: true
+          TEST_DB_HOST: localhost
+          TEST_DB_PORT: 5432
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: reports/junit.xml
+          retention-days: 14
+
+  # E2E Tests Job
+  e2e-tests:
+    name: E2E Tests
+    needs: integration-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Setup Test Environment
+        run: npm run test:setup
+
+      - name: Run E2E Tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: Generate Test Reports
+        run: npm run test:report
+
+      - name: Upload E2E Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-results
+          path: |
+            reports/e2e
+            reports/screenshots
+          retention-days: 14
+
+  # Security Tests Job
+  security-tests:
+    name: Security Tests
+    needs: unit-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run SAST Scan
+        uses: github/codeql-action/analyze@v2
+        with:
+          languages: javascript, typescript
+          queries: security-extended, security-and-quality
+
+      - name: Check Dependencies
+        run: |
+          npm audit
+          npm run check:dependencies
+
+      - name: Run Security Tests
+        run: npm run test:security
+        env:
+          CI: true
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: reports/security
+          retention-days: 30
+
+  # Test Summary Job
+  test-summary:
+    name: Test Summary
+    needs: [unit-tests, integration-tests, e2e-tests, security-tests]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Merge Coverage Reports
+        run: |
+          npm install -g nyc
+          nyc merge coverage-* ./merged-coverage
+          nyc report --reporter=text --reporter=lcov --reporter=html -t ./merged-coverage
+
+      - name: Check Coverage Thresholds
+        run: |
+          COVERAGE=$(cat merged-coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "Coverage below threshold: $COVERAGE%"
+            exit 1
+          fi
+
+      - name: Generate Summary Report
+        run: |
+          echo "# Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Coverage Results" >> $GITHUB_STEP_SUMMARY
+          cat merged-coverage/coverage-summary.txt >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          cat reports/junit.xml | xq . >> $GITHUB_STEP_SUMMARY
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            reports/junit.xml
+            reports/e2e/**/*.xml
+
+      - name: Notify on Failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send Email Notification
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: Test Suite Failed - ${{ github.repository }}
+          body: Test suite failed in ${{ github.repository }}. Check the workflow run for details.
+          to: ${{ secrets.TEAM_EMAIL }}
+          from: CI System
