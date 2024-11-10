@@ -1,0 +1,455 @@
+# Human Tasks:
+# 1. Review and adjust CIDR blocks according to your network planning requirements
+# 2. Verify the number of NAT Gateways per environment aligns with cost and availability requirements
+# 3. Ensure VPC Flow Logs IAM roles and permissions are properly configured in your account
+# 4. Review and adjust VPC endpoint configuration based on required AWS services
+# 5. Validate that the selected Availability Zones are supported in your target region
+
+AWSTemplateFormatVersion: '2010-09-15'
+Description: >-
+  CloudFormation template for Mint Replica Lite VPC infrastructure with multi-AZ networking,
+  security groups, and routing configuration. Implements requirements from Technical Specification
+  sections 5.2.2 (Network Architecture), 5.4 (Security Architecture), and 5.5 (Scalability Architecture).
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment
+    AllowedValues:
+      - production
+      - staging
+      - development
+    Default: development
+
+  AvailabilityZones:
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    Description: List of Availability Zones to use for the subnets in the VPC
+
+Mappings:
+  EnvironmentConfig:
+    production:
+      natGateways: 3
+      vpcFlowLogs: true
+      transitGateway: true
+    staging:
+      natGateways: 2
+      vpcFlowLogs: true
+      transitGateway: false
+    development:
+      natGateways: 1
+      vpcFlowLogs: false
+      transitGateway: false
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, 'production']
+  EnableVPCFlowLogs: !FindInMap [EnvironmentConfig, !Ref Environment, vpcFlowLogs]
+
+Resources:
+  # VPC Configuration
+  # Implements requirement: Network Architecture - Secure network infrastructure
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: MintReplicaLiteVPC
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: MintReplicaLite
+
+  # Public Subnets
+  # Implements requirement: High Availability - Multi-AZ deployment
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Public-1
+        - Key: kubernetes.io/role/elb
+          Value: "1"
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [1, !Ref AvailabilityZones]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Public-2
+        - Key: kubernetes.io/role/elb
+          Value: "1"
+
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [2, !Ref AvailabilityZones]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Public-3
+        - Key: kubernetes.io/role/elb
+          Value: "1"
+
+  # Private Subnets
+  # Implements requirement: Network Architecture - Private subnet isolation
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-1
+        - Key: kubernetes.io/role/internal-elb
+          Value: "1"
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.11.0/24
+      AvailabilityZone: !Select [1, !Ref AvailabilityZones]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-2
+        - Key: kubernetes.io/role/internal-elb
+          Value: "1"
+
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.12.0/24
+      AvailabilityZone: !Select [2, !Ref AvailabilityZones]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-3
+        - Key: kubernetes.io/role/internal-elb
+          Value: "1"
+
+  # Internet Gateway
+  # Implements requirement: Network Architecture - Internet connectivity
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-IGW
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # NAT Gateways
+  # Implements requirement: High Availability - Redundant NAT gateways
+  EIP1:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+
+  NATGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt EIP1.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-NAT-1
+
+  EIP2:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+    Condition: !Not [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 1]]
+
+  NATGateway2:
+    Type: AWS::EC2::NatGateway
+    Condition: !Not [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 1]]
+    Properties:
+      AllocationId: !GetAtt EIP2.AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-NAT-2
+
+  EIP3:
+    Type: AWS::EC2::EIP
+    DependsOn: AttachGateway
+    Properties:
+      Domain: vpc
+    Condition: !Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 3]
+
+  NATGateway3:
+    Type: AWS::EC2::NatGateway
+    Condition: !Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 3]
+    Properties:
+      AllocationId: !GetAtt EIP3.AllocationId
+      SubnetId: !Ref PublicSubnet3
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-NAT-3
+
+  # Route Tables
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Public-RT
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-RT-1
+
+  PrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway1
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Condition: !Not [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 1]]
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-RT-2
+
+  PrivateRoute2:
+    Type: AWS::EC2::Route
+    Condition: !Not [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 1]]
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway2
+
+  PrivateRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Condition: !Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 3]
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Private-RT-3
+
+  PrivateRoute3:
+    Type: AWS::EC2::Route
+    Condition: !Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 3]
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway3
+
+  # Route Table Associations
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: !Not [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 1]]
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable2
+
+  PrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: !Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 3]
+    Properties:
+      SubnetId: !Ref PrivateSubnet3
+      RouteTableId: !Ref PrivateRouteTable3
+
+  # VPC Flow Logs
+  # Implements requirement: Security Architecture - Network monitoring
+  VPCFlowLogsRole:
+    Type: AWS::IAM::Role
+    Condition: EnableVPCFlowLogs
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: flowlogs-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+
+  VPCFlowLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: EnableVPCFlowLogs
+    Properties:
+      LogGroupName: !Sub /aws/vpc/flowlogs/${AWS::StackName}
+      RetentionInDays: 30
+
+  VPCFlowLog:
+    Type: AWS::EC2::FlowLog
+    Condition: EnableVPCFlowLogs
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt VPCFlowLogsRole.Arn
+      LogGroupName: !Ref VPCFlowLogsGroup
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+
+  # Security Groups
+  # Implements requirement: Security Architecture - Network access controls
+  DefaultSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Default security group for Mint Replica Lite VPC
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${Environment}-Default-SG
+
+  # VPC Endpoints
+  # Implements requirement: Security Architecture - Private service access
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - s3:*
+            Resource: '*'
+      RouteTableIds:
+        - !Ref PrivateRouteTable1
+        - !If [!Not [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 1]], !Ref PrivateRouteTable2, !Ref "AWS::NoValue"]
+        - !If [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 3], !Ref PrivateRouteTable3, !Ref "AWS::NoValue"]
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref VPC
+
+  DynamoDBEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - dynamodb:*
+            Resource: '*'
+      RouteTableIds:
+        - !Ref PrivateRouteTable1
+        - !If [!Not [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 1]], !Ref PrivateRouteTable2, !Ref "AWS::NoValue"]
+        - !If [!Equals [!FindInMap [EnvironmentConfig, !Ref Environment, natGateways], 3], !Ref PrivateRouteTable3, !Ref "AWS::NoValue"]
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
+      VpcId: !Ref VPC
+
+Outputs:
+  VpcId:
+    Description: ID of the VPC
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${AWS::StackName}-VpcId
+
+  PublicSubnetIds:
+    Description: List of public subnet IDs
+    Value: !Join
+      - ','
+      - - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+        - !Ref PublicSubnet3
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnetIds
+
+  PrivateSubnetIds:
+    Description: List of private subnet IDs
+    Value: !Join
+      - ','
+      - - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateSubnetIds
+
+  DefaultSecurityGroupId:
+    Description: Default security group ID
+    Value: !Ref DefaultSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-DefaultSecurityGroupId
