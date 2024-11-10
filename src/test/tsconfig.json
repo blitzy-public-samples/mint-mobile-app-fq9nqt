@@ -1,0 +1,98 @@
+/**
+ * Human Tasks Required:
+ * 1. Ensure all test dependencies are installed with correct versions
+ * 2. Configure test environment variables in .env.test file
+ * 3. Set up test database credentials and permissions
+ * 4. Configure test logging directory permissions
+ * 5. Verify network access to test services
+ * 6. Set up SSL certificates if required for secure connections
+ * 7. Configure test coverage report directory permissions
+ */
+
+/**
+ * TypeScript configuration for Mint Replica Lite test suite
+ * Requirements addressed:
+ * - Testing Standards (Technical Specification/A.1.2 Code Quality Standards): 
+ *   Configures strict type checking and >80% test coverage requirements
+ * - Development Standards (Technical Specification/A.4 Development Standards Reference):
+ *   Implements TypeScript configuration standards with proper module resolution
+ * - Secure Development (Technical Specification/9.3 Security Protocols/9.3.5 Secure Development):
+ *   Enforces strict compilation rules for secure code testing
+ */
+{
+  // Extend base TypeScript configuration from backend
+  "extends": "../backend/tsconfig.json",
+
+  // Compiler options specific to test environment
+  "compilerOptions": {
+    // Module configuration
+    "module": "commonjs",
+    "target": "es2017",
+    "lib": [
+      "es2017",
+      "es2018",
+      "es2019",
+      "es2020"
+    ],
+
+    // Output configuration
+    "declaration": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+
+    // Type checking configuration
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Module resolution configuration
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+
+    // Experimental features
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // Type definitions
+    "types": [
+      "node",
+      "jest"
+    ],
+
+    // Path aliases for clean imports
+    "paths": {
+      "@utils/*": ["utils/*"],
+      "@setup/*": ["setup/*"],
+      "@contracts/*": ["contracts/*"],
+      "@e2e/*": ["e2e/*"],
+      "@integration/*": ["integration/*"],
+      "@performance/*": ["performance/*"],
+      "@security/*": ["security/*"],
+      "@accessibility/*": ["accessibility/*"]
+    }
+  },
+
+  // Files to include/exclude
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "reports"
+  ]
+}
