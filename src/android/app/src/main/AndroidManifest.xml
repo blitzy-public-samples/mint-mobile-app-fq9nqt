@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Human Tasks:
+1. Configure Firebase project and add google-services.json
+2. Set up ProGuard rules for Hilt and Firebase
+3. Configure debug/release signing keys
+4. Set up network security config XML
+5. Configure Firebase Crashlytics API key in build config
+6. Configure proper API base URL in NetworkModule
+7. Configure biometric prompt strings in strings.xml
+8. Verify proper SSL certificate pinning is configured
+-->
+
+<!-- 
+Requirements addressed:
+- Native Mobile Applications (1.1 System Overview/Core Components):
+  Native Android application configuration and permissions
+- Security Architecture (5.4 Security Architecture):
+  Security configurations and permissions for Android platform
+- Mobile Development (7.2.1 Mobile Development):
+  Android application configuration using Kotlin and Jetpack Compose
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.mintreplica.lite">
+
+    <!-- Network and security permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Biometric authentication permission -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    
+    <!-- Camera permission for document scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    
+    <!-- Notification permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Optional hardware features -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.fingerprint"
+        android:required="false" />
+
+    <application
+        android:name=".MintReplicaApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MintReplicaLite"
+        android:usesCleartextTraffic="false">
+
+        <!-- Security configurations -->
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:backupRules="@xml/backup_rules"
+        tools:targetApi="31">
+
+        <!-- Main authentication activity -->
+        <activity
+            android:name=".ui.screens.auth.LoginScreen"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Background services -->
+        <service
+            android:name=".services.NotificationService"
+            android:exported="false" />
+        
+        <service
+            android:name=".services.SyncService"
+            android:exported="false" />
+
+        <!-- Boot receiver for background services -->
+        <receiver
+            android:name=".receivers.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- File provider for secure file sharing -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+
+</manifest>
