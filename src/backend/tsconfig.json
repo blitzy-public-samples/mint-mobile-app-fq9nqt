@@ -1,0 +1,73 @@
+// Human Tasks:
+// 1. Ensure Node.js 16+ is installed in the development environment
+// 2. Install TypeScript 4.8+ globally or as a dev dependency
+// 3. Configure IDE/editor to use project's TypeScript version
+// 4. Set up build scripts in package.json to use this tsconfig.json
+
+// @ts-check
+{
+  // Requirement: Backend Technologies - Configures TypeScript 4.8+ with Node.js 16+ runtime environment
+  "compilerOptions": {
+    // Module configuration
+    "module": "commonjs", // Node.js module system
+    "target": "es2017", // Target ECMAScript version compatible with Node.js 16+
+    "lib": [
+      "es2017",
+      "es2018",
+      "es2019",
+      "es2020"
+    ],
+    
+    // Path and output configuration
+    "outDir": "./dist", // Compiled files output directory
+    "baseUrl": "./", // Base directory for resolving non-relative module names
+    "sourceMap": true, // Generate source maps for debugging
+    
+    // Type checking and safety
+    "declaration": true, // Generate .d.ts files
+    "removeComments": true, // Remove comments in output files
+    "strictNullChecks": true, // Enable strict null checks
+    "noImplicitAny": true, // Raise error on expressions and declarations with implied 'any' type
+    "strictBindCallApply": true, // Enable strict 'bind', 'call', and 'apply' methods on functions
+    "noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statements
+    
+    // Module resolution and imports
+    "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
+    "forceConsistentCasingInFileNames": true, // Ensure consistent casing in file names
+    "skipLibCheck": true, // Skip type checking of declaration files
+    
+    // Decorators support for NestJS
+    "emitDecoratorMetadata": true, // Emit design-type metadata for decorated declarations
+    "experimentalDecorators": true, // Enable experimental support for decorators
+    
+    // Incremental compilation
+    "incremental": true, // Enable incremental compilation
+    
+    // Path aliases for modular architecture
+    "paths": {
+      "@modules/*": ["src/modules/*"],
+      "@common/*": ["src/common/*"],
+      "@config/*": ["src/config/*"],
+      "@database/*": ["src/database/*"],
+      "@queue/*": ["src/queue/*"],
+      "@health/*": ["src/health/*"]
+    },
+    
+    // Type definitions
+    "types": [
+      "node",
+      "jest"
+    ]
+  },
+  
+  // Files to include/exclude in compilation
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage"
+  ]
+}
