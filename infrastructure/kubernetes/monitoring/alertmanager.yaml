@@ -1,0 +1,268 @@
+# Human Tasks:
+# 1. Create and configure Slack workspace and channels for alerts
+# 2. Set up PagerDuty integration and obtain service key
+# 3. Configure AWS CloudWatch Logs integration
+# 4. Update DNS records for alertmanager.mintreplica.com
+# 5. Create TLS certificate for alertmanager ingress
+
+# Technical Specification Requirements Addressed:
+# - 9.3.2 Security Monitoring: Implements real-time alert management and notification delivery for security events with CloudWatch Logs integration
+# - 9.3.3 Incident Response: Configures alert routing and notification channels for incident management with Slack and PagerDuty integration
+# - 10.2.1 AWS Service Configuration: Sets up alert management for AWS infrastructure monitoring with EKS integration
+
+apiVersion: v1
+kind: List
+items:
+  # AlertManager ConfigMap containing alert routing and notification configuration
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: alertmanager-config
+      namespace: monitoring
+      labels:
+        app: alertmanager
+        component: monitoring
+    data:
+      alertmanager.yml: |
+        global:
+          resolve_timeout: 5m
+          slack_api_url: ${SLACK_API_URL}
+          smtp_smarthost: 'smtp.aws.amazon.com:587'
+          smtp_from: 'alertmanager@mintreplica.com'
+          smtp_auth_username: '${SMTP_USERNAME}'
+          smtp_auth_password: '${SMTP_PASSWORD}'
+
+        route:
+          group_by: ['alertname', 'cluster', 'service']
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h
+          receiver: default-receiver
+          routes:
+            - match:
+                severity: critical
+              receiver: critical-alerts
+              continue: true
+            - match:
+                severity: warning
+              receiver: warning-alerts
+            - match_re:
+                service: ^.*security.*$
+              receiver: security-alerts
+
+        receivers:
+          - name: default-receiver
+            slack_configs:
+              - channel: '#alerts'
+                title: '{{ .GroupLabels.alertname }}'
+                text: '{{ .CommonAnnotations.description }}'
+                send_resolved: true
+
+          - name: critical-alerts
+            slack_configs:
+              - channel: '#critical-alerts'
+                title: '[CRITICAL] {{ .GroupLabels.alertname }}'
+                text: '{{ .CommonAnnotations.description }}'
+                send_resolved: true
+            pagerduty_configs:
+              - service_key: ${PAGERDUTY_SERVICE_KEY}
+                description: '{{ .GroupLabels.alertname }}'
+                details:
+                  severity: '{{ .Labels.severity }}'
+                  cluster: '{{ .Labels.cluster }}'
+                  instance: '{{ .Labels.instance }}'
+
+          - name: warning-alerts
+            slack_configs:
+              - channel: '#warnings'
+                title: '[WARNING] {{ .GroupLabels.alertname }}'
+                text: '{{ .CommonAnnotations.description }}'
+                send_resolved: true
+            email_configs:
+              - to: 'ops-team@mintreplica.com'
+                send_resolved: true
+
+          - name: security-alerts
+            slack_configs:
+              - channel: '#security-alerts'
+                title: '[SECURITY] {{ .GroupLabels.alertname }}'
+                text: '{{ .CommonAnnotations.description }}'
+                send_resolved: true
+            pagerduty_configs:
+              - service_key: ${PAGERDUTY_SECURITY_KEY}
+                description: 'Security Alert: {{ .GroupLabels.alertname }}'
+                details:
+                  severity: '{{ .Labels.severity }}'
+                  cluster: '{{ .Labels.cluster }}'
+                  instance: '{{ .Labels.instance }}'
+
+  # AlertManager Secrets for storing sensitive configuration
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: alertmanager-secrets
+      namespace: monitoring
+      labels:
+        app: alertmanager
+        component: monitoring
+    type: Opaque
+    stringData:
+      slack-api-url: ${SLACK_API_URL}
+      pagerduty-service-key: ${PAGERDUTY_SERVICE_KEY}
+      pagerduty-security-key: ${PAGERDUTY_SECURITY_KEY}
+      smtp-username: ${SMTP_USERNAME}
+      smtp-password: ${SMTP_PASSWORD}
+
+  # AlertManager StatefulSet for high availability
+  - apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: alertmanager
+      namespace: monitoring
+      labels:
+        app: alertmanager
+        component: monitoring
+    spec:
+      serviceName: alertmanager
+      replicas: 2
+      selector:
+        matchLabels:
+          app: alertmanager
+          component: monitoring
+      template:
+        metadata:
+          labels:
+            app: alertmanager
+            component: monitoring
+        spec:
+          securityContext:
+            fsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+          containers:
+            - name: alertmanager
+              image: prom/alertmanager:v0.24.0
+              args:
+                - "--config.file=/etc/alertmanager/alertmanager.yml"
+                - "--storage.path=/alertmanager"
+                - "--cluster.listen-address=0.0.0.0:9094"
+                - "--cluster.peer=alertmanager-0.alertmanager:9094"
+                - "--cluster.peer=alertmanager-1.alertmanager:9094"
+              ports:
+                - containerPort: 9093
+                  name: http
+                  protocol: TCP
+                - containerPort: 9094
+                  name: cluster
+                  protocol: TCP
+              resources:
+                requests:
+                  cpu: "200m"
+                  memory: "1Gi"
+                limits:
+                  cpu: "500m"
+                  memory: "2Gi"
+              volumeMounts:
+                - name: alertmanager-config
+                  mountPath: /etc/alertmanager
+                  readOnly: true
+                - name: alertmanager-storage
+                  mountPath: /alertmanager
+              livenessProbe:
+                httpGet:
+                  path: /-/healthy
+                  port: 9093
+                initialDelaySeconds: 30
+                timeoutSeconds: 5
+              readinessProbe:
+                httpGet:
+                  path: /-/ready
+                  port: 9093
+                initialDelaySeconds: 15
+                timeoutSeconds: 5
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+          volumes:
+            - name: alertmanager-config
+              configMap:
+                name: alertmanager-config
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                        - key: app
+                          operator: In
+                          values:
+                            - alertmanager
+                    topologyKey: kubernetes.io/hostname
+      volumeClaimTemplates:
+        - metadata:
+            name: alertmanager-storage
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: gp2
+            resources:
+              requests:
+                storage: 20Gi
+
+  # AlertManager Service for internal access
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: alertmanager
+      namespace: monitoring
+      labels:
+        app: alertmanager
+        component: monitoring
+    spec:
+      type: ClusterIP
+      ports:
+        - port: 80
+          targetPort: 9093
+          protocol: TCP
+          name: http
+        - port: 9094
+          targetPort: 9094
+          protocol: TCP
+          name: cluster
+      selector:
+        app: alertmanager
+        component: monitoring
+
+  # AlertManager Ingress for secure external access
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: alertmanager-ingress
+      namespace: monitoring
+      labels:
+        app: alertmanager
+        component: monitoring
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+        nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+    spec:
+      rules:
+        - host: alertmanager.mintreplica.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: alertmanager
+                    port:
+                      number: 80
+      tls:
+        - hosts:
+            - alertmanager.mintreplica.com
+          secretName: alertmanager-tls
