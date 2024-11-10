@@ -1,0 +1,270 @@
+# Requirement: iOS CI/CD Pipeline - Automated iOS build, test and deployment pipeline with multiple stages and environments
+# Requirement: Mobile Application Deployment - Native iOS application deployment using SwiftUI and modern iOS frameworks
+# Requirement: Security Architecture - Secure code signing and certificate management for iOS builds
+
+name: iOS CI/CD
+
+# Human Tasks:
+# 1. Configure GitHub repository secrets:
+#    - APPLE_ID: Apple Developer account email
+#    - TEAM_ID: Apple Developer Team ID
+#    - MATCH_PASSWORD: Password for certificate encryption
+#    - SLACK_URL: Slack webhook URL for notifications
+#    - FASTLANE_USER: App Store Connect API user
+#    - FASTLANE_PASSWORD: App Store Connect API password
+#    - MATCH_GIT_URL: Git repository URL for certificates
+#    - MATCH_S3_BUCKET: AWS S3 bucket for certificate storage
+#    - AWS_ACCESS_KEY_ID: AWS access key for S3 access
+#    - AWS_SECRET_ACCESS_KEY: AWS secret key for S3 access
+# 2. Set up AWS S3 bucket for certificate storage
+# 3. Configure Apple Developer Program membership
+# 4. Set up App Store Connect API access
+# 5. Configure Slack workspace for notifications
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/ios/**'
+      - '.github/workflows/ios.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/ios/**'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+
+# Prevent concurrent runs of the same workflow on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+  FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
+  FASTLANE_XCODE_LIST_TIMEOUT: 180
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: macos-latest
+    timeout-minutes: 60
+    environment: development
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Ruby environment
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Cache Gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Cache Pods
+        uses: actions/cache@v3
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install Fastlane
+        run: |
+          cd src/ios
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Setup code signing
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_S3_BUCKET: ${{ secrets.MATCH_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd src/ios
+          bundle exec fastlane run setup_ci
+          bundle exec fastlane sync_certificates
+
+      - name: Run tests
+        env:
+          SLACK_URL: ${{ secrets.SLACK_URL }}
+        run: |
+          cd src/ios
+          bundle exec fastlane test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: src/ios/fastlane/test_output
+          retention-days: 14
+
+  build:
+    name: Build App
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 60
+    environment: staging
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Ruby environment
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Cache Gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Cache Pods
+        uses: actions/cache@v3
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install Fastlane
+        run: |
+          cd src/ios
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Setup code signing
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_S3_BUCKET: ${{ secrets.MATCH_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd src/ios
+          bundle exec fastlane run setup_ci
+          bundle exec fastlane sync_certificates
+
+      - name: Build app
+        env:
+          SLACK_URL: ${{ secrets.SLACK_URL }}
+        run: |
+          cd src/ios
+          bundle exec fastlane build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: src/ios/builds
+          retention-days: 14
+
+  deploy-testflight:
+    name: Deploy to TestFlight
+    needs: build
+    runs-on: macos-latest
+    timeout-minutes: 60
+    environment: staging
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Ruby environment
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: src/ios/builds
+
+      - name: Install Fastlane
+        run: |
+          cd src/ios
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Deploy to TestFlight
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          SLACK_URL: ${{ secrets.SLACK_URL }}
+        run: |
+          cd src/ios
+          bundle exec fastlane deploy_testflight
+
+  deploy-appstore:
+    name: Deploy to App Store
+    needs: deploy-testflight
+    runs-on: macos-latest
+    timeout-minutes: 60
+    environment: production
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Ruby environment
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: src/ios/builds
+
+      - name: Install Fastlane
+        run: |
+          cd src/ios
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Deploy to App Store
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          SLACK_URL: ${{ secrets.SLACK_URL }}
+        run: |
+          cd src/ios
+          bundle exec fastlane deploy_appstore
