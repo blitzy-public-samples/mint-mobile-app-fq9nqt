@@ -1,0 +1,101 @@
+{
+  // Human Tasks:
+  // 1. Ensure Node.js version 14.x or later is installed for AWS CDK 2.0+ compatibility
+  // 2. Run 'npm install -g aws-cdk' to install AWS CDK CLI globally
+  // 3. Run 'npm install' to install project dependencies
+  // 4. Configure AWS credentials using 'aws configure' before deploying infrastructure
+
+  // Requirement 5.3.4: Infrastructure as Code - TypeScript configuration for AWS CDK 2.0+ infrastructure development
+  "compilerOptions": {
+    // Target ES2018 for AWS Lambda and Node.js compatibility
+    "target": "ES2018",
+    
+    // Use CommonJS modules for better compatibility with Node.js
+    "module": "commonjs",
+    
+    // Include ES2018 and DOM library definitions
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    
+    // Generate .d.ts declaration files for better type support
+    "declaration": true,
+    
+    // Enable strict type checking
+    "strict": true,
+    
+    // Disallow implicit any types
+    "noImplicitAny": true,
+    
+    // Enable strict null checks
+    "strictNullChecks": true,
+    
+    // Enforce explicit 'this' bindings
+    "noImplicitThis": true,
+    
+    // Parse in strict mode
+    "alwaysStrict": true,
+    
+    // Allow unused local variables during development
+    "noUnusedLocals": false,
+    
+    // Allow unused parameters during development
+    "noUnusedParameters": false,
+    
+    // Ensure all code paths return a value
+    "noImplicitReturns": true,
+    
+    // Allow fall through cases in switch statements
+    "noFallthroughCasesInSwitch": false,
+    
+    // Generate inline source maps for better debugging
+    "inlineSourceMap": true,
+    
+    // Include source code in source maps
+    "inlineSources": true,
+    
+    // Enable experimental decorators for CDK constructs
+    "experimentalDecorators": true,
+    
+    // Disable strict property initialization for CDK construct properties
+    "strictPropertyInitialization": false,
+    
+    // TypeScript definition files location
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    
+    // Output directory for compiled files
+    "outDir": "dist",
+    
+    // Root directory of source files
+    "rootDir": ".",
+    
+    // Enable interop between CommonJS and ES modules
+    "esModuleInterop": true,
+    
+    // Allow importing JSON files
+    "resolveJsonModule": true,
+    
+    // Skip type checking of declaration files
+    "skipLibCheck": true,
+    
+    // Ensure consistent casing in file names
+    "forceConsistentCasingInFileNames": true
+  },
+  
+  // Include TypeScript files from these directories
+  "include": [
+    "bin/**/*",
+    "lib/**/*",
+    "test/**/*"
+  ],
+  
+  // Exclude these directories from compilation
+  "exclude": [
+    "node_modules",
+    "cdk.out",
+    "dist"
+  ]
+}
