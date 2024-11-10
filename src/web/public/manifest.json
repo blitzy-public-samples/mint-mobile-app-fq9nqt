@@ -1,0 +1,80 @@
+{
+  "name": "Mint Replica Lite",
+  "short_name": "MintLite",
+  "description": "Personal financial management system for tracking accounts, budgets, and investments",
+  "start_url": "https://app.mintreplicalite.com/",
+  "scope": "https://app.mintreplicalite.com/",
+  "display": "standalone",
+  "background_color": "#F5F7FA",
+  "theme_color": "#0967D2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "finance",
+    "productivity",
+    "utilities"
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your financial overview"
+    },
+    {
+      "name": "Transactions",
+      "url": "/transactions",
+      "description": "View recent transactions"
+    },
+    {
+      "name": "Budgets",
+      "url": "/budgets",
+      "description": "Manage your budgets"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/mobile-dashboard.png",
+      "sizes": "1170x2532",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "Dashboard on Mobile"
+    },
+    {
+      "src": "screenshots/desktop-dashboard.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Dashboard on Desktop"
+    }
+  ],
+  "id": "mintreplicalite-pwa",
+  "lang": "en-US",
+  "dir": "ltr",
+  "iarc_rating_id": "",
+  "protocol_handlers": [
+    {
+      "protocol": "web+mintreplica",
+      "url": "/handle/%s"
+    }
+  ]
+}
