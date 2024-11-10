@@ -1,0 +1,189 @@
+// Human Tasks:
+// 1. Ensure GRADLE_USER_HOME environment variable is properly set on development and CI/CD machines
+// 2. Verify network access to services.gradle.org for downloading Gradle distribution
+// 3. Configure proxy settings if required in gradle.properties for corporate networks
+// 4. Ensure sufficient disk space is available in GRADLE_USER_HOME location
+
+// Requirement: Mobile Development Environment Setup - Android build system configuration using Gradle 7.5+ for native Android development
+// Requirement: CI/CD Integration - Enables consistent build environments across development and CI/CD pipelines
+// Requirement: Build Automation - Automated build process with consistent Gradle version management
+
+package org.gradle.wrapper;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.*;
+import java.security.MessageDigest;
+import java.util.Properties;
+import java.util.zip.ZipFile;
+
+public class GradleWrapperMain {
+    // Constants for Gradle wrapper configuration
+    private static final String GRADLE_USER_HOME = System.getenv("GRADLE_USER_HOME");
+    private static final String DISTRIBUTION_BASE;
+    private static final String DISTRIBUTION_PATH;
+    private static final String DISTRIBUTION_URL;
+    private static final String ZIP_STORE_BASE;
+    private static final String ZIP_STORE_PATH;
+    
+    // Initialize configuration from gradle-wrapper.properties
+    static {
+        Properties properties = new Properties();
+        try (InputStream input = GradleWrapperMain.class.getResourceAsStream("/gradle/wrapper/gradle-wrapper.properties")) {
+            properties.load(input);
+            DISTRIBUTION_BASE = properties.getProperty("distributionBase");
+            DISTRIBUTION_PATH = properties.getProperty("distributionPath");
+            DISTRIBUTION_URL = properties.getProperty("distributionUrl");
+            ZIP_STORE_BASE = properties.getProperty("zipStoreBase");
+            ZIP_STORE_PATH = properties.getProperty("zipStorePath");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load gradle-wrapper.properties", e);
+        }
+    }
+
+    // Main entry point for Gradle wrapper execution
+    public static void main(String[] args) {
+        try {
+            // Setup logging
+            configureLogging();
+
+            // Validate and prepare environment
+            validateEnvironment();
+
+            // Get Gradle distribution
+            Path distributionPath = getGradleDistribution();
+
+            // Launch Gradle with provided arguments
+            launchGradle(distributionPath, args);
+
+        } catch (Exception e) {
+            System.err.println("Error executing Gradle wrapper: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    // Configure wrapper logging
+    private static void configureLogging() {
+        System.setProperty("org.gradle.wrapper.verbose", "true");
+    }
+
+    // Validate environment setup
+    private static void validateEnvironment() {
+        if (GRADLE_USER_HOME == null || GRADLE_USER_HOME.isEmpty()) {
+            throw new RuntimeException("GRADLE_USER_HOME environment variable not set");
+        }
+
+        Path gradleUserHome = Paths.get(GRADLE_USER_HOME);
+        if (!Files.exists(gradleUserHome)) {
+            try {
+                Files.createDirectories(gradleUserHome);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create GRADLE_USER_HOME directory", e);
+            }
+        }
+    }
+
+    // Get or download Gradle distribution
+    private static Path getGradleDistribution() throws IOException, URISyntaxException {
+        URI distributionUri = new URI(DISTRIBUTION_URL);
+        String distributionName = new File(distributionUri.getPath()).getName();
+        Path distributionDir = Paths.get(GRADLE_USER_HOME, DISTRIBUTION_PATH);
+        Path distributionFile = distributionDir.resolve(distributionName);
+
+        if (!Files.exists(distributionFile)) {
+            downloadDistribution(distributionUri, distributionFile);
+        }
+
+        verifyDistribution(distributionFile);
+        return extractDistribution(distributionFile);
+    }
+
+    // Download Gradle distribution
+    private static void downloadDistribution(URI distributionUri, Path targetFile) throws IOException {
+        System.out.println("Downloading Gradle distribution from: " + distributionUri);
+        
+        Files.createDirectories(targetFile.getParent());
+        
+        try (InputStream in = distributionUri.toURL().openStream();
+             OutputStream out = Files.newOutputStream(targetFile)) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+        }
+    }
+
+    // Verify distribution integrity
+    private static void verifyDistribution(Path distributionFile) throws IOException {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            try (InputStream is = Files.newInputStream(distributionFile)) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    md.update(buffer, 0, bytesRead);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to verify distribution integrity", e);
+        }
+    }
+
+    // Extract Gradle distribution
+    private static Path extractDistribution(Path distributionFile) throws IOException {
+        Path extractDir = Paths.get(GRADLE_USER_HOME, DISTRIBUTION_PATH, 
+            distributionFile.getFileName().toString().replace(".zip", ""));
+
+        if (!Files.exists(extractDir)) {
+            Files.createDirectories(extractDir);
+            try (ZipFile zipFile = new ZipFile(distributionFile.toFile())) {
+                zipFile.stream().forEach(entry -> {
+                    try {
+                        Path targetPath = extractDir.resolve(entry.getName());
+                        if (entry.isDirectory()) {
+                            Files.createDirectories(targetPath);
+                        } else {
+                            Files.createDirectories(targetPath.getParent());
+                            try (InputStream in = zipFile.getInputStream(entry);
+                                 OutputStream out = Files.newOutputStream(targetPath)) {
+                                byte[] buffer = new byte[8192];
+                                int bytesRead;
+                                while ((bytesRead = in.read(buffer)) != -1) {
+                                    out.write(buffer, 0, bytesRead);
+                                }
+                            }
+                            targetPath.toFile().setExecutable(true);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to extract distribution", e);
+                    }
+                });
+            }
+        }
+        return extractDir;
+    }
+
+    // Launch Gradle with provided arguments
+    private static void launchGradle(Path gradleHome, String[] args) throws IOException {
+        Path gradleExecutable = gradleHome.resolve("bin/gradle");
+        if (!Files.exists(gradleExecutable)) {
+            throw new RuntimeException("Gradle executable not found at: " + gradleExecutable);
+        }
+
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command().add(gradleExecutable.toString());
+        processBuilder.command().addAll(java.util.Arrays.asList(args));
+        processBuilder.inheritIO();
+
+        Process process = processBuilder.start();
+        try {
+            int exitCode = process.waitFor();
+            System.exit(exitCode);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Gradle execution interrupted", e);
+        }
+    }
+}
