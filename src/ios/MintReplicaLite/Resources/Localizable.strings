@@ -1,0 +1,87 @@
+// MARK: - Human Tasks
+/*
+1. Verify all strings match the approved UI/UX copy guidelines
+2. Ensure accessibility descriptions are clear and descriptive
+3. Review translations with localization team when adding new languages
+4. Update version number strings when releasing new app versions
+*/
+
+// MARK: - Common Strings
+/* Addresses requirement: Mobile Applications - Native iOS application using Swift and SwiftUI with localization support */
+"common.app.name" = "Mint Replica Lite";
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.save" = "Save";
+"common.delete" = "Delete";
+"common.error" = "Error";
+
+// MARK: - Authentication Strings
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"auth.login.title" = "Welcome Back";
+"auth.login.email" = "Email Address";
+"auth.login.password" = "Password";
+"auth.login.biometric" = "Use Face ID/Touch ID";
+
+// MARK: - Dashboard Strings
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"dashboard.title" = "Dashboard";
+"dashboard.net_worth" = "Net Worth";
+"dashboard.accounts" = "Accounts";
+"dashboard.budgets" = "Budgets";
+
+// MARK: - Account Management Strings
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"accounts.title" = "My Accounts";
+"accounts.add_new" = "Add New Account";
+"accounts.balance" = "Current Balance";
+
+// MARK: - Budget Management Strings
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"budgets.title" = "My Budgets";
+"budgets.create" = "Create Budget";
+"budgets.spending" = "Spending Overview";
+
+// MARK: - Financial Goals Strings
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"goals.title" = "Financial Goals";
+"goals.create" = "Set New Goal";
+"goals.progress" = "Goal Progress";
+
+// MARK: - Investment Tracking Strings
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"investments.title" = "Investments";
+"investments.portfolio" = "Portfolio Overview";
+"investments.performance" = "Performance History";
+
+// MARK: - Settings Strings
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"settings.title" = "Settings";
+"settings.notifications" = "Notifications";
+"settings.security" = "Security & Privacy";
+
+// MARK: - Error Messages
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"error.network" = "Network connection error. Please try again.";
+"error.validation" = "Please check your input and try again.";
+"error.authentication" = "Authentication failed. Please verify your credentials.";
+
+// MARK: - Accessibility Strings
+/* Addresses requirement: Accessibility Features - Provides localized strings for screen readers and accessibility support */
+"accessibility.dashboard.net_worth.label" = "Your current net worth";
+"accessibility.dashboard.accounts.label" = "View all your linked accounts";
+"accessibility.dashboard.budgets.label" = "Track your monthly budgets";
+"accessibility.auth.biometric.label" = "Sign in using biometric authentication";
+"accessibility.accounts.balance.label" = "Current account balance";
+"accessibility.budgets.progress.label" = "Budget spending progress";
+"accessibility.goals.progress.label" = "Progress towards financial goal";
+"accessibility.investments.performance.label" = "Investment performance chart";
+
+// MARK: - Version Information
+/* Uses AppConstants.APP_VERSION for consistent version display */
+"about.version" = "Version %@";
+"about.build" = "Build %@";
+
+// MARK: - Currency Formatting
+/* Addresses requirement: User Interface Design - Implements localized strings for all UI components and screens */
+"currency.format" = "$%.2f";
+"currency.zero" = "$0.00";
