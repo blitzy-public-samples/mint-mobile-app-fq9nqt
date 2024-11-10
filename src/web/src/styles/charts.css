@@ -1,0 +1,211 @@
+/**
+ * HUMAN TASKS:
+ * 1. Verify chart color contrast ratios meet WCAG 2.1 AA standards (minimum 4.5:1)
+ * 2. Test chart interactions with screen readers and keyboard navigation
+ * 3. Validate chart responsiveness on different devices and screen sizes
+ * 4. Ensure touch targets are at least 44x44px for mobile accessibility
+ */
+
+/**
+ * Core chart styles for Mint Replica Lite financial visualizations
+ * Requirements addressed:
+ * - Analytics and Reporting Engine (Technical Specification/1.1 System Overview/Core Components)
+ * - Mobile-first Design (Technical Specification/1.1 System Overview/System Architecture)
+ * - Accessibility Features (Technical Specification/8.1.8 Accessibility Features)
+ */
+
+/* Chart.js v4.0.0 Integration Styles */
+@import 'chart.js/dist/chart.min.css';
+
+/* Base Chart Container */
+.chart-container {
+  position: relative;
+  width: 100%;
+  max-width: var(--breakpoint-lg);
+  margin: var(--spacing-4) auto;
+  padding: var(--spacing-4);
+  background-color: var(--color-neutral-50);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal) var(--transition-timing);
+}
+
+.chart-container:focus-within {
+  box-shadow: var(--shadow-md);
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Responsive Chart Wrapper */
+.chart-responsive {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: var(--breakpoint-sm)) {
+  .chart-responsive {
+    min-height: 200px;
+  }
+}
+
+/* Chart Legend */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-2);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-700);
+}
+
+.chart-legend [role="button"] {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: opacity var(--transition-fast) var(--transition-timing);
+}
+
+.chart-legend [role="button"]:hover {
+  opacity: 0.8;
+}
+
+.chart-legend [role="button"]:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+  background-color: var(--color-neutral-800);
+  color: var(--color-neutral-50);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-index-tooltip);
+  pointer-events: none;
+}
+
+/* Area Chart Specific Styles */
+.area-chart {
+  fill-opacity: 0.2;
+  stroke-width: 2;
+  transition: all var(--transition-normal) var(--transition-timing);
+}
+
+.area-chart:hover {
+  fill-opacity: 0.3;
+}
+
+/* Bar Chart Specific Styles */
+.bar-chart {
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal) var(--transition-timing);
+}
+
+.bar-chart:hover {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+/* Donut Chart Specific Styles */
+.donut-chart {
+  stroke-width: 2;
+  transition: transform var(--transition-normal) var(--transition-timing);
+}
+
+.donut-chart:hover {
+  transform: scale(1.02);
+}
+
+.donut-chart text {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  fill: var(--color-neutral-700);
+}
+
+/* Line Chart Specific Styles */
+.line-chart {
+  stroke-width: 2;
+  fill: none;
+  transition: all var(--transition-normal) var(--transition-timing);
+}
+
+.line-chart:hover {
+  stroke-width: 3;
+}
+
+.line-chart .point {
+  transition: r var(--transition-normal) var(--transition-timing);
+}
+
+.line-chart .point:hover {
+  r: 6;
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .chart-container,
+  .area-chart,
+  .bar-chart,
+  .donut-chart,
+  .line-chart,
+  .chart-legend [role="button"] {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .area-chart {
+    fill-opacity: 0.4;
+  }
+  
+  .chart-tooltip {
+    border: 2px solid var(--color-neutral-50);
+  }
+  
+  .line-chart {
+    stroke-width: 3;
+  }
+}
+
+/* Screen Reader Only Elements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .chart-container {
+    background-color: var(--color-neutral-800);
+  }
+  
+  .chart-tooltip {
+    background-color: var(--color-neutral-900);
+    color: var(--color-neutral-50);
+  }
+  
+  .chart-legend {
+    color: var(--color-neutral-200);
+  }
+  
+  .donut-chart text {
+    fill: var(--color-neutral-200);
+  }
+}
