@@ -1,0 +1,151 @@
+# Human Tasks:
+# 1. Ensure any additional sensitive configuration files specific to your development environment are added
+# 2. Review and update encryption keys and certificates paths if stored in non-standard locations
+# 3. Verify cloud provider credential file locations match your setup
+# 4. Confirm monitoring data directory paths match your local setup
+
+# IDE and Editor Files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+xcuserdata/
+*.xcuserdatad/
+*.xcscmblueprint
+*.xccheckout
+.project
+.settings/
+
+# Build outputs
+dist/
+build/
+out/
+*.class
+*.o
+*.pyc
+bin/
+obj/
+target/
+*.ipa
+*.xcarchive
+
+# Dependencies
+node_modules/
+vendor/
+Pods/
+*.lock
+package-lock.json
+yarn.lock
+Podfile.lock
+Carthage/
+.gradle/
+
+# Environment and Configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets.yaml
+config.local.ts
+aws.credentials
+google-services.json
+GoogleService-Info.plist
+firebase.config.json
+plaid.config.json
+**/src/backend/kubernetes/secrets*.yaml
+
+# Logs and Databases
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.sqlite
+*.db
+dump.rdb
+*.pid
+*.seed
+*.pid.lock
+
+# iOS
+xcuserdata/
+*.xcworkspace
+*.pbxuser
+*.mode1v3
+*.perspectivev3
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Android
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
+local.properties
+.gradle/
+captures/
+*.jks
+*.keystore
+google-services.json
+
+# Test Coverage
+coverage/
+.nyc_output/
+junit.xml
+test-report.xml
+jest-*.json
+*.lcov
+coverage.xml
+.coverage
+htmlcov/
+
+# Generated Files
+*.generated.*
+generated/
+*.g.dart
+*.g.swift
+R.java
+*.mock.ts
+*.graphql.ts
+schema.json
+schema.graphql
+
+# Infrastructure
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+.terraform/
+*.tfplan
+kubeconfig
+*.pem
+*.crt
+*.key
+*.csr
+*.srl
+aws-credentials.json
+gcp-credentials.json
+*.kubeconfig
+
+# Monitoring and Metrics
+prometheus-data/
+grafana-data/
+*.prom
+node_exporter/
+alertmanager/
+*.rules
+
+# Requirement: Development Environment Setup (A.1.1)
+# Excludes IDE and development tool specific files
+
+# Requirement: Security Architecture (5.4)
+# Prevents sensitive configuration files and credentials from being committed
+
+# Requirement: Infrastructure Security (9.2)
+# Ensures encryption keys, certificates and infrastructure configurations stay private
