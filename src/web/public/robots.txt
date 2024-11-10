@@ -1,0 +1,53 @@
+# Mint Replica Lite Web Application Robots.txt
+# Version: 1.0
+# Last Updated: 2024
+
+# Requirements addressed:
+# - Security Architecture (5.4): Implements application security layer controls by restricting web crawler access to sensitive areas
+# - Data Security (9.2): Protects sensitive and critical data by preventing crawler access to financial information endpoints
+# - Web Application Security (9.3.1): Implements first-line defense by restricting crawler access to API endpoints and sensitive routes
+
+# Global rules for all web crawlers
+User-agent: *
+# Disallow access to sensitive financial and user data endpoints
+Disallow: /api/
+Disallow: /auth/
+Disallow: /accounts/
+Disallow: /transactions/
+Disallow: /budgets/
+Disallow: /investments/
+Disallow: /goals/
+Disallow: /settings/
+Disallow: /profile/
+Disallow: /plaid/
+Disallow: /notifications/
+Disallow: /analytics/
+# Allow access to public pages
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /help
+Allow: /sitemap.xml
+
+# Specific rules for Googlebot
+User-agent: Googlebot
+# Add crawl delay to prevent overwhelming the server
+Crawl-delay: 10
+# Apply same restrictions as global rules
+Disallow: /api/
+Disallow: /auth/
+Disallow: /accounts/
+Disallow: /transactions/
+Disallow: /budgets/
+Disallow: /investments/
+Disallow: /goals/
+Disallow: /settings/
+Disallow: /profile/
+Disallow: /plaid/
+Disallow: /notifications/
+Disallow: /analytics/
+
+# Sitemap declaration
+Sitemap: https://mintreplicalite.com/sitemap.xml
