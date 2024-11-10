@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+HUMAN TASKS:
+1. Configure SSL certificate and HTTPS redirection on production server
+2. Set up CDN for static asset delivery with proper CORS headers
+3. Configure CSP reporting endpoint for security violations
+4. Verify PWA installation flow on all supported platforms
+5. Test screen reader compatibility across browsers
+-->
+
+<head>
+    <!-- Character encoding and compatibility -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- Primary mobile-first viewport configuration -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <!-- Primary Meta Tags -->
+    <title>Mint Replica Lite - Personal Finance Management</title>
+    <meta name="description" content="Personal financial management system for tracking accounts, budgets, and investments">
+    <meta name="theme-color" content="#0967D2">
+    
+    <!-- Mobile web app capability -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Mint Replica Lite">
+    
+    <!-- Security headers -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: https:;
+        connect-src 'self' https://api.mintreplica.com wss://api.mintreplica.com;
+        font-src 'self';
+        object-src 'none';
+        media-src 'self';
+        frame-src 'self' https://*.plaid.com;
+        worker-src 'self';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests;
+    ">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <!-- Preconnect to API domain -->
+    <link rel="preconnect" href="https://api.mintreplica.com">
+    
+    <!-- PWA and favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/logo192.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Accessibility -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-title" content="Mint Replica Lite">
+</head>
+
+<body>
+    <!-- Main application container with ARIA landmarks -->
+    <div id="root" role="main" aria-label="Main application content"></div>
+    
+    <!-- Fallback for disabled JavaScript -->
+    <noscript>
+        <div style="padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+            JavaScript is required to run this application. Please enable JavaScript to continue.
+        </div>
+    </noscript>
+    
+    <!-- Application entry point -->
+    <script type="module" src="/src/main.tsx" defer crossorigin="anonymous"></script>
+    
+    <!-- Development mode Vite client - automatically removed in production -->
+    <script type="module">
+        // @version: ^4.0.0
+        import '@vite/client';
+    </script>
+</body>
+
+</html>
