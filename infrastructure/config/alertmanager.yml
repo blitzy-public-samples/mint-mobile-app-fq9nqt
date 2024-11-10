@@ -1,0 +1,116 @@
+# Human Tasks:
+# 1. Replace ${SMTP_USERNAME} with actual SMTP username
+# 2. Replace ${SMTP_PASSWORD} with actual SMTP password
+# 3. Replace ${SLACK_API_URL} with Slack webhook URL
+# 4. Replace ${PAGERDUTY_SERVICE_KEY} with PagerDuty integration key
+# 5. Verify email addresses for notification routing
+# 6. Review and adjust notification intervals based on team preferences
+
+# Requirements addressed:
+# - 9.3.2 Security Monitoring: Implements real-time alert management and notification delivery for security events
+# - 9.3.3 Incident Response: Configures alert routing and notification channels with defined response team workflows
+# - 10.2.1 AWS Service Configuration: Sets up alert management for AWS infrastructure monitoring
+
+# Global configuration
+global:
+  # Time to wait before resending an alert to an alert manager
+  resolve_timeout: 5m
+  
+  # SMTP configuration for email notifications
+  smtp_from: alerts@mintreplica.com
+  smtp_smarthost: smtp.mintreplica.com:587
+  smtp_auth_username: ${SMTP_USERNAME}
+  smtp_auth_password: ${SMTP_PASSWORD}
+  
+  # Slack configuration
+  slack_api_url: ${SLACK_API_URL}
+  
+  # PagerDuty configuration
+  pagerduty_url: https://events.pagerduty.com/v2/enqueue
+
+# Template files for notifications
+templates:
+  - /etc/alertmanager/templates/*.tmpl
+
+# Main route configuration
+route:
+  # Group alerts by these labels
+  group_by: ['alertname', 'cluster', 'service']
+  
+  # When a new group is created, wait for 30s to send the initial notification
+  group_wait: 30s
+  
+  # When a new alert needs to be added to a group, wait for 5m
+  group_interval: 5m
+  
+  # How long to wait before sending a notification again
+  repeat_interval: 4h
+  
+  # Default receiver if no match is found
+  receiver: default-receiver
+  
+  # Specific routing configurations
+  routes:
+    # Critical severity alerts
+    - match:
+        severity: critical
+      receiver: critical-alerts
+      group_wait: 0s
+      repeat_interval: 1h
+    
+    # Warning severity alerts
+    - match:
+        severity: warning
+      receiver: warning-alerts
+      group_wait: 1m
+      repeat_interval: 2h
+
+# Inhibition rules to prevent alert spam
+inhibit_rules:
+  # Inhibit warning alerts if there is a critical alert for the same alertname/cluster/service
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: ['alertname', 'cluster', 'service']
+
+# Notification receivers configuration
+receivers:
+  # Default notification receiver
+  - name: default-receiver
+    slack_configs:
+      - channel: '#alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    email_configs:
+      - to: team@mintreplica.com
+        send_resolved: true
+
+  # Critical alerts receiver
+  - name: critical-alerts
+    slack_configs:
+      - channel: '#critical-alerts'
+        title: '[CRITICAL] {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    pagerduty_configs:
+      - service_key: ${PAGERDUTY_SERVICE_KEY}
+        description: '{{ .CommonAnnotations.description }}'
+        severity: '{{ .CommonLabels.severity }}'
+        client: 'AlertManager'
+        client_url: '{{ .GeneratorURL }}'
+    email_configs:
+      - to: oncall@mintreplica.com
+        send_resolved: true
+
+  # Warning alerts receiver
+  - name: warning-alerts
+    slack_configs:
+      - channel: '#warning-alerts'
+        title: '[WARNING] {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    email_configs:
+      - to: monitoring@mintreplica.com
+        send_resolved: true
