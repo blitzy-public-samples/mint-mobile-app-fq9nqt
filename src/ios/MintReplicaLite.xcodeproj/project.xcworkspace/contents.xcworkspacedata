@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <!-- Requirement: Native iOS Development (5.2.1 Mobile Applications) -->
+   <!-- Implements native iOS development environment with SwiftUI and modern iOS development practices -->
+   <FileRef
+      location = "group:../MintReplicaLite.xcodeproj">
+   </FileRef>
+   <!-- Requirement: Development Environment (A.1.1 Development Environment Setup) -->
+   <!-- Configures Xcode 14+ workspace with modern build system and derived data management -->
+   <WorkspaceSettings>
+      <BuildSystemType>Latest</BuildSystemType>
+      <DerivedDataLocation>workspace-relative:DerivedData</DerivedDataLocation>
+      <EnableAutomaticDerivedData>true</EnableAutomaticDerivedData>
+      <EnableSharedPrecompiledHeaders>true</EnableSharedPrecompiledHeaders>
+   </WorkspaceSettings>
+</Workspace>
