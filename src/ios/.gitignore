@@ -1,0 +1,89 @@
+# Human Tasks:
+# 1. Ensure Xcode is properly configured with your development team settings
+# 2. Configure code signing certificates and provisioning profiles outside of version control
+# 3. Set up proper environment-specific configuration files and secrets management
+# 4. Configure CocoaPods if not already initialized
+# 5. Set up fastlane match for certificate management if using fastlane
+
+# Xcode
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcworkspace/contents.xcworkspacedata
+/*.gcno
+**/xcshareddata/WorkspaceSettings.xcsettings
+xcuserdata/
+*.xcuserstate
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Build generated
+build/
+DerivedData/
+*.build/
+*.app.dSYM.zip
+*.ipa
+*.hmap
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods
+Pods/
+*.xcworkspace
+Podfile.lock
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/FastlaneRunner
+
+# Swift Package Manager
+Packages/
+.build/
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+.swiftpm
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Code Coverage
+*.gcda
+*.gcno
+*.profraw
+coverage.xml
+*.lcov
+
+# Sensitive Information
+# Requirement: Security Considerations - Ensure sensitive credentials and certificates are not tracked
+*.mobileprovision
+*.cer
+*.p12
+*.key
+GoogleService-Info.plist
+*/Configuration.plist
+*.keystore
+*.jks
+**/secrets.xcconfig
+
+# IDE
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+
+# Testing
+*.xcresult/
+test-reports/
+*.test_result
