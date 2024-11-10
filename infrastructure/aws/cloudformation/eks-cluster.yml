@@ -1,0 +1,217 @@
+# Human Tasks:
+# 1. Review and adjust node instance types based on workload requirements
+# 2. Verify KMS key policies align with your organization's security requirements
+# 3. Configure additional RBAC roles and users as needed
+# 4. Review and adjust logging retention periods
+# 5. Validate cluster version compatibility with your applications
+
+AWSTemplateFormatVersion: '2010-09-15'
+Description: >-
+  CloudFormation template for Mint Replica Lite's EKS cluster with high availability,
+  security, and scalability features. Implements requirements from Technical Specification
+  sections 7.5 (Development and Deployment Tools), 5.5 (Scalability Architecture),
+  and 5.4 (Security Architecture).
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment
+    AllowedValues:
+      - production
+      - staging
+      - development
+    Default: development
+
+  ClusterVersion:
+    Type: String
+    Description: Kubernetes version for the EKS cluster
+    Default: '1.24'
+    AllowedPattern: '^\d+\.\d+$'
+
+Mappings:
+  EnvironmentConfig:
+    production:
+      nodeMin: 3
+      nodeMax: 10
+      nodeType: t3.medium
+    staging:
+      nodeMin: 2
+      nodeMax: 5
+      nodeType: t3.small
+    development:
+      nodeMin: 1
+      nodeMax: 3
+      nodeType: t3.small
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, 'production']
+
+Resources:
+  # KMS Key for EKS Secrets Encryption
+  # Implements requirement: Security Architecture - Encryption at rest
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for EKS cluster secrets encryption
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
+          - Sid: Allow EKS Service
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:role/${EKSClusterRole}
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: '*'
+
+  KMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${AWS::StackName}-eks-key
+      TargetKeyId: !Ref KMSKey
+
+  # EKS Cluster IAM Role
+  # Implements requirement: Security Architecture - IAM roles and policies
+  EKSClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: eks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSVPCResourceController
+
+  # Node Group IAM Role
+  NodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  # EKS Cluster
+  # Implements requirements: Container Orchestration, High Availability
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub mint-replica-lite-${Environment}
+      Version: !Ref ClusterVersion
+      RoleArn: !GetAtt EKSClusterRole.Arn
+      ResourcesVpcConfig:
+        SecurityGroupIds: 
+          - !ImportValue vpc-stack-DefaultSecurityGroupId
+        SubnetIds: !Split 
+          - ','
+          - !ImportValue vpc-stack-PrivateSubnetIds
+        EndpointPrivateAccess: true
+        EndpointPublicAccess: true
+        PublicAccessCidrs: 
+          - 0.0.0.0/0
+      EncryptionConfig:
+        - Provider:
+            KeyArn: !GetAtt KMSKey.Arn
+          Resources:
+            - secrets
+      Logging:
+        ClusterLogging:
+          EnabledTypes:
+            - Type: api
+            - Type: audit
+            - Type: authenticator
+            - Type: controllerManager
+            - Type: scheduler
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: MintReplicaLite
+
+  # EKS Node Group
+  # Implements requirements: High Availability, Scalability
+  EKSNodeGroup:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      ClusterName: !Ref EKSCluster
+      NodeRole: !GetAtt NodeInstanceRole.Arn
+      ScalingConfig:
+        MinSize: !FindInMap [EnvironmentConfig, !Ref Environment, nodeMin]
+        DesiredSize: !FindInMap [EnvironmentConfig, !Ref Environment, nodeMin]
+        MaxSize: !FindInMap [EnvironmentConfig, !Ref Environment, nodeMax]
+      InstanceTypes: 
+        - !FindInMap [EnvironmentConfig, !Ref Environment, nodeType]
+      AmiType: AL2_x86_64
+      DiskSize: 50
+      Subnets: !Split 
+        - ','
+        - !ImportValue vpc-stack-PrivateSubnetIds
+      Labels:
+        role: application
+        environment: !Ref Environment
+      Tags:
+        Name: !Sub mint-replica-lite-${Environment}-node
+        Environment: !Ref Environment
+      UpdateConfig:
+        MaxUnavailable: 1
+
+  # CloudWatch Log Group for EKS Cluster Logs
+  EKSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/eks/mint-replica-lite-${Environment}/cluster
+      RetentionInDays: !If [IsProduction, 90, 30]
+
+Outputs:
+  ClusterName:
+    Description: Name of the EKS cluster
+    Value: !Ref EKSCluster
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterName
+
+  ClusterEndpoint:
+    Description: API endpoint for the EKS cluster
+    Value: !GetAtt EKSCluster.Endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterEndpoint
+
+  ClusterArn:
+    Description: ARN of the EKS cluster
+    Value: !GetAtt EKSCluster.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterArn
+
+  NodeInstanceRoleArn:
+    Description: ARN of the node instance role
+    Value: !GetAtt NodeInstanceRole.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-NodeInstanceRoleArn
+
+  KMSKeyArn:
+    Description: ARN of the KMS key used for secrets encryption
+    Value: !GetAtt KMSKey.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-KMSKeyArn
