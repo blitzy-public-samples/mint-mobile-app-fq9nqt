@@ -1,0 +1,27 @@
+# Requirement: CI/CD Pipeline - Defines application and team identifiers for automated iOS deployment pipeline
+# Version: fastlane 2.210.0
+
+# App Identifier - Used across fastlane workflows for consistent app identification
+# References bundle identifier from Info.plist for consistency
+app_identifier("com.mintreplica.lite")
+
+# Apple ID - Developer account email for authentication in CI/CD processes
+# Stored as environment variable for security
+apple_id(ENV["APPLE_ID"])
+
+# Team ID - Apple Developer Team ID for code signing and provisioning profile management
+# Stored as environment variable for security
+team_id(ENV["TEAM_ID"])
+
+# iTunes Connect Team ID - App Store Connect Team ID for app distribution and TestFlight management
+# Stored as environment variable for security
+itc_team_id(ENV["ITC_TEAM_ID"])
+
+# Human Tasks:
+# 1. Configure the following environment variables in your CI system:
+#    - APPLE_ID: Your Apple Developer account email
+#    - TEAM_ID: Your Apple Developer Team ID (found in Developer Portal)
+#    - ITC_TEAM_ID: Your App Store Connect Team ID
+# 2. Ensure Apple Developer Program membership is active
+# 3. Verify proper code signing certificates are installed in CI environment
+# 4. Configure App Store Connect access for automated deployments
