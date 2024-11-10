@@ -1,0 +1,116 @@
+# Gradle files and directories
+.gradle/
+build/
+/captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# IDE-specific files
+.idea/
+*.iml
+.project
+.settings/
+.classpath
+.navigation/
+
+# Build outputs and release artifacts
+/build
+/release
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Sensitive configuration files and credentials
+google-services.json
+keystore.properties
+*.keystore
+*.jks
+secrets.xml
+debug.keystore
+release.keystore
+*.p12
+*.pem
+
+# System and temporary files
+.DS_Store
+Thumbs.db
+*~
+*.log
+*.bak
+*.tmp
+*.swp
+
+# Android Studio layout inspector files
+/layout-inspector/
+
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+/captures/
+
+# Version control
+.svn/
+.hg/
+.git/
+
+# Proguard
+proguard/
+
+# Generated files
+bin/
+gen/
+out/
+
+# NDK
+obj/
+.externalNativeBuild
+.cxx
+
+# Crashlytics
+crashlytics.properties
+crashlytics-build.properties
+com_crashlytics_export_strings.xml
+fabric.properties
+
+# Android Profiling
+*.hprof
+
+# Kotlin
+*.kotlin_module
+
+# Android Studio Performance files
+*.trace
+
+# Android Studio Layout Inspector
+/layout-inspector/
+
+# Code coverage
+jacoco.exec
+coverage/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+# Firebase
+google-services.json
+firebase_credentials.json
+
+# Misc Android Studio
+*.iws
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+.idea/navEditor.xml
+.idea/workspace.xml
