@@ -1,0 +1,120 @@
+# Human Tasks Required:
+# 1. Configure test database credentials in test-env-config ConfigMap
+# 2. Set up SSL certificates for database connections
+# 3. Configure Redis password in test-env-config ConfigMap
+# 4. Verify volume mount permissions
+# 5. Configure resource limits based on cluster capacity
+# 6. Set up Prometheus scraping endpoints
+# 7. Configure node selectors for test workloads
+# 8. Set up test runner service account with proper RBAC
+# 9. Configure network policies for test namespace
+# 10. Set up monitoring and metrics collection
+
+# Technical Specification/A.4 Development Standards Reference - Test Automation
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mint-replica-test-job
+  namespace: test
+  labels:
+    app: mint-replica-lite
+    component: test
+    environment: test
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+
+spec:
+  # Technical Specification/A.4 Development Standards Reference - Test execution configuration
+  backoffLimit: 3
+  completionMode: NonIndexed
+  ttlSecondsAfterFinished: 3600
+  parallelism: 1
+  completions: 1
+
+  template:
+    metadata:
+      labels:
+        app: mint-replica-lite
+        component: test
+        environment: test
+    spec:
+      # Technical Specification/9.3 Security Protocols/9.3.2 Security Monitoring - Security controls
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        readOnlyRootFilesystem: true
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+      - name: test-runner
+        image: node:16-alpine
+        command: ["npm", "run", "test:ci"]
+        
+        # Technical Specification/10.1 Deployment Environment - Resource management
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+        
+        # Technical Specification/9.3 Security Protocols - Container security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+        
+        # Technical Specification/A.4 Development Standards Reference - Test environment configuration
+        env:
+        - name: NODE_ENV
+          value: "test"
+        - name: TEST_DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: test-env-config
+              key: database_url
+        - name: TEST_REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: test-env-config
+              key: redis_url
+        - name: TEST_LOG_LEVEL
+          value: "debug"
+        
+        # Technical Specification/A.4 Development Standards Reference - Volume mounts
+        volumeMounts:
+        - name: test-results
+          mountPath: /app/reports
+          readOnly: false
+        - name: test-config
+          mountPath: /app/config
+          readOnly: true
+
+      # Technical Specification/A.4 Development Standards Reference - Volume definitions
+      volumes:
+      - name: test-results
+        emptyDir:
+          sizeLimit: 1Gi
+      - name: test-config
+        configMap:
+          name: test-env-config
+          optional: false
+
+      # Technical Specification/10.1 Deployment Environment - Test execution configuration
+      serviceAccountName: test-runner-sa
+      restartPolicy: Never
+      
+      # Technical Specification/10.1 Deployment Environment - Node selection
+      nodeSelector:
+        kubernetes.io/os: linux
+        test-workload: "true"
+      
+      # Technical Specification/10.1 Deployment Environment - Node tolerations
+      tolerations:
+      - key: "test-workload"
+        operator: "Exists"
+        effect: "NoSchedule"
