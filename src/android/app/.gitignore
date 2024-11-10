@@ -1,0 +1,55 @@
+# Build outputs and generated files
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+
+# Local configuration
+local.properties
+
+# ProGuard files
+proguard/
+
+# Navigation editor
+.navigation/
+
+# Log files
+*.log
+
+# OS-specific files
+.DS_Store
+
+# IDE-specific files
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+.idea/navEditor.xml
+
+# Human Tasks:
+# 1. Ensure Android Studio is configured to respect .gitignore patterns
+# 2. Run 'git rm --cached' on any previously tracked files that should now be ignored
+# 3. Verify that sensitive files like local.properties are not already tracked
+# 4. Configure ProGuard rules appropriately for release builds
+
+# Requirements addressed:
+# - Native Android Application (Technical Specification/1.1 System Overview)
+#   Excludes build outputs and IDE files specific to Android development
+# - Security Architecture (Technical Specification/5.4 Security Architecture)
+#   Prevents sensitive configuration files and credentials from being committed
+# - Development Environment (Technical Specification/7.1 Programming Languages)
+#   Maintains clean version control for Android/Kotlin development environment
