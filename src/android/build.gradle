@@ -1,0 +1,51 @@
+// Requirement: Native Android Development
+// Root-level build.gradle file for project-wide configuration
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules
+buildscript {
+    // Define versions in ext block for centralized version management
+    ext {
+        // Requirement: Development Standards - Kotlin 1.5+
+        kotlin_version = '1.8.0'
+        compose_version = '1.4.0'
+        room_version = '2.5.0'
+        hilt_version = '2.44'
+        retrofit_version = '2.9.0'
+        biometric_version = '1.2.0-alpha05'
+    }
+    
+    repositories {
+        google()  // Google's Maven repository
+        mavenCentral()  // Maven Central repository
+    }
+    
+    dependencies {
+        // Android Gradle Plugin v7.4.2
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        
+        // Kotlin Gradle Plugin v1.8.0
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        
+        // Hilt Dependency Injection Plugin v2.44
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+        
+        // Secrets Gradle Plugin for API key management v2.0.1
+        classpath 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin:2.0.1'
+    }
+}
+
+// Configure settings for all projects in the build
+allprojects {
+    repositories {
+        google()  // Google's Maven repository
+        mavenCentral()  // Maven Central repository
+        
+        // Additional repositories for specific dependencies
+        maven { url 'https://jitpack.io' }  // Required for MPAndroidChart
+    }
+}
+
+// Clean task for removing build directories
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
+}
