@@ -1,0 +1,183 @@
+# Human Tasks:
+# 1. Ensure PodSecurityPolicy admission controller is enabled in the cluster
+# 2. Verify compatibility with Kubernetes version (PSP is deprecated in v1.21+)
+# 3. Consider migration to Pod Security Standards in newer K8s versions
+# 4. Monitor and alert on policy violations
+# 5. Review and update policies periodically based on security assessments
+
+# Technical Specification Requirements Addressed:
+# - 5.4 Security Architecture/Security Layers: Implements pod-level security controls 
+#   and container security policies as part of multi-layered security
+# - 10.1 Deployment Environment: Establishes security controls for cloud-native deployment 
+#   with strict pod security requirements
+# - 9.3.5 Secure Development/Runtime: Implements runtime security controls and container 
+#   security policies for secure pod execution
+
+apiVersion: v1
+kind: List
+items:
+  # Restricted PSP for application workloads
+  - apiVersion: policy/v1beta1
+    kind: PodSecurityPolicy
+    metadata:
+      name: restricted-psp
+      annotations:
+        seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+        seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+        apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+        apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+      labels:
+        app: mintreplica-lite
+        type: security
+        policy: restricted
+    spec:
+      privileged: false
+      allowPrivilegeEscalation: false
+      requiredDropCapabilities:
+        - ALL
+      volumes:
+        - 'configMap'
+        - 'emptyDir'
+        - 'projected'
+        - 'secret'
+        - 'persistentVolumeClaim'
+        - 'downwardAPI'
+      hostNetwork: false
+      hostIPC: false
+      hostPID: false
+      runAsUser:
+        rule: 'MustRunAsNonRoot'
+        ranges:
+          - min: 1000
+            max: 65535
+      runAsGroup:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 1000
+            max: 65535
+      seLinux:
+        rule: 'RunAsAny'
+      supplementalGroups:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 1000
+            max: 65535
+      fsGroup:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 1000
+            max: 65535
+      readOnlyRootFilesystem: true
+      forbiddenSysctls:
+        - '*'
+      allowedCapabilities: []
+      defaultAllowPrivilegeEscalation: false
+      allowedHostPaths: []
+      allowedFlexVolumes: []
+      allowedUnsafeSysctls: []
+
+  # Privileged PSP for system components
+  - apiVersion: policy/v1beta1
+    kind: PodSecurityPolicy
+    metadata:
+      name: privileged-psp
+      annotations:
+        seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
+        seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+      labels:
+        app: mintreplica-lite
+        type: security
+        policy: privileged
+    spec:
+      privileged: true
+      allowPrivilegeEscalation: true
+      allowedCapabilities:
+        - '*'
+      volumes:
+        - '*'
+      hostNetwork: true
+      hostIPC: true
+      hostPID: true
+      hostPorts:
+        - min: 0
+          max: 65535
+      runAsUser:
+        rule: 'RunAsAny'
+      runAsGroup:
+        rule: 'RunAsAny'
+      seLinux:
+        rule: 'RunAsAny'
+      supplementalGroups:
+        rule: 'RunAsAny'
+      fsGroup:
+        rule: 'RunAsAny'
+      readOnlyRootFilesystem: false
+      allowedHostPaths:
+        - pathPrefix: "/"
+          readOnly: false
+      allowedUnsafeSysctls:
+        - '*'
+      forbiddenSysctls: []
+      defaultAllowPrivilegeEscalation: true
+      allowedFlexVolumes:
+        - driver: '*'
+
+  # Database PSP for database workloads
+  - apiVersion: policy/v1beta1
+    kind: PodSecurityPolicy
+    metadata:
+      name: database-psp
+      annotations:
+        seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'runtime/default'
+        seccomp.security.alpha.kubernetes.io/defaultProfileName: 'runtime/default'
+        apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+        apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+      labels:
+        app: mintreplica-lite
+        type: security
+        policy: database
+    spec:
+      privileged: false
+      allowPrivilegeEscalation: false
+      requiredDropCapabilities:
+        - ALL
+      volumes:
+        - 'configMap'
+        - 'emptyDir'
+        - 'secret'
+        - 'persistentVolumeClaim'
+        - 'projected'
+        - 'downwardAPI'
+      hostNetwork: false
+      hostIPC: false
+      hostPID: false
+      runAsUser:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 999
+            max: 999
+      runAsGroup:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 999
+            max: 999
+      seLinux:
+        rule: 'RunAsAny'
+      supplementalGroups:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 999
+            max: 999
+      fsGroup:
+        rule: 'MustRunAs'
+        ranges:
+          - min: 999
+            max: 999
+      readOnlyRootFilesystem: false
+      forbiddenSysctls:
+        - '*'
+      allowedCapabilities: []
+      defaultAllowPrivilegeEscalation: false
+      allowedHostPaths: []
+      allowedFlexVolumes: []
+      allowedUnsafeSysctls: []
