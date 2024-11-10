@@ -1,0 +1,171 @@
+# Human Tasks:
+# 1. Verify container image tag matches current release version
+# 2. Confirm resource quotas align with cluster capacity
+# 3. Validate security context UID/GID with container image
+# 4. Review network policies and ingress rules
+# 5. Check monitoring and logging configurations
+# 6. Verify ConfigMap and Secret names match existing resources
+# 7. Ensure HPA configuration aligns with cluster resources
+
+# Requirement: Container Orchestration
+# Location: Technical Specification/10.4 Orchestration/10.4.1 Kubernetes Configuration
+# Implementation: Kubernetes Deployment resource for backend API service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mint-replica-backend
+  namespace: default
+  labels:
+    app: mint-replica
+    component: backend
+    environment: production
+  annotations:
+    kubernetes.io/change-cause: "Initial deployment of Mint Replica Lite backend API"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/metrics"
+
+# Requirement: Scalability Architecture
+# Location: Technical Specification/5.5 Scalability Architecture
+# Implementation: Deployment specification with scalability configuration
+spec:
+  # Configure replica count for high availability
+  replicas: 3
+  
+  # Define update strategy for zero-downtime deployments
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  
+  # Pod selector for service binding
+  selector:
+    matchLabels:
+      app: mint-replica
+      component: backend
+
+  # Pod template specification
+  template:
+    metadata:
+      labels:
+        app: mint-replica
+        component: backend
+      annotations:
+        checksum/config: ${CONFIG_CHECKSUM}
+        checksum/secrets: ${SECRETS_CHECKSUM}
+    
+    # Requirement: High Availability
+    # Location: Technical Specification/5.6 Deployment Architecture
+    # Implementation: Pod specification with health checks and resource management
+    spec:
+      # Security context for pod-level security settings
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      
+      # Container specifications
+      containers:
+      - name: api
+        image: mint-replica-backend:latest
+        imagePullPolicy: Always
+        
+        # Container ports
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        
+        # Resource requests and limits
+        resources:
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+        
+        # Liveness probe for container health checking
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Readiness probe for service availability
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Container security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        
+        # Environment configuration from ConfigMap and Secrets
+        envFrom:
+        - configMapRef:
+            name: mint-replica-backend-config
+        - secretRef:
+            name: mint-replica-backend-secrets
+        
+        # Volume mounts
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: node-modules
+          mountPath: /app/node_modules
+          readOnly: true
+      
+      # Volumes configuration
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: node-modules
+        emptyDir: {}
+      
+      # Pod termination grace period
+      terminationGracePeriodSeconds: 30
+      
+      # Node affinity and anti-affinity rules
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - mint-replica-backend
+              topologyKey: kubernetes.io/hostname
+      
+      # Node selector for deployment targeting
+      nodeSelector:
+        kubernetes.io/os: linux
+      
+      # Tolerations for node conditions
+      tolerations:
+      - key: node.kubernetes.io/not-ready
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 300
+      - key: node.kubernetes.io/unreachable
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 300
