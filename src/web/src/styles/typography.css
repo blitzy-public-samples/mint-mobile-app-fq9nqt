@@ -1,0 +1,234 @@
+/**
+ * HUMAN TASKS:
+ * 1. Verify font rendering across different operating systems and browsers
+ * 2. Test responsive typography scaling on actual devices
+ * 3. Validate WCAG 2.1 compliance for text contrast and readability
+ * 4. Ensure proper font loading and fallback behavior
+ */
+
+/**
+ * Core typography styles for Mint Replica Lite
+ * Requirements addressed:
+ * - Mobile-First Design (Technical Specification/1.1 System Overview)
+ *   Implements responsive typography scaling starting from mobile breakpoints
+ * - User Interface Design (Technical Specification/8.1 User Interface Design)
+ *   Defines consistent text hierarchies and spacing
+ * - Accessibility Features (Technical Specification/8.1.8 Accessibility Features)
+ *   Ensures minimum text size and proper line heights for readability
+ */
+
+@import './variables.css';
+
+/* Base Typography */
+body {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-neutral-900);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings */
+h1, .heading-1 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-6);
+}
+
+h2, .heading-2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-4);
+}
+
+h3, .heading-3 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-4);
+}
+
+h4, .heading-4 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-3);
+}
+
+/* Body Text */
+p, .text-body {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--spacing-4);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.text-xs {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+/* Font Families */
+.font-mono {
+  font-family: var(--font-family-mono);
+}
+
+/* Font Weights */
+.font-normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Responsive Typography */
+@media (max-width: var(--breakpoint-sm)) {
+  h1, .heading-1 {
+    font-size: var(--font-size-3xl);
+  }
+
+  h2, .heading-2 {
+    font-size: var(--font-size-2xl);
+  }
+
+  h3, .heading-3 {
+    font-size: var(--font-size-xl);
+  }
+
+  h4, .heading-4 {
+    font-size: var(--font-size-lg);
+  }
+}
+
+/* Helper Classes */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-break {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+/* Line Heights */
+.leading-tight {
+  line-height: var(--line-height-tight);
+}
+
+.leading-normal {
+  line-height: var(--line-height-normal);
+}
+
+.leading-relaxed {
+  line-height: var(--line-height-relaxed);
+}
+
+/* Text Alignment */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Text Decoration */
+.text-underline {
+  text-decoration: underline;
+}
+
+.text-no-underline {
+  text-decoration: none;
+}
+
+.text-strike {
+  text-decoration: line-through;
+}
+
+/* Text Transform */
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+/* Letter Spacing */
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+.tracking-normal {
+  letter-spacing: 0;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+/* Accessibility */
+@media screen and (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+  }
+
+  h1, .heading-1 {
+    font-size: 24pt;
+  }
+
+  h2, .heading-2 {
+    font-size: 20pt;
+  }
+
+  h3, .heading-3 {
+    font-size: 18pt;
+  }
+
+  h4, .heading-4 {
+    font-size: 16pt;
+  }
+}
