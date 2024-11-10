@@ -1,0 +1,268 @@
+# Human Tasks:
+# 1. Ensure AWS EBS CSI driver is installed for persistent volume provisioning
+# 2. Configure AWS IAM roles for EKS service discovery
+# 3. Verify network policies allow Prometheus to scrape metrics from all namespaces
+# 4. Set up CloudWatch Logs integration for long-term metrics storage
+# 5. Configure alertmanager endpoints for notifications
+
+# Technical Specification Requirements Addressed:
+# - 7.5 Development and Deployment Tools: Implements Prometheus 2.40+ deployment with specified resource limits
+# - 9.3.2 Security Monitoring: Configures real-time metrics collection with CloudWatch integration
+# - 10.2.1 AWS Service Configuration: Sets up EKS service discovery
+# - 10.3.2 Container Resource Limits: Implements monitoring container resource limits
+
+apiVersion: v1
+kind: List
+items:
+  # Prometheus configuration
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: prometheus-config
+      namespace: monitoring
+      labels:
+        app: prometheus
+        component: monitoring
+    data:
+      prometheus.yml: |
+        global:
+          scrape_interval: 15s
+          evaluation_interval: 15s
+          external_labels:
+            cluster: mintreplica-prod
+            environment: production
+
+        scrape_configs:
+          - job_name: 'kubernetes-apiservers'
+            kubernetes_sd_configs:
+              - role: endpoints
+            scheme: https
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+                action: keep
+                regex: default;kubernetes
+
+          - job_name: 'kubernetes-nodes'
+            kubernetes_sd_configs:
+              - role: node
+            scheme: https
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            relabel_configs:
+              - action: labelmap
+                regex: __meta_kubernetes_node_label_(.+)
+
+          - job_name: 'kubernetes-pods'
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                action: replace
+                target_label: __metrics_path__
+                regex: (.+)
+              - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                action: replace
+                regex: ([^:]+)(?::\d+)?;(\d+)
+                replacement: $1:$2
+                target_label: __address__
+
+          - job_name: 'kubernetes-service-endpoints'
+            kubernetes_sd_configs:
+              - role: endpoints
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                action: replace
+                target_label: __scheme__
+                regex: (https?)
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                action: replace
+                target_label: __metrics_path__
+                regex: (.+)
+              - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                action: replace
+                target_label: __address__
+                regex: ([^:]+)(?::\d+)?;(\d+)
+                replacement: $1:$2
+
+  # Prometheus secrets for remote storage and alerting
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: prometheus-secrets
+      namespace: monitoring
+      labels:
+        app: prometheus
+        component: monitoring
+    type: Opaque
+    stringData:
+      remote_write.yml: |
+        remote_write:
+          - url: "https://aps-workspaces.${AWS_REGION}.amazonaws.com/workspaces/${WORKSPACE_ID}/api/v1/remote_write"
+            queue_config:
+              max_samples_per_send: 1000
+              max_shards: 200
+              capacity: 2500
+            sigv4:
+              region: ${AWS_REGION}
+              role_arn: ${IAM_ROLE_ARN}
+
+  # Prometheus StatefulSet for high availability
+  - apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      name: prometheus
+      namespace: monitoring
+      labels:
+        app: prometheus
+        component: monitoring
+    spec:
+      serviceName: prometheus
+      replicas: 2
+      selector:
+        matchLabels:
+          app: prometheus
+          component: monitoring
+      template:
+        metadata:
+          labels:
+            app: prometheus
+            component: monitoring
+        spec:
+          serviceAccountName: prometheus
+          securityContext:
+            fsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+          containers:
+            - name: prometheus
+              image: prom/prometheus:v2.40.0  # Version specified in requirements
+              args:
+                - "--config.file=/etc/prometheus/prometheus.yml"
+                - "--storage.tsdb.path=/prometheus"
+                - "--storage.tsdb.retention.time=15d"
+                - "--web.enable-lifecycle"
+                - "--web.enable-admin-api"
+              ports:
+                - containerPort: 9090
+                  protocol: TCP
+                  name: http
+              resources:
+                requests:
+                  cpu: "500m"    # As per requirement 10.3.2
+                  memory: "1Gi"  # As per requirement 10.3.2
+                limits:
+                  cpu: "1000m"
+                  memory: "2Gi"
+              volumeMounts:
+                - name: prometheus-config
+                  mountPath: /etc/prometheus
+                  readOnly: true
+                - name: prometheus-storage
+                  mountPath: /prometheus
+              livenessProbe:
+                httpGet:
+                  path: /-/healthy
+                  port: 9090
+                initialDelaySeconds: 30
+                timeoutSeconds: 5
+              readinessProbe:
+                httpGet:
+                  path: /-/ready
+                  port: 9090
+                initialDelaySeconds: 15
+                timeoutSeconds: 5
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+          volumes:
+            - name: prometheus-config
+              configMap:
+                name: prometheus-config
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                        - key: app
+                          operator: In
+                          values:
+                            - prometheus
+                    topologyKey: kubernetes.io/hostname
+      volumeClaimTemplates:
+        - metadata:
+            name: prometheus-storage
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: gp2
+            resources:
+              requests:
+                storage: 50Gi
+
+  # Prometheus service for internal access
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: prometheus
+      namespace: monitoring
+      labels:
+        app: prometheus
+        component: monitoring
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+    spec:
+      type: ClusterIP
+      ports:
+        - port: 80
+          targetPort: 9090
+          protocol: TCP
+          name: http
+      selector:
+        app: prometheus
+        component: monitoring
+
+  # Prometheus ingress for secure external access
+  - apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: prometheus-ingress
+      namespace: monitoring
+      labels:
+        app: prometheus
+        component: monitoring
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+        nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"  # Internal networks only
+    spec:
+      rules:
+        - host: prometheus.mintreplica.com
+          http:
+            paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: prometheus
+                    port:
+                      number: 80
+      tls:
+        - hosts:
+            - prometheus.mintreplica.com
+          secretName: prometheus-tls
