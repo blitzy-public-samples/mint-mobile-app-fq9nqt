@@ -1,0 +1,129 @@
+# Environment Files
+# Technical Specification/9.2 Data Security - Ensures sensitive test configuration files and credentials are not committed
+.env
+.env.local
+.env.*.local
+.env.test.local
+
+# Dependencies
+# Technical Specification/A.4 Development Standards Reference - Maintains clean repository state
+node_modules/
+package-lock.json
+
+# Build Output
+# Technical Specification/A.4 Development Standards Reference - Excludes build artifacts
+dist/
+build/
+lib/
+*.tsbuildinfo
+
+# Test Reports and Coverage
+# Technical Specification/A.1.2 Code Quality Standards - Manages test artifacts with >80% coverage requirement
+coverage/
+reports/
+junit.xml
+test-results/
+*.lcov
+.nyc_output/
+*.log
+
+# IDE Files
+# Technical Specification/A.4 Development Standards Reference - Excludes development-specific configurations
+.idea/
+.vscode/
+*.sublime-*
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# OS Files
+# Technical Specification/A.4 Development Standards Reference - Maintains clean repository
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+desktop.ini
+
+# Temporary Files
+# Technical Specification/A.4 Development Standards Reference - Excludes temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.cache
+.eslintcache
+.prettiercache
+
+# Test-Specific Files
+# Technical Specification/A.1.2 Code Quality Standards - Manages test execution outputs
+mocks/__recordings__/
+__snapshots__/
+*.snap
+test-report.xml
+test-report.json
+*.test.js.snap
+
+# Security and Credentials
+# Technical Specification/9.2 Data Security - Protects sensitive data
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+*.keystore
+credentials.json
+auth.json
+
+# Performance Test Data
+# Technical Specification/A.1.2 Code Quality Standards - Manages test artifacts
+benchmark/
+load-test/
+stress-test/
+performance-results/
+*.heap
+*.cpu
+*.flamegraph
+
+# Database
+# Technical Specification/8.2 Database Design - Protects test database files
+*.sqlite
+*.sqlite3
+*.db
+dump.rdb
+*.rdb
+
+# Debug Files
+# Technical Specification/A.4 Development Standards Reference - Excludes debug artifacts
+debug/
+.debug/
+*.debug
+debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker Test Environment
+# Technical Specification/A.1.1 Development Environment Setup
+.docker/
+docker-compose.override.yml
+
+# Generated Documentation
+# Technical Specification/A.4 Development Standards Reference
+docs/generated/
+api-docs/
+coverage-docs/
+test-docs/
+
+# Misc
+# Technical Specification/A.4 Development Standards Reference - Additional cleanup
+.history/
+*.pid
+*.seed
+*.pid.lock
+.env.development.local
+.env.test.local
+.env.production.local
