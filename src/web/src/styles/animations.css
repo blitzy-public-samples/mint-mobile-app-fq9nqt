@@ -1,0 +1,190 @@
+/**
+ * HUMAN TASKS:
+ * 1. Test animations with screen readers and assistive technologies
+ * 2. Verify animation performance on low-end mobile devices
+ * 3. Validate animations against vestibular motion sensitivities
+ */
+
+/**
+ * Core CSS animations and transitions for Mint Replica Lite
+ * Requirements addressed:
+ * - User Interface Design (Technical Specification/8.1 User Interface Design)
+ * - Mobile-First Design (Technical Specification/1.1 System Overview)
+ * - Accessibility Features (Technical Specification/8.1.8 Accessibility Features)
+ */
+
+@import './variables.css';
+
+/* Keyframe Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes progress-bar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation Utility Classes */
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.2s ease-in;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-slide-out {
+  animation: slide-out 0.3s ease-in;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-progress {
+  animation: progress-bar 2s linear;
+}
+
+.animate-spin {
+  animation: spinner 1s linear infinite;
+}
+
+/* Transition Utility Classes */
+.transition-transform {
+  transition: transform 0.2s ease-in-out;
+}
+
+.transition-opacity {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.transition-colors {
+  transition: background-color 0.2s ease-in-out,
+              border-color 0.2s ease-in-out,
+              color 0.2s ease-in-out;
+}
+
+.transition-shadow {
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Accessibility - Respect User Preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-spin {
+    animation: none !important;
+  }
+  
+  .animate-progress {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Color Transitions */
+.transition-primary {
+  transition: color 0.2s ease-in-out;
+  color: var(--color-primary-500);
+}
+
+.transition-primary:hover {
+  color: var(--color-primary-600);
+}
+
+.transition-neutral {
+  transition: color 0.2s ease-in-out;
+  color: var(--color-neutral-500);
+}
+
+.transition-neutral:hover {
+  color: var(--color-neutral-600);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .animate-slide-in,
+  .animate-slide-out {
+    /* Reduce motion on mobile for better performance */
+    transform: translateY(10px);
+  }
+  
+  .animate-scale-in {
+    /* Smaller scale factor on mobile */
+    transform: scale(0.98);
+  }
+}
