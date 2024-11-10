@@ -1,0 +1,215 @@
+/**
+ * HUMAN TASKS:
+ * 1. Verify color contrast ratios meet WCAG 2.1 AA standards (minimum 4.5:1 for normal text)
+ * 2. Test theme implementations with screen readers and assistive technologies
+ * 3. Validate theme transitions on actual devices
+ */
+
+/* Import global CSS variables */
+@import './variables.css';
+
+/**
+ * Core theme system for Mint Replica Lite
+ * Requirements addressed:
+ * - Mobile-First Design (Technical Specification/1.1 System Overview)
+ * - User Interface Design (Technical Specification/8.1 User Interface Design)
+ * - Accessibility Features (Technical Specification/8.1.8 Accessibility Features)
+ */
+
+/* Base theme class with shared properties */
+.theme-base {
+  transition: background-color var(--transition-normal) var(--transition-timing),
+              color var(--transition-normal) var(--transition-timing),
+              border-color var(--transition-normal) var(--transition-timing),
+              box-shadow var(--transition-normal) var(--transition-timing);
+}
+
+/* Light theme - Default */
+.theme-light {
+  composes: theme-base;
+  color-scheme: light;
+  
+  /* Core colors */
+  --theme-bg-primary: var(--color-neutral-50);
+  --theme-bg-secondary: var(--color-neutral-100);
+  --theme-bg-tertiary: var(--color-neutral-200);
+  
+  --theme-text-primary: var(--color-neutral-900);
+  --theme-text-secondary: var(--color-neutral-700);
+  --theme-text-tertiary: var(--color-neutral-500);
+  
+  --theme-accent-primary: var(--color-primary-500);
+  --theme-accent-secondary: var(--color-primary-600);
+  
+  /* Interactive elements */
+  --theme-interactive-normal: var(--color-primary-500);
+  --theme-interactive-hover: var(--color-primary-600);
+  --theme-interactive-active: var(--color-primary-700);
+  --theme-interactive-disabled: var(--color-neutral-300);
+  
+  /* Borders */
+  --theme-border-light: var(--color-neutral-200);
+  --theme-border-normal: var(--color-neutral-300);
+  --theme-border-heavy: var(--color-neutral-400);
+  
+  /* Shadows */
+  --theme-shadow-sm: var(--shadow-sm);
+  --theme-shadow-md: var(--shadow-md);
+  --theme-shadow-lg: var(--shadow-lg);
+  
+  /* Status colors */
+  --theme-success: var(--color-success-500);
+  --theme-warning: var(--color-warning-500);
+  --theme-error: var(--color-error-500);
+  
+  /* Ensures WCAG 2.1 contrast ratio of 4.5:1 */
+  --theme-contrast-ratio: 4.5;
+}
+
+/* Dark theme */
+.theme-dark {
+  composes: theme-base;
+  color-scheme: dark;
+  
+  /* Core colors */
+  --theme-bg-primary: var(--color-neutral-900);
+  --theme-bg-secondary: var(--color-neutral-800);
+  --theme-bg-tertiary: var(--color-neutral-700);
+  
+  --theme-text-primary: var(--color-neutral-50);
+  --theme-text-secondary: var(--color-neutral-200);
+  --theme-text-tertiary: var(--color-neutral-400);
+  
+  --theme-accent-primary: var(--color-primary-400);
+  --theme-accent-secondary: var(--color-primary-300);
+  
+  /* Interactive elements */
+  --theme-interactive-normal: var(--color-primary-400);
+  --theme-interactive-hover: var(--color-primary-300);
+  --theme-interactive-active: var(--color-primary-200);
+  --theme-interactive-disabled: var(--color-neutral-600);
+  
+  /* Borders */
+  --theme-border-light: var(--color-neutral-700);
+  --theme-border-normal: var(--color-neutral-600);
+  --theme-border-heavy: var(--color-neutral-500);
+  
+  /* Shadows */
+  --theme-shadow-sm: var(--shadow-lg);
+  --theme-shadow-md: var(--shadow-xl);
+  --theme-shadow-lg: none;
+  
+  /* Status colors */
+  --theme-success: var(--color-success-400);
+  --theme-warning: var(--color-warning-400);
+  --theme-error: var(--color-error-400);
+  
+  /* Ensures WCAG 2.1 contrast ratio of 4.5:1 */
+  --theme-contrast-ratio: 4.5;
+}
+
+/* High contrast theme for accessibility */
+.high-contrast {
+  composes: theme-base;
+  color-scheme: light;
+  
+  /* Core colors - Using pure black and white for maximum contrast */
+  --theme-bg-primary: #FFFFFF;
+  --theme-bg-secondary: #F8F8F8;
+  --theme-bg-tertiary: #EEEEEE;
+  
+  --theme-text-primary: #000000;
+  --theme-text-secondary: #222222;
+  --theme-text-tertiary: #444444;
+  
+  --theme-accent-primary: #0052CC;
+  --theme-accent-secondary: #004299;
+  
+  /* Interactive elements */
+  --theme-interactive-normal: #0052CC;
+  --theme-interactive-hover: #004299;
+  --theme-interactive-active: #003380;
+  --theme-interactive-disabled: #666666;
+  
+  /* Borders */
+  --theme-border-light: #202020;
+  --theme-border-normal: #000000;
+  --theme-border-heavy: #000000;
+  
+  /* Shadows - Removed for clarity */
+  --theme-shadow-sm: none;
+  --theme-shadow-md: none;
+  --theme-shadow-lg: none;
+  
+  /* Status colors - Enhanced for visibility */
+  --theme-success: #006600;
+  --theme-warning: #994D00;
+  --theme-error: #CC0000;
+  
+  /* Ensures WCAG 2.1 contrast ratio of 7:1 for enhanced readability */
+  --theme-contrast-ratio: 7;
+  
+  /* Remove transitions for reduced visual noise */
+  transition: none;
+}
+
+/* System preference overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+  
+  /* Auto-enable dark theme when system preference is dark */
+  :root:not(.theme-light):not(.high-contrast) {
+    composes: theme-dark;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  
+  .theme-base {
+    transition: none !important;
+  }
+}
+
+/* Mobile-first responsive adjustments */
+@media screen and (max-width: 640px) {
+  .theme-light,
+  .theme-dark,
+  .high-contrast {
+    /* Adjust shadow sizes for mobile */
+    --theme-shadow-sm: var(--shadow-sm);
+    --theme-shadow-md: var(--shadow-sm);
+    --theme-shadow-lg: var(--shadow-md);
+    
+    /* Increase touch targets */
+    --theme-border-light: 2px;
+    --theme-border-normal: 2px;
+    --theme-border-heavy: 3px;
+  }
+}
+
+/* Theme transition helpers */
+.theme-transition-enter {
+  opacity: 0;
+}
+
+.theme-transition-enter-active {
+  opacity: 1;
+  transition: opacity var(--transition-normal) var(--transition-timing);
+}
+
+.theme-transition-exit {
+  opacity: 1;
+}
+
+.theme-transition-exit-active {
+  opacity: 0;
+  transition: opacity var(--transition-normal) var(--transition-timing);
+}
