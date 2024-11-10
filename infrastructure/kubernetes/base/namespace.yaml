@@ -1,0 +1,59 @@
+# Kubernetes API version: v1.24+
+# Purpose: Define isolated namespaces for different deployment environments and monitoring
+
+# Human Tasks:
+# 1. Ensure cluster admin privileges are available for namespace creation
+# 2. Verify that the cluster supports the specified node configurations
+# 3. Configure cluster autoscaling if enabled for production environment
+
+# Technical Specification Requirements Addressed:
+# - 5.6 Deployment Architecture: Defines separate deployment environments for production, 
+#   staging and development with clear isolation and progression path
+# - 10.1 Deployment Environment: Specifies cloud-native deployment model with separate 
+#   namespaces for different environments, supporting distinct node configurations
+
+apiVersion: v1
+kind: List
+items:
+  # Production namespace with auto-scaling enabled and minimum 3 nodes
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: mintreplica-prod
+      labels:
+        environment: production
+        app: mintreplica-lite
+        scaling: auto
+        min-nodes: "3"
+
+  # Staging namespace with fixed 2 nodes
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: mintreplica-staging
+      labels:
+        environment: staging
+        app: mintreplica-lite
+        scaling: fixed
+        nodes: "2"
+
+  # Development namespace with fixed single node
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: mintreplica-dev
+      labels:
+        environment: development
+        app: mintreplica-lite
+        scaling: fixed
+        nodes: "1"
+
+  # Global monitoring namespace
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: monitoring
+      labels:
+        purpose: monitoring
+        app: mintreplica-lite
+        scope: global
