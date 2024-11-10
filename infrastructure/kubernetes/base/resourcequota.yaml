@@ -1,0 +1,85 @@
+# Kubernetes API version: v1.24+
+# Purpose: Define and enforce resource quotas across different deployment environments
+
+# Human Tasks:
+# 1. Verify cluster has sufficient total resources to accommodate these quotas
+# 2. Ensure monitoring is configured to track quota usage and alerts
+# 3. Review and adjust quotas based on actual usage patterns after deployment
+
+# Technical Specification Requirements Addressed:
+# - 5.5.1 Horizontal Scaling: Enforces resource constraints for auto-scaling groups
+#   and application services, supporting min 3 nodes in production and fixed nodes
+#   in other environments
+# - 10.1 Deployment Environment: Defines resource quotas for different deployment
+#   environments aligned with their scaling requirements
+# - 10.3.2 Container Resource Limits: Implements container-level resource constraints
+#   and limits aligned with specified CPU and memory requirements
+
+apiVersion: v1
+kind: List
+items:
+  # Production environment resource quota
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: prod-compute-resources
+      namespace: mintreplica-prod
+    spec:
+      hard:
+        # CPU and Memory quotas sized for production workload
+        # Accommodates min 3 nodes with headroom for auto-scaling
+        requests.cpu: "24"    # Base CPU request capacity
+        requests.memory: "48Gi"  # Base memory request capacity
+        limits.cpu: "32"     # Maximum CPU limit
+        limits.memory: "64Gi"   # Maximum memory limit
+        
+        # Workload quotas
+        pods: "50"              # Support for multiple replicas per service
+        services: "20"          # Core services + monitoring + utilities
+        persistentvolumeclaims: "20"  # Storage claims for databases and caches
+        secrets: "30"           # Credentials, tokens, and certificates
+        configmaps: "30"        # Configuration and settings
+
+  # Staging environment resource quota
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: staging-compute-resources
+      namespace: mintreplica-staging
+    spec:
+      hard:
+        # CPU and Memory quotas sized for staging environment
+        # Fixed 2 node configuration
+        requests.cpu: "12"    # Reduced CPU capacity for staging
+        requests.memory: "24Gi"  # Reduced memory capacity for staging
+        limits.cpu: "16"     # Maximum CPU limit for staging
+        limits.memory: "32Gi"   # Maximum memory limit for staging
+        
+        # Workload quotas
+        pods: "30"              # Fewer replicas than production
+        services: "15"          # Core services + basic monitoring
+        persistentvolumeclaims: "15"  # Storage for testing
+        secrets: "20"           # Test credentials and certificates
+        configmaps: "20"        # Test configurations
+
+  # Development environment resource quota
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: dev-compute-resources
+      namespace: mintreplica-dev
+    spec:
+      hard:
+        # CPU and Memory quotas sized for development environment
+        # Single node configuration
+        requests.cpu: "8"     # Minimal CPU for development
+        requests.memory: "16Gi"  # Minimal memory for development
+        limits.cpu: "12"     # Maximum CPU limit for development
+        limits.memory: "24Gi"   # Maximum memory limit for development
+        
+        # Workload quotas
+        pods: "20"              # Minimal replicas for development
+        services: "10"          # Basic services for development
+        persistentvolumeclaims: "10"  # Basic storage for development
+        secrets: "15"           # Development credentials
+        configmaps: "15"        # Development configurations
