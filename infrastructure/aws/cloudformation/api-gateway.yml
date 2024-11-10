@@ -1,0 +1,231 @@
+# Human Tasks:
+# 1. Verify that the SSL/TLS certificate for api.mintreplicalite.com is properly validated in AWS Certificate Manager
+# 2. Ensure IAM roles and policies are properly configured for API Gateway logging
+# 3. Review and adjust rate limiting settings based on your traffic patterns
+# 4. Configure custom domain DNS records to point to the API Gateway endpoint
+# 5. Review and adjust caching settings based on your performance requirements
+
+AWSTemplateFormatVersion: '2010-05-15'
+Description: >-
+  AWS CloudFormation template for provisioning and configuring the API Gateway infrastructure
+  for Mint Replica Lite's RESTful backend services. Implements requirements from Technical
+  Specification sections 5.2.2 (API Gateway), 5.4 (Security Architecture), and 9.3.1 (API Security).
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment
+    AllowedValues:
+      - production
+      - staging
+      - development
+    Default: development
+
+  VpcId:
+    Type: String
+    Description: VPC ID for API Gateway VPC Link
+    Default: !ImportValue VpcId
+
+Mappings:
+  EnvironmentConfig:
+    production:
+      throttlingRate: 10000
+      throttlingBurst: 5000
+      cachingEnabled: true
+      logRetention: 90
+    staging:
+      throttlingRate: 5000
+      throttlingBurst: 2000
+      cachingEnabled: true
+      logRetention: 30
+    development:
+      throttlingRate: 1000
+      throttlingBurst: 500
+      cachingEnabled: false
+      logRetention: 7
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, 'production']
+  IsCachingEnabled: !FindInMap [EnvironmentConfig, !Ref Environment, cachingEnabled]
+
+Resources:
+  # API Gateway REST API
+  # Implements requirement: API Gateway Implementation - Base API configuration
+  RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: MintReplicaLiteAPI
+      Description: API Gateway for Mint Replica Lite backend services
+      EndpointConfiguration:
+        Types: 
+          - REGIONAL
+      MinimumCompressionSize: 1024
+      BinaryMediaTypes:
+        - multipart/form-data
+        - application/octet-stream
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: MintReplicaLite
+
+  # API Gateway Role
+  # Implements requirement: Security Architecture - IAM roles and permissions
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      Policies:
+        - PolicyName: ApiGatewayCustomPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+
+  # API Gateway Stage
+  # Implements requirements: API versioning, rate limiting, and monitoring
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref RestApi
+      StageName: !Ref Environment
+      Description: API Stage for Mint Replica Lite
+      DeploymentId: !Ref ApiDeployment
+      MethodSettings:
+        - ResourcePath: /*
+          HttpMethod: '*'
+          MetricsEnabled: true
+          DataTraceEnabled: true
+          LoggingLevel: INFO
+          ThrottlingBurstLimit: !FindInMap [EnvironmentConfig, !Ref Environment, throttlingBurst]
+          ThrottlingRateLimit: !FindInMap [EnvironmentConfig, !Ref Environment, throttlingRate]
+          CachingEnabled: !FindInMap [EnvironmentConfig, !Ref Environment, cachingEnabled]
+          CacheDataEncrypted: true
+      Variables:
+        environment: !Ref Environment
+      TracingEnabled: true
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "resourcePath":"$context.resourcePath", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+
+  # API Gateway Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - RestApi
+    Properties:
+      RestApiId: !Ref RestApi
+      Description: Initial deployment for Mint Replica Lite API
+
+  # API Gateway Log Group
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${RestApi}
+      RetentionInDays: !FindInMap [EnvironmentConfig, !Ref Environment, logRetention]
+
+  # SSL Certificate
+  # Implements requirement: Security Architecture - SSL/TLS termination
+  ApiGatewayCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: api.mintreplicalite.com
+      ValidationMethod: DNS
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Custom Domain
+  ApiGatewayDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: api.mintreplicalite.com
+      RegionalCertificateArn: !Ref ApiGatewayCertificate
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      SecurityPolicy: TLS_1_2
+
+  # Domain Mapping
+  ApiGatewayBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    DependsOn:
+      - ApiGatewayStage
+      - ApiGatewayDomainName
+    Properties:
+      DomainName: api.mintreplicalite.com
+      RestApiId: !Ref RestApi
+      Stage: !Ref Environment
+
+  # WAF Association
+  # Implements requirement: API Security - WAF integration
+  ApiGatewayWAFAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${RestApi}/stages/${Environment}
+      WebACLArn: !ImportValue WafWebAclArn
+
+  # VPC Link
+  # Implements requirement: Network Architecture - VPC integration
+  ApiGatewayVpcLink:
+    Type: AWS::ApiGateway::VpcLink
+    Properties:
+      Name: MintReplicaLiteVpcLink
+      Description: VPC Link for private integration
+      TargetArns: 
+        - !ImportValue NetworkLoadBalancerArn
+
+  # Usage Plan
+  # Implements requirement: API Security - Usage plans and throttling
+  ApiGatewayUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId: !Ref RestApi
+          Stage: !Ref Environment
+      Description: Usage plan for Mint Replica Lite API
+      Quota:
+        Limit: !If [IsProduction, 1000000, 100000]
+        Period: MONTH
+      Throttle:
+        BurstLimit: !FindInMap [EnvironmentConfig, !Ref Environment, throttlingBurst]
+        RateLimit: !FindInMap [EnvironmentConfig, !Ref Environment, throttlingRate]
+      UsagePlanName: !Sub ${Environment}-usage-plan
+
+Outputs:
+  RestApiId:
+    Description: ID of the created REST API
+    Value: !Ref RestApi
+    Export:
+      Name: ApiGatewayRestApiId
+
+  ApiGatewayUrl:
+    Description: URL of the API Gateway endpoint
+    Value: !Sub https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+    Export:
+      Name: ApiGatewayUrl
+
+  CustomDomainUrl:
+    Description: Custom domain URL for the API
+    Value: !Sub https://${ApiGatewayDomainName}
+    Export:
+      Name: ApiGatewayCustomDomainUrl
+
+  VpcLinkId:
+    Description: ID of the VPC Link
+    Value: !Ref ApiGatewayVpcLink
+    Export:
+      Name: ApiGatewayVpcLinkId
