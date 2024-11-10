@@ -1,0 +1,81 @@
+# Minimum iOS platform version: 15.0
+platform :ios, '15.0'
+
+# Disable sending stats
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+# Use frameworks instead of static libraries
+use_frameworks!
+
+# Human Tasks:
+# 1. Ensure Firebase is properly configured by adding GoogleService-Info.plist to the project
+# 2. Configure Plaid API keys in project settings
+# 3. Set up Sentry DSN in project configuration
+# 4. Configure SwiftLint rules in .swiftlint.yml if custom rules are needed
+
+target 'MintReplicaLite' do
+  # Networking and API Communication
+  # Alamofire v5.8+ - HTTP networking with request interceptors and SSL pinning
+  pod 'Alamofire', '~> 5.8'
+  
+  # Secure Storage
+  # KeychainAccess v4.2+ - Encrypted credential storage
+  pod 'KeychainAccess', '~> 4.2'
+  
+  # Code Quality
+  # SwiftLint v0.52+ - Swift style and conventions enforcement
+  pod 'SwiftLint', '~> 0.52'
+  
+  # Data Visualization
+  # Charts v4.1+ - Financial data visualization components
+  pod 'Charts', '~> 4.1'
+  
+  # Analytics and Monitoring
+  # Firebase/Analytics v10.0+ - User behavior tracking
+  pod 'Firebase/Analytics', '~> 10.0'
+  
+  # Push Notifications
+  # Firebase/Messaging v10.0+ - Push notification handling
+  pod 'Firebase/Messaging', '~> 10.0'
+  
+  # Financial Institution Integration
+  # Plaid v4.0+ - Bank account linking and transaction syncing
+  pod 'Plaid', '~> 4.0'
+  
+  # Error Tracking
+  # Sentry v8.0+ - Crash reporting and performance monitoring
+  pod 'Sentry', '~> 8.0'
+  
+  target 'MintReplicaLiteTests' do
+    inherit! :search_paths
+  end
+
+  target 'MintReplicaLiteUITests' do
+    inherit! :search_paths
+  end
+end
+
+# Post-install configuration
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      # Ensure minimum deployment target matches project setting
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      
+      # Enable required build settings for iOS 15+
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      config.build_settings['SWIFT_VERSION'] = '5.5'
+      
+      # Add any necessary compiler flags
+      config.build_settings['OTHER_SWIFT_FLAGS'] ||= ['$(inherited)', '-D', 'COCOAPODS']
+      
+      # Enable recommended security settings
+      config.build_settings['ENABLE_STRICT_OBJC_MSGSEND'] = 'YES'
+      config.build_settings['CLANG_WARN_DOCUMENTATION_COMMENTS'] = 'YES'
+      config.build_settings['GCC_WARN_UNDECLARED_SELECTOR'] = 'YES'
+    end
+  end
+  
+  # Run SwiftLint during build process
+  system('if which swiftlint >/dev/null; then swiftlint; fi')
+end
