@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21754" systemVersion="22E261" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <!-- Account Entity -->
+    <entity name="Account" representedClassName="AccountEntity" syncable="YES">
+        <!-- Basic Properties -->
+        <attribute name="id" attributeType="String" indexed="YES"/>
+        <attribute name="institutionId" attributeType="String" indexed="YES"/>
+        <attribute name="accountType" attributeType="String"/>
+        <attribute name="balance" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="currency" attributeType="String"/>
+        <attribute name="lastSynced" attributeType="Date"/>
+        <attribute name="isActive" attributeType="Boolean" defaultValueString="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="institutionName" optional="YES" attributeType="String"/>
+        
+        <!-- Relationships -->
+        <relationship name="transactions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Transaction" inverseName="account" inverseEntity="Transaction"/>
+        
+        <!-- Indexes -->
+        <fetchIndex name="id_index">
+            <fetchIndexElement property="id" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="institution_index">
+            <fetchIndexElement property="institutionId" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+
+    <!-- Transaction Entity -->
+    <entity name="Transaction" representedClassName="TransactionEntity" syncable="YES">
+        <!-- Basic Properties -->
+        <attribute name="id" attributeType="String" indexed="YES"/>
+        <attribute name="description" attributeType="String"/>
+        <attribute name="amount" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="date" attributeType="Date" indexed="YES"/>
+        <attribute name="category" attributeType="String" indexed="YES"/>
+        <attribute name="isPending" attributeType="Boolean" defaultValueString="NO"/>
+        <attribute name="merchantName" attributeType="String"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="transactionType" optional="YES" attributeType="String"/>
+        <attribute name="categoryId" optional="YES" attributeType="String"/>
+        
+        <!-- Relationships -->
+        <relationship name="account" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Account" inverseName="transactions" inverseEntity="Account"/>
+        
+        <!-- Indexes -->
+        <fetchIndex name="id_index">
+            <fetchIndexElement property="id" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="date_index">
+            <fetchIndexElement property="date" type="Binary" order="descending"/>
+        </fetchIndex>
+        <fetchIndex name="category_index">
+            <fetchIndexElement property="category" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+
+    <!-- Budget Entity -->
+    <entity name="Budget" representedClassName="BudgetEntity" syncable="YES">
+        <!-- Basic Properties -->
+        <attribute name="id" attributeType="String" indexed="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="budgetDescription" optional="YES" attributeType="String"/>
+        <attribute name="period" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="totalAmount" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="spentAmount" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="startDate" attributeType="Date"/>
+        <attribute name="endDate" attributeType="Date"/>
+        <attribute name="status" attributeType="Integer 16" defaultValueString="0"/>
+        <attribute name="userId" attributeType="String"/>
+        <attribute name="categories" optional="YES" attributeType="Binary"/>
+        <attribute name="createdAt" attributeType="Date"/>
+        <attribute name="updatedAt" attributeType="Date"/>
+        
+        <!-- Indexes -->
+        <fetchIndex name="id_index">
+            <fetchIndexElement property="id" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="period_index">
+            <fetchIndexElement property="period" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="status_index">
+            <fetchIndexElement property="status" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+
+    <!-- Goal Entity -->
+    <entity name="Goal" representedClassName="GoalEntity" syncable="YES">
+        <!-- Basic Properties -->
+        <attribute name="id" attributeType="String" indexed="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="goalDescription" attributeType="String"/>
+        <attribute name="targetAmount" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="currentAmount" attributeType="Decimal" defaultValueString="0.0"/>
+        <attribute name="targetDate" attributeType="Date"/>
+        <attribute name="createdAt" attributeType="Date"/>
+        <attribute name="updatedAt" attributeType="Date"/>
+        <attribute name="isCompleted" attributeType="Boolean" defaultValueString="NO"/>
+        <attribute name="category" attributeType="String"/>
+        
+        <!-- Indexes -->
+        <fetchIndex name="id_index">
+            <fetchIndexElement property="id" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="category_index">
+            <fetchIndexElement property="category" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+
+    <!-- Configuration -->
+    <configuration name="Default">
+        <memberEntity name="Account"/>
+        <memberEntity name="Transaction"/>
+        <memberEntity name="Budget"/>
+        <memberEntity name="Goal"/>
+    </configuration>
+
+    <!-- Element Options -->
+    <elements>
+        <element name="Account" positionX="-63" positionY="-18" width="128" height="209"/>
+        <element name="Transaction" positionX="160" positionY="192" width="128" height="209"/>
+        <element name="Budget" positionX="-54" positionY="144" width="128" height="224"/>
+        <element name="Goal" positionX="305" positionY="153" width="128" height="179"/>
+    </elements>
+</model>
