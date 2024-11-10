@@ -1,0 +1,184 @@
+# Human Tasks:
+# 1. Ensure NetworkPolicy admission controller is enabled in the Kubernetes cluster
+# 2. Verify that CNI plugin supports NetworkPolicy (e.g., Calico, Cilium)
+# 3. Test policies in lower environment before applying to production
+# 4. Configure monitoring alerts for denied traffic patterns
+
+# Technical Specification Requirements Addressed:
+# - 5.4 Security Architecture: Implements network security layer through microsegmentation 
+#   and zero-trust networking principles
+# - 9.3.1 API Security: Enforces network-level security controls and DDoS protection 
+#   through ingress/egress policies
+# - 10.1 Deployment Environment: Defines strict network isolation between production, 
+#   staging, and development environments
+
+apiVersion: v1
+kind: List
+items:
+  # Default deny all ingress/egress traffic in production namespace
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: default-deny-all
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+    spec:
+      podSelector: {} # Applies to all pods in namespace
+      policyTypes:
+      - Ingress
+      - Egress
+
+  # Allow ingress traffic to API Gateway pods
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-api-ingress
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: api-gateway
+    spec:
+      podSelector:
+        matchLabels:
+          app: api-gateway
+      policyTypes:
+      - Ingress
+      ingress:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              environment: production
+        ports:
+        - protocol: TCP
+          port: 443 # HTTPS traffic
+        - protocol: TCP
+          port: 80  # HTTP traffic (for health checks)
+
+  # Allow monitoring access from Prometheus
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-monitoring
+      namespace: monitoring
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: monitoring
+    spec:
+      podSelector:
+        matchLabels:
+          app: prometheus
+      policyTypes:
+      - Ingress
+      ingress:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              purpose: monitoring
+        ports:
+        - protocol: TCP
+          port: 9090 # Prometheus port
+
+  # Allow backend services to access database
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-database-access
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: database
+    spec:
+      podSelector:
+        matchLabels:
+          app: database
+      policyTypes:
+      - Ingress
+      ingress:
+      - from:
+        - podSelector:
+            matchLabels:
+              tier: backend
+        ports:
+        - protocol: TCP
+          port: 5432 # PostgreSQL port
+
+  # Allow inter-service communication for backend services
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-backend-services
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: backend
+    spec:
+      podSelector:
+        matchLabels:
+          tier: backend
+      policyTypes:
+      - Ingress
+      ingress:
+      - from:
+        - podSelector:
+            matchLabels:
+              tier: backend
+        ports:
+        - protocol: TCP
+          port: 8080 # Backend services port
+
+  # Allow egress to external services
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-external-egress
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: egress
+    spec:
+      podSelector:
+        matchLabels:
+          tier: backend
+      policyTypes:
+      - Egress
+      egress:
+      - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+            - 10.0.0.0/8    # Private network
+            - 172.16.0.0/12 # Private network
+            - 192.168.0.0/16 # Private network
+        ports:
+        - protocol: TCP
+          port: 443 # HTTPS for external APIs
+
+  # Allow DNS resolution
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-dns
+      namespace: mintreplica-prod
+      labels:
+        app: mintreplica-lite
+        type: security
+        component: dns
+    spec:
+      podSelector: {} # Applies to all pods
+      policyTypes:
+      - Egress
+      egress:
+      - to:
+        - namespaceSelector: {}
+        ports:
+        - protocol: UDP
+          port: 53 # DNS
+        - protocol: TCP
+          port: 53 # DNS
