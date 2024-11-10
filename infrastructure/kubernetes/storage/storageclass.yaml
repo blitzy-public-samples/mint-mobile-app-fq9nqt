@@ -1,0 +1,75 @@
+# Human Tasks:
+# 1. Replace 'fs-xxxxx' with actual AWS EFS filesystem ID in the shared-storage StorageClass
+# 2. Verify AWS EBS and EFS CSI drivers are installed in the cluster
+# 3. Configure IAM roles and policies for EBS/EFS access
+# 4. Ensure encryption KMS keys are properly set up if using custom keys
+
+# Required CSI Drivers:
+# - aws-ebs-csi-driver v1.0+ 
+# - aws-efs-csi-driver v1.0+
+
+# Addresses requirements from Technical Specification:
+# - 5.2.4 Data Architecture: Storage classes for Primary Storage, Cache Layer, Queue System
+# - 5.3.3 Data Storage/Primary Database: High-performance storage for PostgreSQL
+# - 10.1 Deployment Environment: Cloud-native storage using AWS EBS/EFS
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: premium-io
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  iopsPerGB: "3000"
+  throughput: "1000"
+  encrypted: "true"
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+mountOptions:
+  - noatime
+  - nodiscard
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  iopsPerGB: "3000"
+  encrypted: "true"
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+mountOptions:
+  - noatime
+  - nodiscard
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: shared-storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: efs.csi.aws.com
+parameters:
+  fileSystemId: fs-xxxxx
+  provisioningMode: efs-ap
+  encrypted: "true"
+  uid: "1000"
+  gid: "1000"
+  directoryPerms: "700"
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+mountOptions:
+  - tls
+  - iam
+  - noatime
