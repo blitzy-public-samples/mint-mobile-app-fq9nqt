@@ -1,0 +1,159 @@
+# Requirement: CI/CD Pipeline - Automated build, test and deployment pipeline for Android application
+name: Android CI
+
+# Trigger workflow on push to main and pull requests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Environment variables used across jobs
+env:
+  JAVA_VERSION: '17'
+  GRADLE_VERSION: '7.4.2'
+  ANDROID_SDK: '33'
+  KOTLIN_VERSION: '1.8.0'
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Requirement: CI/CD Pipeline - Code checkout
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      # Requirement: CI/CD Pipeline - Java environment setup
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+      
+      # Requirement: CI/CD Pipeline - Gradle setup
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+      
+      # Requirement: CI/CD Pipeline - Cache dependencies
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      
+      # Requirement: Quality Controls - Static code analysis
+      - name: Run ktlint check
+        run: ./gradlew ktlintCheck
+      
+      # Requirement: Quality Controls - Code quality analysis
+      - name: Run detekt analysis
+        run: ./gradlew detekt
+      
+      # Requirement: Quality Controls - Unit tests with coverage
+      - name: Run unit tests
+        run: ./gradlew test jacocoTestReport
+      
+      # Requirement: Quality Controls - Test coverage verification
+      - name: Verify test coverage
+        run: ./gradlew jacocoTestCoverageVerification
+      
+      # Requirement: Security Scanning - Build debug APK
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
+      
+      # Requirement: Security Scanning - CodeQL analysis
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: java, kotlin
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+      
+      # Upload debug APK as artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+      
+      # Upload test results
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            app/build/reports/tests/
+            app/build/reports/jacoco/
+            app/build/reports/ktlint/
+            app/build/reports/detekt/
+        if: always()
+      
+      # Quality gate check
+      - name: Quality Gate Check
+        run: |
+          echo "Checking quality gates..."
+          ./gradlew checkQualityGates
+        env:
+          MIN_COVERAGE: 80
+          MAX_COMPLEXITY: 15
+          MAX_DUPLICATION: 3
+
+  # Optional release job (only runs on tags)
+  release:
+    name: Create Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+      
+      # Decode keystore for signing
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE }}" > keystore.asc
+          gpg -d --passphrase "${{ secrets.KEYSTORE_PASSPHRASE }}" --batch keystore.asc > app/keystore.jks
+      
+      # Build release APK
+      - name: Build release APK
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      
+      # Create GitHub release
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: app/build/outputs/apk/release/app-release.apk
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# Human Tasks (as code comments):
+# 1. Set up repository secrets:
+#    - KEYSTORE_FILE: Base64 encoded keystore file
+#    - KEYSTORE_PASSPHRASE: GPG passphrase for keystore file
+#    - KEYSTORE_PASSWORD: Keystore password
+#    - KEY_ALIAS: Key alias for signing
+#    - KEY_PASSWORD: Key password for signing
+# 2. Configure code coverage thresholds in build.gradle
+# 3. Set up CodeQL scanning
+# 4. Create CHANGELOG.md for release notes
