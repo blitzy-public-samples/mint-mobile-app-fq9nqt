@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Execution Report</title>
+    <!-- Chart.js v4.3.0 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <!-- Handlebars v4.7.7 -->
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.7/dist/handlebars.min.js"></script>
+    <style>
+        :root {
+            --color-pass: #4CAF50;
+            --color-fail: #F44336;
+            --color-skip: #FFC107;
+            --color-coverage: #2196F3;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .metric {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .error-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid var(--color-fail);
+            background: #fff5f5;
+        }
+        .stack-trace {
+            font-family: monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .coverage-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .coverage-table th, .coverage-table td {
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+        .coverage-bar {
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .coverage-progress {
+            height: 100%;
+            background: var(--color-coverage);
+        }
+    </style>
+</head>
+<body>
+    <!-- Requirements Addressed:
+         - Test Reporting (Technical Specification/9.3.2 Security Monitoring)
+         - Test Documentation (Technical Specification/A.4 Development Standards Reference)
+         - Security Monitoring (Technical Specification/9.3.2 Security Monitoring) -->
+    <div class="report-container">
+        <h1>Test Execution Report</h1>
+        
+        <!-- Summary Section Template -->
+        <script id="summary-template" type="text/x-handlebars-template">
+            <div class="section" id="summary">
+                <h2>Test Summary</h2>
+                <div class="metrics-container">
+                    <div class="metric">
+                        <div class="metric-label">Total Tests</div>
+                        <div class="metric-value">{{totalTests}}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Passed</div>
+                        <div class="metric-value" style="color: var(--color-pass)">{{passedTests}}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Failed</div>
+                        <div class="metric-value" style="color: var(--color-fail)">{{failedTests}}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Skipped</div>
+                        <div class="metric-value" style="color: var(--color-skip)">{{skippedTests}}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Execution Time</div>
+                        <div class="metric-value">{{executionTime}}ms</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="summary-chart"></canvas>
+                </div>
+            </div>
+        </script>
+
+        <!-- Coverage Section Template -->
+        <script id="coverage-template" type="text/x-handlebars-template">
+            <div class="section" id="coverage">
+                <h2>Code Coverage</h2>
+                <div class="metrics-container">
+                    <div class="metric">
+                        <div class="metric-label">Line Coverage</div>
+                        <div class="metric-value">{{lines}}%</div>
+                        <div class="coverage-bar">
+                            <div class="coverage-progress" style="width: {{lines}}%"></div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Function Coverage</div>
+                        <div class="metric-value">{{functions}}%</div>
+                        <div class="coverage-bar">
+                            <div class="coverage-progress" style="width: {{functions}}%"></div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Branch Coverage</div>
+                        <div class="metric-value">{{branches}}%</div>
+                        <div class="coverage-bar">
+                            <div class="coverage-progress" style="width: {{branches}}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="coverage-chart"></canvas>
+                </div>
+            </div>
+        </script>
+
+        <!-- Performance Section Template -->
+        <script id="performance-template" type="text/x-handlebars-template">
+            <div class="section" id="performance">
+                <h2>Performance Analysis</h2>
+                <div class="metrics-container">
+                    <div class="metric">
+                        <div class="metric-label">Avg Response Time</div>
+                        <div class="metric-value">{{avgResponseTime}}ms</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Max Throughput</div>
+                        <div class="metric-value">{{maxThroughput}} req/s</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Concurrency Level</div>
+                        <div class="metric-value">{{concurrency}}</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performance-chart"></canvas>
+                </div>
+            </div>
+        </script>
+
+        <!-- Error Report Section Template -->
+        <script id="error-template" type="text/x-handlebars-template">
+            <div class="section" id="errors">
+                <h2>Test Failures and Errors</h2>
+                <div class="chart-container">
+                    <canvas id="error-distribution-chart"></canvas>
+                </div>
+                {{#each errors}}
+                <div class="error-item">
+                    <h3>{{testName}}</h3>
+                    <div class="error-type">Type: {{type}}</div>
+                    <div class="error-message">{{message}}</div>
+                    <div class="stack-trace">{{stackTrace}}</div>
+                </div>
+                {{/each}}
+            </div>
+        </script>
+
+        <!-- Test Details Section Template -->
+        <script id="details-template" type="text/x-handlebars-template">
+            <div class="section" id="details">
+                <h2>Test Details</h2>
+                <table class="coverage-table">
+                    <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                            <th>Suite</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each tests}}
+                        <tr>
+                            <td>{{name}}</td>
+                            <td>{{status}}</td>
+                            <td>{{duration}}ms</td>
+                            <td>{{suite}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </script>
+    </div>
+
+    <script>
+        // Chart.js configuration and rendering functions
+        const CHART_COLORS = {
+            PASS: '#4CAF50',
+            FAIL: '#F44336',
+            SKIP: '#FFC107',
+            COVERAGE: '#2196F3'
+        };
+
+        const REPORT_SECTIONS = ['summary', 'coverage', 'performance', 'errors', 'details'];
+
+        function renderTestSummary(summaryData) {
+            const template = Handlebars.compile(document.getElementById('summary-template').innerHTML);
+            const html = template(summaryData);
+            document.querySelector('#summary').innerHTML = html;
+
+            const ctx = document.getElementById('summary-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Passed', 'Failed', 'Skipped'],
+                    datasets: [{
+                        data: [summaryData.passedTests, summaryData.failedTests, summaryData.skippedTests],
+                        backgroundColor: [CHART_COLORS.PASS, CHART_COLORS.FAIL, CHART_COLORS.SKIP]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function renderCoverageReport(coverageData) {
+            const template = Handlebars.compile(document.getElementById('coverage-template').innerHTML);
+            const html = template(coverageData);
+            document.querySelector('#coverage').innerHTML = html;
+
+            const ctx = document.getElementById('coverage-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Lines', 'Functions', 'Branches', 'Statements'],
+                    datasets: [{
+                        label: 'Coverage %',
+                        data: [
+                            coverageData.lines,
+                            coverageData.functions,
+                            coverageData.branches,
+                            coverageData.statements
+                        ],
+                        backgroundColor: CHART_COLORS.COVERAGE
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPerformanceData(performanceData) {
+            const template = Handlebars.compile(document.getElementById('performance-template').innerHTML);
+            const html = template({
+                avgResponseTime: Math.round(performanceData.responseTime.reduce((a, b) => a + b) / performanceData.responseTime.length),
+                maxThroughput: Math.max(...performanceData.throughput),
+                concurrency: performanceData.concurrency
+            });
+            document.querySelector('#performance').innerHTML = html;
+
+            const ctx = document.getElementById('performance-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: performanceData.responseTime.map((_, i) => `Request ${i + 1}`),
+                    datasets: [{
+                        label: 'Response Time (ms)',
+                        data: performanceData.responseTime,
+                        borderColor: CHART_COLORS.COVERAGE,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function renderErrorReport(errors) {
+            const template = Handlebars.compile(document.getElementById('error-template').innerHTML);
+            const html = template({ errors });
+            document.querySelector('#errors').innerHTML = html;
+
+            if (errors.length > 0) {
+                const errorTypes = {};
+                errors.forEach(error => {
+                    errorTypes[error.type] = (errorTypes[error.type] || 0) + 1;
+                });
+
+                const ctx = document.getElementById('error-distribution-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(errorTypes),
+                        datasets: [{
+                            data: Object.values(errorTypes),
+                            backgroundColor: Object.keys(errorTypes).map(() => CHART_COLORS.FAIL)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
