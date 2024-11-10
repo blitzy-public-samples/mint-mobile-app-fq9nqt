@@ -1,0 +1,237 @@
+# Human Tasks:
+# 1. Configure AWS credentials in GitHub repository secrets
+# 2. Set up Snyk token for security scanning
+# 3. Configure ECR repository and ECS cluster
+# 4. Set up Codecov token for coverage reporting
+# 5. Review and adjust resource limits for containers
+# 6. Configure notification settings for workflow failures
+# 7. Verify deployment environment variables
+
+# Requirement: CI/CD Pipeline
+# Location: Technical Specification/10.5 CI/CD Pipeline
+# Implementation: Automated build, test, and deployment pipeline
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/backend/**'
+      - '.github/workflows/backend.yml'
+
+env:
+  NODE_VERSION: '16.x'
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+
+jobs:
+  # Requirement: Security Controls
+  # Location: Technical Specification/9.3.5 Secure Development
+  # Implementation: Code quality and security scanning
+  test:
+    name: Test and Code Quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test:cov
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./coverage
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: true
+
+  # Requirement: Security Controls
+  # Location: Technical Specification/9.3.5 Secure Development
+  # Implementation: Security vulnerability scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Snyk scan
+        uses: snyk/actions/node@v3
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+
+      - name: Save security report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-report
+          path: security-scan/
+          retention-days: 30
+
+  # Requirement: CI/CD Pipeline
+  # Location: Technical Specification/10.5 CI/CD Pipeline
+  # Implementation: Container build and push
+  build:
+    name: Build and Push
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: src/backend
+          push: true
+          tags: |
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Requirement: Deployment Strategy
+  # Location: Technical Specification/10.5.3 Deployment Strategy
+  # Implementation: Blue-green deployment with health checks
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    concurrency: production_environment
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_SERVICE }} \
+            --query taskDefinition > task-definition.json
+
+      - name: Update task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: api
+          image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          codedeploy-appspec: |
+            version: 0.0
+            Resources:
+              - TargetService:
+                  Type: AWS::ECS::Service
+                  Properties:
+                    TaskDefinition: <TASK_DEFINITION>
+                    LoadBalancerInfo:
+                      ContainerName: "api"
+                      ContainerPort: 3000
+                    PlatformVersion: "LATEST"
+
+      - name: Health check
+        run: |
+          # Wait for new task to be healthy
+          attempts=0
+          max_attempts=30
+          until [ $attempts -ge $max_attempts ]
+          do
+            health_status=$(aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.ECS_SERVICE }} \
+              --query 'services[0].deployments[0].rolloutState' \
+              --output text)
+            
+            if [ "$health_status" = "COMPLETED" ]; then
+              echo "Deployment successful!"
+              exit 0
+            fi
+            
+            attempts=$((attempts+1))
+            sleep 10
+          done
+          echo "Deployment health check failed"
+          exit 1
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --task-definition ${{ env.ECS_SERVICE }}:${{ github.event.before }} \
+            --force-new-deployment
+
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
