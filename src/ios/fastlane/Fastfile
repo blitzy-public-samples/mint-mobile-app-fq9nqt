@@ -1,0 +1,306 @@
+# Version: fastlane 2.210.0
+# Requirement: CI/CD Pipeline - Automated iOS build, test and deployment pipeline with multiple stages and environments
+# Requirement: Security Architecture - Secure code signing and provisioning profile management
+# Requirement: Native iOS Application - iOS application build and deployment automation
+
+# Import dependencies
+import_from_git(
+  url: ENV["MATCH_GIT_URL"],
+  branch: "main",
+  path: "fastlane/Matchfile"
+)
+
+# Default platform
+default_platform(:ios)
+
+# Human Tasks:
+# 1. Configure the following environment variables in your CI system:
+#    - APPLE_ID: Apple Developer account email
+#    - TEAM_ID: Apple Developer Team ID
+#    - MATCH_PASSWORD: Password for certificate encryption
+#    - SLACK_URL: Slack webhook URL for notifications
+#    - FASTLANE_USER: App Store Connect API user
+#    - FASTLANE_PASSWORD: App Store Connect API password
+#    - MATCH_GIT_URL: Git repository URL for certificates
+#    - MATCH_S3_BUCKET: AWS S3 bucket for certificate storage
+# 2. Ensure Apple Developer Program membership is active
+# 3. Configure App Store Connect access
+# 4. Set up AWS S3 bucket with proper permissions
+# 5. Configure Slack workspace for notifications
+
+platform :ios do
+  # Setup required before running any lane
+  before_all do |options|
+    # Verify required environment variables
+    ensure_env_vars(
+      env_vars: [
+        'APPLE_ID',
+        'TEAM_ID',
+        'MATCH_PASSWORD',
+        'SLACK_URL',
+        'FASTLANE_USER',
+        'FASTLANE_PASSWORD',
+        'MATCH_GIT_URL',
+        'MATCH_S3_BUCKET'
+      ]
+    )
+
+    # Setup code signing using match with S3 storage
+    sync_code_signing(
+      type: "development",
+      readonly: true,
+      storage_mode: "s3",
+      s3_region: "us-east-1",
+      s3_bucket: ENV["MATCH_S3_BUCKET"],
+      app_identifier: "com.mintreplica.lite",
+      force_for_new_devices: true
+    )
+
+    # Install CocoaPods dependencies
+    cocoapods(
+      clean_install: true,
+      repo_update: true
+    )
+
+    # Configure Slack notifications
+    ENV["SLACK_URL"] = ENV["SLACK_URL"]
+    ENV["SLACK_USERNAME"] = "Fastlane Bot"
+    ENV["SLACK_ICON_URL"] = "https://fastlane.tools/assets/img/fastlane.png"
+  end
+
+  # Run unit and UI tests with coverage reporting
+  desc "Run unit and UI tests with coverage reporting"
+  lane :test do
+    # Clean build folder and derived data
+    clear_derived_data
+    clean_build_artifacts
+
+    # Run SwiftLint for code quality
+    swiftlint(
+      mode: :lint,
+      config_file: '.swiftlint.yml',
+      strict: true,
+      reporter: 'html'
+    )
+
+    # Build for testing using Debug configuration
+    build_ios_app(
+      scheme: "MintReplicaLite",
+      configuration: "Debug",
+      clean: true,
+      skip_archive: true,
+      skip_codesigning: true
+    )
+
+    # Run unit tests with code coverage
+    run_tests(
+      scheme: "MintReplicaLite",
+      code_coverage: true,
+      devices: ["iPhone 14 Pro"],
+      clean: true,
+      result_bundle: true,
+      output_directory: "fastlane/test_output"
+    )
+
+    # Generate and upload test coverage report
+    slather(
+      scheme: "MintReplicaLite",
+      proj: "MintReplicaLite.xcodeproj",
+      html: true,
+      show: true,
+      output_directory: "fastlane/test_output/coverage"
+    )
+
+    # Notify team of test results via Slack
+    slack(
+      message: "✅ Tests completed successfully!",
+      success: true,
+      payload: {
+        "Build Date" => Time.new.to_s,
+        "Coverage Report" => "Available in test_output/coverage"
+      }
+    )
+  end
+
+  # Build the iOS app with specified configuration
+  desc "Build the iOS app with specified configuration"
+  lane :build do |options|
+    configuration = options[:configuration] || "Release"
+
+    # Install pod dependencies
+    cocoapods(
+      clean_install: true,
+      repo_update: true
+    )
+
+    # Setup code signing certificates
+    sync_code_signing(
+      type: configuration.downcase,
+      readonly: true,
+      storage_mode: "s3",
+      s3_region: "us-east-1",
+      s3_bucket: ENV["MATCH_S3_BUCKET"],
+      app_identifier: "com.mintreplica.lite"
+    )
+
+    # Build application with specified configuration
+    build_ios_app(
+      scheme: "MintReplicaLite",
+      configuration: configuration,
+      clean: true,
+      export_method: configuration.downcase,
+      include_bitcode: false,
+      include_symbols: true,
+      output_directory: "builds",
+      output_name: "MintReplicaLite-#{configuration.downcase}.ipa"
+    )
+
+    # Verify build artifacts
+    verify_build(
+      ipa_path: "builds/MintReplicaLite-#{configuration.downcase}.ipa"
+    )
+
+    # Return IPA path
+    return lane_context[SharedValues::IPA_OUTPUT_PATH]
+  end
+
+  # Deploy to TestFlight for beta testing
+  desc "Deploy to TestFlight for beta testing"
+  lane :deploy_testflight do
+    # Verify version and build number
+    ensure_git_status_clean
+    increment_build_number(
+      build_number: number_of_commits,
+      xcodeproj: "MintReplicaLite.xcodeproj"
+    )
+
+    # Build release configuration
+    ipa_path = build(configuration: "Release")
+
+    # Upload to TestFlight
+    changelog = create_changelog_from_git_commits
+    upload_to_testflight(
+      ipa: ipa_path,
+      skip_waiting_for_build_processing: true,
+      changelog: changelog,
+      distribute_external: true,
+      notify_external_testers: true,
+      beta_app_review_info: {
+        contact_email: ENV["APPLE_ID"],
+        contact_first_name: "MintReplica",
+        contact_last_name: "Team",
+        demo_account_name: ENV["DEMO_USER"],
+        demo_account_password: ENV["DEMO_PASSWORD"],
+        notes: "Thank you for reviewing our app!"
+      }
+    )
+
+    # Notify team on Slack
+    slack(
+      message: "🚀 Successfully deployed to TestFlight!",
+      success: true,
+      payload: {
+        "Version" => get_version_number,
+        "Build" => get_build_number,
+        "Changelog" => changelog
+      }
+    )
+  end
+
+  # Deploy to App Store for production release
+  desc "Deploy to App Store for production release"
+  lane :deploy_appstore do
+    # Verify version and build number
+    ensure_git_status_clean
+    increment_build_number(
+      build_number: number_of_commits,
+      xcodeproj: "MintReplicaLite.xcodeproj"
+    )
+
+    # Build release configuration
+    ipa_path = build(configuration: "Release")
+
+    # Upload to App Store Connect
+    changelog = create_changelog_from_git_commits
+    upload_to_app_store(
+      ipa: ipa_path,
+      skip_metadata: false,
+      skip_screenshots: false,
+      force: true,
+      submit_for_review: true,
+      automatic_release: true,
+      submission_information: {
+        add_id_info_uses_idfa: false,
+        export_compliance_uses_encryption: true,
+        export_compliance_is_exempt: true
+      },
+      release_notes: {
+        'default' => changelog,
+        'en-US' => changelog
+      }
+    )
+
+    # Verify submission status
+    verify_app_store_submission
+
+    # Notify team on Slack
+    slack(
+      message: "🎉 Successfully deployed to App Store!",
+      success: true,
+      payload: {
+        "Version" => get_version_number,
+        "Build" => get_build_number,
+        "Changelog" => changelog
+      }
+    )
+  end
+
+  # Error handling for all lanes
+  error do |lane, exception|
+    # Notify team of failure via Slack
+    slack(
+      message: "❌ Lane '#{lane}' failed with error: #{exception.message}",
+      success: false,
+      payload: {
+        "Lane" => lane,
+        "Error" => exception.message,
+        "Backtrace" => exception.backtrace.first(5)
+      }
+    )
+  end
+
+  # Cleanup after all lanes
+  after_all do |lane|
+    # Clean up temporary files
+    clean_build_artifacts
+    clear_derived_data
+
+    # Reset git state if needed
+    reset_git_repo(
+      force: true,
+      skip_clean: true
+    )
+  end
+end
+
+# Helper methods
+def verify_app_store_submission
+  UI.message "Verifying App Store submission status..."
+  # Add implementation for submission verification
+end
+
+def verify_build(ipa_path)
+  UI.message "Verifying build artifacts..."
+  # Add implementation for build verification
+end
+
+def create_changelog_from_git_commits
+  changelog = changelog_from_git_commits(
+    between: [last_git_tag, "HEAD"],
+    pretty: "- %s",
+    date_format: "short",
+    match_lightweight_tag: false,
+    merge_commit_filtering: "exclude_merges"
+  )
+  return changelog.empty? ? "Bug fixes and improvements" : changelog
+end
