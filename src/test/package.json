@@ -1,0 +1,92 @@
+{
+  "name": "@mintreplica/test",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "test": "jest --config=jest.config.js --detectOpenHandles",
+    "test:watch": "jest --watch --config=jest.config.js",
+    "test:coverage": "jest --coverage --config=jest.config.js",
+    "test:e2e": "jest --config=jest.config.js --testMatch='**/e2e/**/*.test.ts'",
+    "test:integration": "jest --config=jest.config.js --testMatch='**/integration/**/*.test.ts'",
+    "test:security": "jest --config=jest.config.js --testMatch='**/security/**/*.test.ts'",
+    "test:performance": "jest --config=jest.config.js --testMatch='**/performance/**/*.test.ts' --runInBand"
+  },
+  "dependencies": {
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "supertest": "^6.3.0",
+    "@types/supertest": "^6.0.0",
+    "jest-junit": "^15.0.0",
+    "typescript": "^4.8.0",
+    "ts-node": "^10.9.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "jest-environment-jsdom": "^29.0.0",
+    "msw": "^1.0.0",
+    "@faker-js/faker": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-jest": "^27.0.0",
+    "prettier": "^2.8.0",
+    "rimraf": "^5.0.0",
+    "ts-node-dev": "^2.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/setup/global-setup.ts"
+    ]
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:jest/recommended",
+      "prettier"
+    ],
+    "plugins": [
+      "@typescript-eslint",
+      "jest"
+    ],
+    "env": {
+      "node": true,
+      "jest": true
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "printWidth": 100
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mintreplica/mintreplica-lite.git"
+  },
+  "keywords": [
+    "testing",
+    "jest",
+    "typescript",
+    "e2e",
+    "integration",
+    "security",
+    "performance"
+  ],
+  "author": "Mint Replica Lite Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mintreplica/mintreplica-lite/issues"
+  },
+  "homepage": "https://github.com/mintreplica/mintreplica-lite#readme"
+}
