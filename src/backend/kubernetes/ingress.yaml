@@ -1,0 +1,78 @@
+# Human Tasks:
+# 1. Replace ${AWS_CERT_ARN} with actual ACM certificate ARN for api.mintreplica.com
+# 2. Replace ${WAF_ACL_ID} with actual AWS WAF web ACL ID
+# 3. Verify AWS Load Balancer Controller version 2.4+ is installed in cluster
+# 4. Confirm security groups allow traffic on ports 80/443
+# 5. Validate DNS records for api.mintreplica.com point to ALB
+
+# Requirement: API Gateway
+# Location: Technical Specification/5.2.2 API Gateway
+# Implementation: Configures API routing, rate limiting, SSL termination and versioning
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mint-replica-backend-ingress
+  namespace: default
+  labels:
+    app: mint-replica
+    component: backend
+    environment: production
+  annotations:
+    # AWS ALB Controller configuration
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: ${AWS_CERT_ARN}
+    
+    # Health check configuration
+    alb.ingress.kubernetes.io/healthcheck-path: '/health'
+    alb.ingress.kubernetes.io/success-codes: '200'
+    
+    # Load balancer configuration
+    alb.ingress.kubernetes.io/group.name: mint-replica-production
+    alb.ingress.kubernetes.io/waf-acl-id: ${WAF_ACL_ID}
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60
+    
+    # Requirement: Load Balancing
+    # Location: Technical Specification/5.5.1 Horizontal Scaling
+    # Implementation: Target group configuration for 3-10 backend replicas
+    alb.ingress.kubernetes.io/target-group-attributes: >-
+      deregistration_delay.timeout_seconds=30,
+      slow_start.duration_seconds=30
+    
+    # Rate limiting configuration
+    alb.ingress.kubernetes.io/actions.rate-limit: >-
+      {"type": "fixed-response", "fixedResponseConfig": {
+        "contentType":"application/json",
+        "statusCode": "429",
+        "messageBody": "{\"error\":\"rate limit exceeded\"}"
+      }}
+    alb.ingress.kubernetes.io/conditions.rate-limit: >-
+      [{"field":"http-header","httpHeaderConfig":{
+        "httpHeaderName": "X-Rate-Limit",
+        "values":["exceeded"]
+      }}]
+
+# Requirement: Network Architecture
+# Location: Technical Specification/10.2.2 Network Architecture
+# Implementation: External access routing through public subnets with WAF
+spec:
+  rules:
+    - host: api.mintreplica.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mint-replica-backend
+                port:
+                  name: http
+  
+  # SSL/TLS configuration
+  tls:
+    - hosts:
+        - api.mintreplica.com
+      secretName: mint-replica-tls
