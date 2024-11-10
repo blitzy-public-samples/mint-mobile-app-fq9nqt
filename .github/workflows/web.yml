@@ -1,0 +1,150 @@
+# Human Tasks:
+# 1. Set up AWS IAM role with proper S3 and CloudFront permissions
+# 2. Configure repository secrets:
+#    - VITE_API_BASE_URL: API base URL for the environment
+#    - AWS_S3_BUCKET: S3 bucket name for web deployment
+#    - AWS_CLOUDFRONT_DISTRIBUTION_ID: CloudFront distribution ID
+#    - AWS_ROLE_ARN: ARN of the IAM role for AWS authentication
+
+# @version actions/checkout@v3
+# @version actions/setup-node@v3
+# @version actions/cache@v3
+# @version actions/upload-artifact@v3
+# @version actions/download-artifact@v3
+# @version aws-actions/configure-aws-credentials@v2
+# @version aws-actions/amazon-cloudfront-invalidate@v1
+
+name: Web CI/CD
+
+# Implements Technical Specification/10.5.1 Pipeline Architecture
+on:
+  push:
+    branches: [main]
+    paths: ['src/web/**']
+  pull_request:
+    branches: [main]
+    paths: ['src/web/**']
+
+env:
+  NODE_VERSION: '16.x'
+
+# Implements Technical Specification/9.3.5 Secure Development
+permissions:
+  id-token: write
+  contents: read
+
+# Prevent concurrent deployments
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Implements Technical Specification/A.4 Development Standards Reference
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/web
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type checking
+        run: npm run typecheck
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Run security audit
+        run: npm audit
+
+  build:
+    name: Build
+    needs: validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/web
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: src/web/dist
+          retention-days: 1
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync to S3 bucket
+        run: |
+          aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET }} \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html" \
+            --exclude "manifest.json"
+
+      - name: Upload index.html and manifest.json with no-cache
+        run: |
+          aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET }} \
+            --exclude "*" \
+            --include "index.html" \
+            --include "manifest.json" \
+            --cache-control "public, no-cache, must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        uses: aws-actions/amazon-cloudfront-invalidate@v1
+        with:
+          distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          paths: '/*'
