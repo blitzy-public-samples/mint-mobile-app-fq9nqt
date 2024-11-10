@@ -1,0 +1,139 @@
+# Human Tasks:
+# 1. Ensure AWS EBS and EFS CSI drivers are installed in the cluster
+# 2. Configure IAM roles and policies for EBS/EFS access
+# 3. Verify KMS encryption keys are properly set up
+# 4. Validate storage class configurations match requirements
+
+# Required CSI Drivers:
+# - aws-ebs-csi-driver v1.0+
+# - aws-efs-csi-driver v1.0+
+
+# Addresses requirements from Technical Specification:
+# - 5.2.4 Data Architecture: Implements persistent volumes for Primary Storage, Cache Layer, Queue System
+# - 5.3.3 Data Storage: Configures high-performance storage for PostgreSQL 14+, Redis 6+, TimescaleDB 2.8+
+# - 10.1 Deployment Environment: Defines cloud-native storage using AWS EBS/EFS
+
+apiVersion: v1
+kind: List
+items:
+  # PostgreSQL Database Storage - High Performance EBS
+  - apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: postgres-data-pv
+      labels:
+        type: database
+        app: postgres
+    spec:
+      capacity:
+        storage: 100Gi
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Retain
+      storageClassName: premium-io
+      csi:
+        driver: ebs.csi.aws.com
+        volumeHandle: ${EBS_VOLUME_ID} # To be replaced with actual EBS volume ID
+        fsType: ext4
+        volumeAttributes:
+          encrypted: "true"
+          type: gp3
+          iopsPerGB: "3000"
+
+  # TimescaleDB Storage - High Performance EBS
+  - apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: timescaledb-data-pv
+      labels:
+        type: database
+        app: timescaledb
+    spec:
+      capacity:
+        storage: 200Gi
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Retain
+      storageClassName: premium-io
+      csi:
+        driver: ebs.csi.aws.com
+        volumeHandle: ${EBS_VOLUME_ID} # To be replaced with actual EBS volume ID
+        fsType: ext4
+        volumeAttributes:
+          encrypted: "true"
+          type: gp3
+          iopsPerGB: "3000"
+
+  # Redis Cache Storage - Standard EBS
+  - apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: redis-data-pv
+      labels:
+        type: cache
+        app: redis
+    spec:
+      capacity:
+        storage: 20Gi
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Delete
+      storageClassName: standard
+      csi:
+        driver: ebs.csi.aws.com
+        volumeHandle: ${EBS_VOLUME_ID} # To be replaced with actual EBS volume ID
+        fsType: ext4
+        volumeAttributes:
+          encrypted: "true"
+          type: gp3
+
+  # RabbitMQ Queue Storage - Standard EBS
+  - apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: rabbitmq-data-pv
+      labels:
+        type: queue
+        app: rabbitmq
+    spec:
+      capacity:
+        storage: 10Gi
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Delete
+      storageClassName: standard
+      csi:
+        driver: ebs.csi.aws.com
+        volumeHandle: ${EBS_VOLUME_ID} # To be replaced with actual EBS volume ID
+        fsType: ext4
+        volumeAttributes:
+          encrypted: "true"
+          type: gp3
+
+  # Shared Storage - EFS
+  - apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: shared-data-pv
+      labels:
+        type: shared
+        app: backup
+    spec:
+      capacity:
+        storage: 500Gi
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteMany
+      persistentVolumeReclaimPolicy: Retain
+      storageClassName: shared-storage
+      csi:
+        driver: efs.csi.aws.com
+        volumeHandle: ${EFS_FILESYSTEM_ID} # To be replaced with actual EFS filesystem ID
+        volumeAttributes:
+          encryptInTransit: "true"
+          encryptAtRest: "true"
+          iam: "true"
