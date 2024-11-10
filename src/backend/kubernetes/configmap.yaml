@@ -1,0 +1,62 @@
+# Human Tasks:
+# 1. Review and validate all configuration values before deployment
+# 2. Ensure service discovery DNS names match Kubernetes service names
+# 3. Verify port numbers align with security policies and firewall rules
+# 4. Confirm environment settings match deployment environment
+# 5. Validate database and Redis hostnames match service names
+
+# Requirement: Container Orchestration
+# Location: Technical Specification/10.4 Orchestration/10.4.1 Kubernetes Configuration
+# Implementation: Kubernetes ConfigMap for backend service configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mint-replica-backend-config
+  namespace: default
+  labels:
+    app: mint-replica
+    component: backend
+    environment: production
+
+# Requirement: Security Architecture
+# Location: Technical Specification/5.4 Security Architecture
+# Implementation: Strict separation of sensitive and non-sensitive configuration
+data:
+  # Application environment configuration
+  # Validated against allowed values: development, production, test, staging
+  environment: production
+
+  # Application port configuration
+  # Validated range: 1024-65535
+  port: "3000"
+
+  # Database connection settings (non-sensitive)
+  # Host pattern validation: ^[\w.-]+$
+  # Port range validation: 1024-65535
+  # Database name pattern: ^[\w-]+$
+  database.host: postgres-service
+  database.port: "5432"
+  database.database: mint_replica
+
+  # Redis cache settings (non-sensitive)
+  # Host pattern validation: ^[\w.-]+$
+  # Port range validation: 1024-65535
+  redis.host: redis-service
+  redis.port: "6379"
+
+  # Plaid API configuration (non-sensitive)
+  # Environment values validation: sandbox, development, production
+  plaid.environment: production
+
+  # AWS configuration (non-sensitive)
+  # Region pattern validation: ^[a-z]{2}-[a-z]+-\d{1}$
+  aws.region: us-east-1
+
+# Note: This ConfigMap strictly contains only non-sensitive configuration data.
+# Sensitive data such as:
+# - Database credentials
+# - Redis passwords
+# - JWT secrets
+# - Plaid API keys
+# - AWS credentials
+# are stored separately in Kubernetes Secrets
