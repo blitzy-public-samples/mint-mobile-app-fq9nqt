@@ -1,0 +1,176 @@
+/**
+ * HUMAN TASKS:
+ * 1. Test responsive layouts across all specified breakpoints (320px to 2048px)
+ * 2. Verify grid system behavior with dynamic content
+ * 3. Validate dashboard layout accessibility with screen readers
+ */
+
+/**
+ * Core layout system for Mint Replica Lite
+ * Requirements addressed:
+ * - Mobile-First Design (Technical Specification/1.1 System Overview)
+ * - User Interface Design (Technical Specification/8.1 User Interface Design)
+ * - Mobile Responsive Considerations (Technical Specification/8.1.7 Mobile Responsive Considerations)
+ */
+
+@import './variables.css';
+
+/* Container */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-4);
+  padding-right: var(--spacing-4);
+  max-width: var(--breakpoint-2xl);
+}
+
+/* Grid System */
+.grid {
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+/* Grid Columns - Mobile First (single column by default) */
+.grid-cols-2,
+.grid-cols-3,
+.grid-cols-4,
+.grid-cols-6 {
+  grid-template-columns: 1fr;
+}
+
+/* Flex Utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+  min-height: 100vh;
+}
+
+/* Sidebar (hidden on mobile) */
+.sidebar {
+  display: none;
+}
+
+/* Main Content */
+.main-content {
+  width: 100%;
+  min-height: 100vh;
+  padding: var(--spacing-4);
+}
+
+/* Small Screens (640px and up) */
+@media (min-width: var(--breakpoint-sm)) {
+  .container {
+    max-width: var(--breakpoint-sm);
+    padding-left: var(--spacing-6);
+    padding-right: var(--spacing-6);
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium Screens (768px and up) */
+@media (min-width: var(--breakpoint-md)) {
+  .container {
+    max-width: var(--breakpoint-md);
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Show sidebar and adjust dashboard layout */
+  .dashboard-layout {
+    grid-template-columns: 240px 1fr;
+  }
+
+  .sidebar {
+    display: block;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+/* Large Screens (1024px and up) */
+@media (min-width: var(--breakpoint-lg)) {
+  .container {
+    max-width: var(--breakpoint-lg);
+  }
+
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Extra Large Screens (1280px and up) */
+@media (min-width: var(--breakpoint-xl)) {
+  .container {
+    max-width: var(--breakpoint-xl);
+  }
+
+  .grid-cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sidebar {
+    display: none;
+  }
+
+  .dashboard-layout {
+    display: block;
+  }
+
+  .container {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .sidebar,
+  .main-content {
+    border: 2px solid currentColor;
+  }
+}
