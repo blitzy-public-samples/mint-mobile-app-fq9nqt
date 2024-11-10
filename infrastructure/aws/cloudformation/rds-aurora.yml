@@ -1,0 +1,237 @@
+# Human Tasks:
+# 1. Review and adjust database instance classes based on workload requirements
+# 2. Verify KMS key permissions and access policies
+# 3. Configure custom parameter group settings if needed
+# 4. Review backup retention periods for compliance requirements
+# 5. Ensure IAM roles for monitoring have proper permissions
+# 6. Validate subnet group configuration matches VPC architecture
+
+AWSTemplateFormatVersion: '2010-09-15'
+Description: >-
+  CloudFormation template for provisioning Amazon Aurora PostgreSQL database cluster
+  with high availability and security configurations for Mint Replica Lite.
+  Implements requirements from Technical Specification sections 7.3.1 (Primary Databases),
+  5.2.4 (Data Architecture), and 9.2 (Data Security).
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment
+    AllowedValues:
+      - production
+      - staging
+      - development
+    Default: development
+
+  DBName:
+    Type: String
+    Description: Database name
+    Default: mintreplicalite
+    MinLength: 1
+    MaxLength: 64
+    Pattern: '[a-zA-Z][a-zA-Z0-9_]*'
+
+Mappings:
+  EnvironmentConfig:
+    production:
+      instanceClass: r6g.xlarge
+      readReplicas: 2
+      backupRetention: 30
+    staging:
+      instanceClass: r6g.large
+      readReplicas: 1
+      backupRetention: 7
+    development:
+      instanceClass: r6g.large
+      readReplicas: 0
+      backupRetention: 1
+
+Conditions:
+  IsProduction: !Equals ['${Environment}', 'production']
+
+Resources:
+  # Database Credentials Secret
+  # Implements requirement: Data Security - Secure credential management
+  DBCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}-db-credentials'
+      Description: Aurora database credentials
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "dbadmin"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+
+  # KMS Key for Database Encryption
+  # Implements requirement: Data Security - Encryption at rest
+  DatabaseKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for Aurora database encryption
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow Aurora to use the key
+            Effect: Allow
+            Principal:
+              Service: 'rds.amazonaws.com'
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+
+  DatabaseKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${AWS::StackName}-aurora-key'
+      TargetKeyId: !Ref DatabaseKMSKey
+
+  # Database Subnet Group
+  # Implements requirement: High Availability - Multi-AZ deployment
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Aurora cluster
+      SubnetIds: !Split [',', !ImportValue 'VPC-PrivateSubnetIds']
+
+  # Security Group for Database Access
+  # Implements requirement: Data Security - Network access controls
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Aurora database cluster
+      VpcId: !ImportValue 'VPC-VpcId'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !ImportValue 'VPC-DefaultSecurityGroupId'
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-db-sg'
+
+  # Enhanced Monitoring Role
+  # Implements requirement: High Availability - Performance monitoring
+  MonitoringRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: monitoring.rds.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole
+
+  # Aurora PostgreSQL Cluster
+  # Implements requirements: Database Architecture, High Availability
+  DBCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineVersion: '14.6'
+      DatabaseName: !Ref DBName
+      MasterUsername: !Sub '{{resolve:secretsmanager:${DBCredentialsSecret}:SecretString:username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DBCredentialsSecret}:SecretString:password}}'
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref DBSecurityGroup
+      BackupRetentionPeriod: !FindInMap [EnvironmentConfig, !Ref Environment, backupRetention]
+      StorageEncrypted: true
+      KmsKeyId: !Ref DatabaseKMSKey
+      EnableIAMDatabaseAuthentication: true
+      DeletionProtection: !If [IsProduction, true, false]
+      Port: 5432
+      PreferredBackupWindow: '03:00-04:00'
+      PreferredMaintenanceWindow: 'mon:04:00-mon:05:00'
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0.5
+        MaxCapacity: 16
+      CopyTagsToSnapshot: true
+      EnableCloudwatchLogsExports:
+        - postgresql
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: MintReplicaLite
+
+  # Primary DB Instance
+  # Implements requirement: Database Architecture - Primary instance
+  DBInstance1:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref DBCluster
+      Engine: aurora-postgresql
+      DBInstanceClass: !FindInMap [EnvironmentConfig, !Ref Environment, instanceClass]
+      PubliclyAccessible: false
+      AutoMinorVersionUpgrade: true
+      MonitoringInterval: 60
+      EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 7
+      EnableEnhancedMonitoring: true
+      MonitoringRoleArn: !GetAtt MonitoringRole.Arn
+      PromotionTier: 1
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-primary'
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Read Replica Instance (Production)
+  # Implements requirement: High Availability - Read replicas
+  DBInstance2:
+    Type: AWS::RDS::DBInstance
+    Condition: IsProduction
+    Properties:
+      DBClusterIdentifier: !Ref DBCluster
+      Engine: aurora-postgresql
+      DBInstanceClass: !FindInMap [EnvironmentConfig, !Ref Environment, instanceClass]
+      PubliclyAccessible: false
+      AutoMinorVersionUpgrade: true
+      MonitoringInterval: 60
+      EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 7
+      EnableEnhancedMonitoring: true
+      MonitoringRoleArn: !GetAtt MonitoringRole.Arn
+      PromotionTier: 2
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-replica-1'
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  ClusterEndpoint:
+    Description: Aurora cluster endpoint
+    Value: !GetAtt DBCluster.Endpoint.Address
+    Export:
+      Name: AuroraClusterEndpoint
+
+  ReaderEndpoint:
+    Description: Aurora reader endpoint
+    Value: !GetAtt DBCluster.ReadEndpoint.Address
+    Export:
+      Name: AuroraReaderEndpoint
+
+  ClusterResourceId:
+    Description: Aurora cluster resource ID
+    Value: !Ref DBCluster
+
+  SecretArn:
+    Description: Database credentials secret ARN
+    Value: !Ref DBCredentialsSecret
+
+  SecurityGroupId:
+    Description: Database security group ID
+    Value: !Ref DBSecurityGroup
