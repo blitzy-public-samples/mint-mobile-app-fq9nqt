@@ -1,0 +1,76 @@
+# Human Tasks:
+# 1. Verify cluster metrics-server is installed and functioning
+# 2. Confirm HPA min/max replicas align with cluster capacity
+# 3. Validate CPU/Memory metrics collection is working
+# 4. Review scaling thresholds against historical usage patterns
+# 5. Check stabilization windows match application behavior
+# 6. Ensure proper RBAC permissions for HPA controller
+
+# Requirement: Horizontal Scaling
+# Location: Technical Specification/5.5 Scalability Architecture/5.5.1 Horizontal Scaling
+# Implementation: HorizontalPodAutoscaler configuration for dynamic scaling based on metrics
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mint-replica-backend-hpa
+  namespace: default
+  labels:
+    app: mint-replica
+    component: backend
+    environment: production
+
+# Requirement: Load Management
+# Location: Technical Specification/5.2 Component Architecture/5.2.3 Service Layer Architecture
+# Implementation: Auto-scaling configuration based on resource utilization metrics
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mint-replica-backend
+  
+  # Maintain minimum 3 replicas for high availability
+  minReplicas: 3
+  # Maximum 10 replicas to handle peak load while preventing resource exhaustion
+  maxReplicas: 10
+  
+  # Requirement: Resource Optimization
+  # Location: Technical Specification/10.4 Orchestration/10.4.2 Kubernetes Resources
+  # Implementation: Resource-based scaling metrics with defined thresholds
+  metrics:
+  # CPU-based scaling
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  
+  # Memory-based scaling
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+  # Scaling behavior configuration
+  behavior:
+    # Scale up behavior
+    scaleUp:
+      # 60-second stabilization window to prevent rapid scaling
+      stabilizationWindowSeconds: 60
+      policies:
+      # Add maximum 2 pods per minute
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+    
+    # Scale down behavior
+    scaleDown:
+      # 5-minute stabilization window to prevent thrashing
+      stabilizationWindowSeconds: 300
+      policies:
+      # Remove maximum 1 pod every 2 minutes
+      - type: Pods
+        value: 1
+        periodSeconds: 120
