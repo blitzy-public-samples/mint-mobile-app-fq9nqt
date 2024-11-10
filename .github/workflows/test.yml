@@ -1,0 +1,254 @@
+# Requirements addressed:
+# - Continuous Integration (Technical Specification/7.5 Development and Deployment Tools)
+# - Code Quality Standards (Technical Specification/A.1.2 Code Quality Standards)
+# - Security Testing (Technical Specification/9.3.5 Secure Development)
+
+name: Test Suite
+
+# Trigger workflow on push, pull request, and manual dispatch
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+# Environment variables available to all jobs
+env:
+  NODE_ENV: test
+  TEST_DB_URL: ${{ secrets.TEST_DB_URL }}
+  TEST_REDIS_URL: ${{ secrets.TEST_REDIS_URL }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+        env:
+          CI: true
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-unit
+          path: reports/coverage
+          retention-days: 14
+
+  integration-tests:
+    name: Integration Tests
+    needs: unit-tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: mint_replica_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database migrations
+        run: npm run db:migrate
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          TEST_DB_HOST: localhost
+          TEST_DB_PORT: 5432
+          TEST_DB_NAME: mint_replica_test
+          TEST_DB_USER: test_user
+          TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          TEST_REDIS_URL: redis://localhost:6379
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-integration
+          path: reports/junit.xml
+
+  e2e-tests:
+    name: End-to-End Tests
+    needs: integration-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start backend services
+        run: |
+          npm run build
+          npm run start:test &
+          sleep 15
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          TEST_API_URL: http://localhost:4000
+
+      - name: Generate test reports
+        run: npm run test:report
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-e2e
+          path: |
+            reports/e2e
+            reports/screenshots
+
+  security-tests:
+    name: Security Tests
+    needs: unit-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run SAST scan
+        run: npm run test:security:sast
+
+      - name: Check dependencies
+        run: |
+          npm audit
+          npm run test:security:deps
+
+      - name: Run security tests
+        run: npm run test:security
+        env:
+          TEST_ENABLE_SSL: true
+          TEST_ENABLE_AUTH: true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: reports/security
+          retention-days: 30
+
+  test-summary:
+    name: Test Summary
+    needs: [unit-tests, integration-tests, e2e-tests, security-tests]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Publish test summary
+        uses: test-summary/action@v2
+        with:
+          paths: |
+            **/junit.xml
+            **/test-results/**/*.xml
+
+      - name: Check test results
+        run: |
+          if [ "${{ needs.unit-tests.result }}" != "success" ] || \
+             [ "${{ needs.integration-tests.result }}" != "success" ] || \
+             [ "${{ needs.e2e-tests.result }}" != "success" ] || \
+             [ "${{ needs.security-tests.result }}" != "success" ]; then
+            echo "One or more test suites failed"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send email notification
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: Test Suite Failed - ${{ github.repository }}
+          body: Test suite failed in ${{ github.repository }}. Check the workflow run for details.
+          to: ${{ secrets.TEAM_EMAIL }}
+          from: CI/CD Pipeline
