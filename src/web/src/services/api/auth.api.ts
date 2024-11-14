@@ -6,7 +6,7 @@ import {
   PasswordResetCredentials 
 } from '../../types/auth.types';
 import { createApiRequest, handleApiError } from '../../utils/api.utils';
-import { API_CONFIG } from '../../config/api.config';
+// import { API_CONFIG } from '../../config/api.config';
 
 /**
  * Human Tasks:
@@ -168,7 +168,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
     const api = createApiRequest({ 
       includeAuth: false,
       retryOnError: true,
-      maxRetries: 2 
+      maxRetries: 0
     });
 
     await api.post(

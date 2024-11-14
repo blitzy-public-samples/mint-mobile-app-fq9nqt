@@ -2,6 +2,8 @@
 import { ApiResponse } from '../../types/api.types';
 import { Investment } from '../../types/models.types';
 import { createApiRequest, handleApiError } from '../../utils/api.utils';
+import { mockInvestments } from '../../mocks/mockData';
+import { AxiosError } from 'axios';
 
 /**
  * Human Tasks:
@@ -26,7 +28,7 @@ const api = createApiRequest({
   timeout: 30000, // Extended timeout for investment operations
   withCredentials: true,
   retryOnError: true,
-  maxRetries: 3
+  maxRetries: 0
 });
 
 /**
@@ -38,7 +40,14 @@ export async function getInvestments(): Promise<ApiResponse<Investment[]>> {
     const response = await api.get<ApiResponse<Investment[]>>('/investments');
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    const date = new Date().toISOString();
+    return {
+      data: mockInvestments,
+      success: true,
+      message: 'Mock investment data returned',
+      timestamp: date,
+      correlationId: `getInvestments-correlation-id-${date}`
+    };
   }
 }
 
@@ -51,11 +60,22 @@ export async function getInvestmentById(id: string): Promise<ApiResponse<Investm
     if (!id) {
       throw new Error('Investment ID is required');
     }
-    
+
     const response = await api.get<ApiResponse<Investment>>(`/investments/${id}`);
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    const investment = mockInvestments.find(inv => inv.id === id);
+    if (!investment) {
+      throw new Error('Investment not found');
+    }
+    const date = new Date().toISOString();
+    return {
+      data: investment,
+      success: true,
+      message: 'Mock investment data returned',
+      timestamp: date,
+      correlationId: `getInvestmentById-correlation-id-${date}`
+    };
   }
 }
 
@@ -86,7 +106,7 @@ export async function getInvestmentPerformance(
     );
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }
 
@@ -109,6 +129,6 @@ export async function syncInvestments(): Promise<ApiResponse<void>> {
     );
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }

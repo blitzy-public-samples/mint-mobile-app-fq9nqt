@@ -9,7 +9,7 @@
 import React from 'react';
 
 // Import theme colors for progress bar variants
-import { primary, success, warning, error } from '../../config/theme.config';
+import { colors } from '../../config/theme.config';
 
 // Type definition for progress bar style variants
 type ProgressBarVariant = 'default' | 'success' | 'warning' | 'danger';
@@ -72,20 +72,20 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   const getVariantColor = (): string => {
     switch (variant) {
       case 'success':
-        return success[500];
+        return colors.success[500];
       case 'warning':
-        return warning[500];
+        return colors.warning[500];
       case 'danger':
-        return error[500];
+        return colors.error[500];
       default:
-        return primary[500];
+        return colors.primary[500];
     }
   };
 
   // Base styles for progress bar container
   const containerStyles: React.CSSProperties = {
     width: '100%',
-    backgroundColor: primary[100],
+    backgroundColor: colors.primary[100],
     borderRadius: '0.25rem',
     overflow: 'hidden',
   };
@@ -107,7 +107,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     marginBottom: '0.5rem',
     fontSize: '0.875rem',
     fontWeight: 500,
-    color: primary[900],
+    color: colors.primary[900],
   };
 
   return (

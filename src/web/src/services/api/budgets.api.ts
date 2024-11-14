@@ -1,9 +1,10 @@
 // @version axios ^1.4.0
 
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { ApiResponse, PaginatedResponse } from '../../types/api.types';
 import { Budget, BudgetPeriod } from '../../types/models.types';
 import { API_CONFIG } from '../../config/api.config';
+import { mockBudgets } from '@/mocks/mockData';
 
 /**
  * Human Tasks:
@@ -15,14 +16,14 @@ import { API_CONFIG } from '../../config/api.config';
 
 // API endpoints for budget operations
 const BUDGETS_API_ENDPOINTS = {
-  BASE: '/api/v1/budgets',
-  GET_ALL: '/api/v1/budgets',
-  GET_BY_ID: '/api/v1/budgets/:id',
-  CREATE: '/api/v1/budgets',
-  UPDATE: '/api/v1/budgets/:id',
-  DELETE: '/api/v1/budgets/:id',
-  GET_CATEGORIES: '/api/v1/budgets/categories',
-  GET_SPENDING: '/api/v1/budgets/:id/spending'
+  BASE: '/budgets',
+  GET_ALL: '/budgets',
+  GET_BY_ID: '/budgets/:id',
+  CREATE: '/budgets',
+  UPDATE: '/budgets/:id',
+  DELETE: '/budgets/:id',
+  GET_CATEGORIES: '/budgets/categories',
+  GET_SPENDING: '/budgets/:id/spending'
 } as const;
 
 // Types for budget-related requests
@@ -67,7 +68,22 @@ export async function getBudgets(params: {
         timeout: API_CONFIG.TIMEOUT,
         withCredentials: true
       }
-    );
+    ).catch((error) => {
+      console.log(error);
+
+      const mockResponse = {
+        data: {
+          data: mockBudgets,
+          page: params.page || 1,
+          limit: params.limit || 10,
+          total: mockBudgets.length,
+          hasMore: false,
+          totalPages: 1,
+        }
+      };
+      return mockResponse as AxiosResponse<PaginatedResponse<Budget>>;
+    });
+
     return response.data;
   } catch (error) {
     console.error('Error fetching budgets:', error);

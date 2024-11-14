@@ -16,7 +16,7 @@ import { Outlet } from 'react-router-dom';
 // Internal imports
 import { Header } from '../components/layout/Header';
 import { Sidebar } from '../components/layout/Sidebar';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 // Props interface
 interface DashboardLayoutProps {

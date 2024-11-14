@@ -2,7 +2,9 @@
 // @version @plaid/plaid-js ^12.0.0
 
 import axios from 'axios';
-import { Configuration, PlaidApi, PlaidEnvironments } from '@plaid/plaid-js';
+// import { Configuration, PlaidApi, PlaidEnvironments } from '@plaid/plaid-js';
+import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid';
+
 import { ApiResponse } from '../../types/api.types';
 import { API_CONFIG } from '../../config/api.config';
 

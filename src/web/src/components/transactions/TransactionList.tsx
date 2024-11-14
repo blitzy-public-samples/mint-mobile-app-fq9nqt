@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 // @version: classnames ^2.3.2
 import classNames from 'classnames';
 import { Transaction } from '../../types/models.types';
-import { Table, TableColumn } from '../common/Table';
+import Table, { TableColumn } from '../common/Table';
 import { useTransactions } from '../../hooks/useTransactions';
 
 // Human tasks:

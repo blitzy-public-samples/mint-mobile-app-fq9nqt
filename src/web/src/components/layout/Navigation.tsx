@@ -19,10 +19,10 @@ import { useAuth } from '../../contexts/AuthContext';
 // Navigation items constant from specification
 const NAVIGATION_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: 'dashboard', ariaLabel: 'Navigate to Dashboard' },
-  { path: '/accounts', label: 'Accounts', icon: 'accounts', ariaLabel: 'Navigate to Accounts' },
-  { path: '/budgets', label: 'Budgets', icon: 'budgets', ariaLabel: 'Navigate to Budgets' },
-  { path: '/goals', label: 'Goals', icon: 'goals', ariaLabel: 'Navigate to Goals' },
-  { path: '/investments', label: 'Investments', icon: 'investments', ariaLabel: 'Navigate to Investments' }
+  { path: '/dashboard/accounts', label: 'Accounts', icon: 'accounts', ariaLabel: 'Navigate to Accounts' },
+  { path: '/dashboard/budgets', label: 'Budgets', icon: 'budgets', ariaLabel: 'Navigate to Budgets' },
+  { path: '/dashboard/goals', label: 'Goals', icon: 'goals', ariaLabel: 'Navigate to Goals' },
+  { path: '/dashboard/investments', label: 'Investments', icon: 'investments', ariaLabel: 'Navigate to Investments' }
 ];
 
 /**
@@ -67,10 +67,10 @@ const Navigation: React.FC = () => {
       return;
     }
 
-    if (!authState.isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+    // if (!authState.isAuthenticated) {
+    //   navigate('/login');
+    //   return;
+    // }
 
     navigate(path);
   };

@@ -12,11 +12,11 @@ import React, { useRef, useEffect } from 'react';
 // @version: chart.js ^4.0.0
 import { Chart } from 'chart.js/auto';
 // @version: lodash ^4.17.21
-import merge from 'lodash';
+import merge from 'lodash/merge';
 
 // Internal imports
 import { ChartProps } from '../../types/components.types';
-import chartConfig from '../../config/chart.config';
+// import chartConfig from '../../config/chart.config';
 import { formatChartData, generateChartOptions } from '../../utils/chart.utils';
 
 // Human Tasks:

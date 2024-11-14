@@ -120,7 +120,7 @@ const CreateBudget: React.FC = () => {
       });
 
       // Navigate to budgets list on success
-      navigate('/budgets');
+      navigate('/dashboard/budgets');
     } catch (err) {
       console.error('Failed to create budget:', err);
     } finally {
@@ -276,7 +276,7 @@ const CreateBudget: React.FC = () => {
         <div className="flex justify-end gap-4">
           <Button
             variant="secondary"
-            onClick={() => navigate('/budgets')}
+            onClick={() => navigate('/dashboard/budgets')}
             type="button"
           >
             Cancel

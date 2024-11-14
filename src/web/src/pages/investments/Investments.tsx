@@ -10,9 +10,10 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import useInvestments from '../../hooks/useInvestments';
+import { useInvestments } from '../../hooks/useInvestments';
 import DonutChart from '../../components/charts/DonutChart';
 import Spinner from '../../components/common/Spinner';
+import { Investment } from '@/types/models.types';
 
 // Asset allocation color mapping
 const ASSET_COLORS = {
@@ -80,7 +81,7 @@ const Investments: React.FC = () => {
    * Transform investment data into chart-compatible format
    * Implements User Interface Design requirement
    */
-  const prepareAssetAllocationData = (investments: any[]): AssetAllocationData[] => {
+  const prepareAssetAllocationData = (investments: Investment[]): AssetAllocationData[] => {
     // Group investments by asset type
     const groupedByType = investments.reduce((acc, inv) => {
       const type = inv.assetType.toLowerCase();
@@ -238,7 +239,7 @@ const Investments: React.FC = () => {
             <tbody>
               {investments.map((investment) => (
                 <tr key={investment.id}>
-                  <td>{investment.name}</td>
+                  <td>{investment.symbol}</td>
                   <td>{investment.assetType}</td>
                   <td>${investment.currentValue.toLocaleString()}</td>
                   <td className={investment.return >= 0 ? 'positive' : 'negative'}>

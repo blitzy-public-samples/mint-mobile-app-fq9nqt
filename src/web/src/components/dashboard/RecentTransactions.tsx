@@ -15,7 +15,7 @@ import React, { useMemo, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
 import { Transaction } from '../../types/models.types';
-import { Table, TableColumn } from '../common/Table';
+import Table, { TableColumn } from '../common/Table';
 import { useTransactions } from '../../hooks/useTransactions';
 
 // Human tasks:

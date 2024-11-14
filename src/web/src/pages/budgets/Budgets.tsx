@@ -45,7 +45,7 @@ const Budgets: React.FC = () => {
    * Implements requirement: Budget Management UI - Creation Flow
    */
   const handleCreateBudget = useCallback(() => {
-    navigate('/budgets/create');
+    navigate('/dashboard/budgets/create');
   }, [navigate]);
 
   /**
@@ -53,7 +53,7 @@ const Budgets: React.FC = () => {
    * Implements requirement: Budget Management UI - Edit Flow
    */
   const handleEditBudget = useCallback((budgetId: string) => {
-    navigate(`/budgets/${budgetId}/edit`);
+    navigate(`/dashboard/budgets/${budgetId}`);
   }, [navigate]);
 
   /**

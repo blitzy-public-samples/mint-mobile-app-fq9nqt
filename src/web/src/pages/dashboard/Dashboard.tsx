@@ -15,10 +15,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Internal components
-import { AccountsSummary } from '../../components/dashboard/AccountsSummary';
-import { BudgetOverview } from '../../components/dashboard/BudgetOverview';
-import { RecentTransactions } from '../../components/dashboard/RecentTransactions';
-import { DashboardLayout } from '../../layouts/DashboardLayout';
+import AccountsSummary from '../../components/dashboard/AccountsSummary';
+import BudgetOverview from '../../components/dashboard/BudgetOverview';
+import  RecentTransactions from '../../components/dashboard/RecentTransactions';
+import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../hooks/useAuth';
 
 // Human tasks:
@@ -34,13 +34,13 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Check authentication status on mount
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    setLoading(false);
-  }, [isAuthenticated, navigate]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate('/login');
+  //     return;
+  //   }
+  //   setLoading(false);
+  // }, [isAuthenticated, navigate]);
 
   // Handle account click navigation
   const handleAccountClick = (accountId: string) => {

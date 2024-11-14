@@ -63,7 +63,7 @@ export async function getGoals(params: GetGoalsParams = {}): Promise<PaginatedRe
       includeAuth: true,
       timeout: API_CONFIG.TIMEOUT,
       retryOnError: true,
-      maxRetries: 3
+      maxRetries: 0
     });
 
     const response = await api.get(GOALS_API_ENDPOINTS.GET_GOALS, {

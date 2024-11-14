@@ -11,10 +11,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Account } from '../../types/models.types';
+import { Account, Transaction } from '../../types/models.types';
 import { getAccountById, syncAccount } from '../../services/api/accounts.api';
-import { TransactionList } from '../../components/transactions/TransactionList';
-import { AreaChart } from '../../components/charts/AreaChart';
+import TransactionList from '../../components/transactions/TransactionList';
+import AreaChart from '../../components/charts/AreaChart';
 
 // Human Tasks:
 // 1. Configure error monitoring service integration
@@ -89,7 +89,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
   // Handle transaction click
   const handleTransactionClick = useCallback((transaction: Transaction) => {
-    navigate(`/transactions/${transaction.id}`, {
+    navigate(`/dashboard/transactions/${transaction.id}`, {
       state: { accountId, transaction }
     });
   }, [accountId, navigate]);
@@ -124,7 +124,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
         <h2>Account Not Found</h2>
         <p>The requested account could not be found.</p>
         <button 
-          onClick={() => navigate('/accounts')}
+          onClick={() => navigate('/dashboard/accounts')}
           className="back-button"
         >
           Back to Accounts
@@ -173,7 +173,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
       </section>
 
       {/* Balance History Chart */}
-      <section className="balance-history">
+      {/* <section className="balance-history">
         <h2>Balance History</h2>
         <div className="chart-container">
           <AreaChart
@@ -221,7 +221,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
             lineColor="rgb(75, 192, 192)"
           />
         </div>
-      </section>
+      </section> */}
 
       {/* Transactions Section */}
       <section className="transactions">

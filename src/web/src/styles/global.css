@@ -10,6 +10,9 @@
 /* Import design tokens and typography styles */
 @import './variables.css';
 @import './typography.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* 
  * Global Reset and Base Styles

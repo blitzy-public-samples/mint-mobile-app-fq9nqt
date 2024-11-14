@@ -14,7 +14,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 // Internal imports
 import { Account, AccountType } from '../../types/models.types';
-import { Card } from '../common/Card';
+import Card from '../common/Card';
 import { getAccounts } from '../../services/api/accounts.api';
 import { formatCurrency } from '../../utils/currency.utils';
 

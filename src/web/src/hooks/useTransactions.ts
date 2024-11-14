@@ -1,13 +1,13 @@
 // @version react ^18.0.0
 
 import { useState, useCallback, useEffect } from 'react';
-import { Transaction } from '../../types/models.types';
+import { Transaction } from '../types/models.types';
 import {
   getTransactions,
   updateTransaction,
   categorizeTransaction,
   searchTransactions,
-} from '../../services/api/transactions.api';
+} from '../services/api/transactions.api';
 
 /**
  * Human Tasks:
@@ -89,7 +89,7 @@ export function useTransactions(filters: TransactionFilters = {}) {
         error: error instanceof Error ? error.message : 'Failed to fetch transactions',
       }));
     }
-  }, [filters]);
+  }, [filters.accountId, filters.startDate, filters.endDate, filters.categoryId]);
 
   // Handle transaction updates
   const handleUpdateTransaction = useCallback(async (
@@ -204,7 +204,7 @@ export function useTransactions(filters: TransactionFilters = {}) {
     return () => {
       ws.close();
     };
-  }, [filters, fetchTransactions]);
+  }, [fetchTransactions]);
 
   return {
     ...state,

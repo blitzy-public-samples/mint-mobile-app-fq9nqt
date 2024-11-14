@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '../components/auth/LoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
 import { BiometricPrompt } from '../components/auth/BiometricPrompt';
+import { AuthResponse } from '@/types/auth.types';
 
 // Types
 interface AuthLayoutProps {
@@ -47,7 +48,8 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ authMode }) => {
       sessionStorage.setItem('refreshToken', response.refreshToken);
 
       // Check if biometric authentication is available and enabled
-      if (response.biometricEnabled) {
+      // if (response.biometricEnabled) {
+      if (false) {
         setShowBiometric(true);
       } else {
         // Navigate to dashboard if biometric is not required

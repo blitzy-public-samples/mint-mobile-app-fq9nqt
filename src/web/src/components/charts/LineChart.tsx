@@ -16,7 +16,7 @@ import { Line } from 'react-chartjs-2';
 
 // Internal imports
 import { formatChartData, generateChartOptions } from '../../utils/chart.utils';
-import { chartConfig } from '../../config/chart.config';
+import { defaultOptions as chartConfig } from '../../config/chart.config';
 import type { ChartProps } from '../../types/components.types';
 
 // Register Chart.js components
@@ -75,7 +75,7 @@ const LineChart: React.FC<LineChartProps> = ({
 
   // Generate chart options with defaults and custom settings
   const chartOptions = generateChartOptions('line', 'light', {
-    ...chartConfig.defaultOptions,
+    ...chartConfig,
     ...options,
     responsive: true,
     maintainAspectRatio: false,
@@ -85,9 +85,9 @@ const LineChart: React.FC<LineChartProps> = ({
       intersect: false
     },
     plugins: {
-      ...chartConfig.defaultOptions.plugins,
+      ...chartConfig.plugins,
       tooltip: {
-        ...chartConfig.defaultOptions.plugins.tooltip,
+        ...chartConfig.plugins.tooltip,
         callbacks: {
           label: (context: any) => {
             const value = context.parsed.y;
@@ -101,7 +101,7 @@ const LineChart: React.FC<LineChartProps> = ({
     },
     scales: {
       x: {
-        ...chartConfig.defaultOptions.scales.x,
+        ...chartConfig.scales.x,
         type: 'category',
         display: true,
         title: {
@@ -110,7 +110,7 @@ const LineChart: React.FC<LineChartProps> = ({
         }
       },
       y: {
-        ...chartConfig.defaultOptions.scales.y,
+        ...chartConfig.scales.y,
         display: true,
         title: {
           display: true,

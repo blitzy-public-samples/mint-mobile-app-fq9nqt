@@ -36,16 +36,16 @@ interface ChartDimensions {
  * Addresses requirement: Analytics and Reporting - Enable analytics and reporting engine
  */
 export function formatChartData(data: any[], options: FormatOptions): ChartData {
-  // Validate input data
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error('Invalid data format: Expected non-empty array');
-  }
-
   // Initialize base chart data structure
   const chartData: ChartData = {
     labels: [],
     datasets: []
   };
+
+  // Validate input data
+  if (!Array.isArray(data) || data.length === 0) {
+    return chartData;
+  }
 
   // Apply chart type specific formatting
   switch (options.type) {
@@ -70,7 +70,7 @@ export function formatChartData(data: any[], options: FormatOptions): ChartData 
       chartData.datasets = [{
         data: data.map(item => item.amount),
         backgroundColor: data.map(item => 
-          TRANSACTION_CATEGORY_COLORS[item.category] || CHART_COLORS.secondary
+          TRANSACTION_CATEGORY_COLORS[item.categoryId] || CHART_COLORS.secondary
         )
       }];
       break;
@@ -146,7 +146,7 @@ export function createChartGradient(
   
   colors.forEach((color, index) => {
     const alpha = index === 0 ? '40' : '00';
-    gradient.addColorStop(index / (colors.length - 1), `${color}${alpha}`);
+    // gradient.addColorStop(index / (colors.length - 1), `${color}${alpha}`);
   });
 
   return gradient;

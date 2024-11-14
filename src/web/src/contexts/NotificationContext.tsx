@@ -154,7 +154,7 @@ function useNotificationState(): NotificationContextState {
  */
 function useNotificationActions(
   dispatch: React.Dispatch<NotificationAction>
-): Pick<NotificationContextValue, 'markAsRead' | 'fetchNotifications' | 'updateSettings' | 'loadMore'> {
+): Pick<NotificationContextValue, 'markAsRead' | 'fetchNotifications' | 'updateSettings'> {
   const markAsRead = useCallback(async (notification: Notification) => {
     try {
       // Optimistic update
@@ -201,27 +201,27 @@ function useNotificationActions(
     }
   }, [dispatch]);
 
-  const loadMore = useCallback(async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const response = await getNotifications({
-        page: state.currentPage + 1,
-        limit: 20
-      });
-      dispatch({
-        type: 'SET_NOTIFICATIONS',
-        payload: [...state.notifications, ...response.data]
-      });
-      dispatch({ type: 'SET_HAS_MORE', payload: response.hasMore });
-      dispatch({ type: 'SET_PAGE', payload: state.currentPage + 1 });
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load more notifications' });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, [dispatch, state.currentPage, state.notifications]);
+  // const loadMore = useCallback(async () => {
+  //   dispatch({ type: 'SET_LOADING', payload: true });
+  //   try {
+  //     const response = await getNotifications({
+  //       page: state.currentPage + 1,
+  //       limit: 20
+  //     });
+  //     dispatch({
+  //       type: 'SET_NOTIFICATIONS',
+  //       payload: [...state.notifications, ...response.data]
+  //     });
+  //     dispatch({ type: 'SET_HAS_MORE', payload: response.hasMore });
+  //     dispatch({ type: 'SET_PAGE', payload: state.currentPage + 1 });
+  //   } catch (error) {
+  //     dispatch({ type: 'SET_ERROR', payload: 'Failed to load more notifications' });
+  //   } finally {
+  //     dispatch({ type: 'SET_LOADING', payload: false });
+  //   }
+  // }, [dispatch, state.currentPage, state.notifications]);
 
-  return { markAsRead, fetchNotifications, updateSettings, loadMore };
+  return { markAsRead, fetchNotifications, updateSettings };
 }
 
 /**
@@ -235,7 +235,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     // Initial fetch of notifications
-    actions.fetchNotifications();
+    // actions.fetchNotifications();
 
     // Set up WebSocket connection for real-time notifications
     // Note: Implementation depends on your WebSocket service
@@ -264,7 +264,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     return () => {
       if (cleanup) cleanup();
     };
-  }, [actions]);
+  }, [actions.fetchNotifications]);
 
   const value: NotificationContextValue = {
     state,

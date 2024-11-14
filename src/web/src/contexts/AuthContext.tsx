@@ -13,14 +13,14 @@ import {
   LoginCredentials, 
   RegisterCredentials, 
   User 
-} from '../../types/auth.types';
+} from '../types/auth.types';
 import { 
   login as loginApi, 
   register as registerApi, 
-  logout as logoutApi, 
+  logout as logoutApi,
   refreshToken as refreshTokenApi 
-} from '../../services/api/auth.api';
-import { SecureStorageService } from '../../services/storage/secureStorage.service';
+} from '../services/api/auth.api';
+import { SecureStorageService } from '../services/storage/secureStorage.service';
 
 // Initial authentication state
 const INITIAL_AUTH_STATE: AuthState = {

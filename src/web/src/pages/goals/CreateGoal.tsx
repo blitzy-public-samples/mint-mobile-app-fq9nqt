@@ -84,7 +84,7 @@ const CreateGoal: React.FC = () => {
       await createNewGoal(goalData);
       
       // Navigate to goals list on success
-      navigate('/goals');
+      navigate('/dashboard/goals');
     } catch (err) {
       setError('root', {
         type: 'manual',
@@ -290,7 +290,7 @@ const CreateGoal: React.FC = () => {
           <Button
             type="button"
             variant="secondary"
-            onClick={() => navigate('/goals')}
+            onClick={() => navigate('/dashboard/goals')}
             disabled={isLoading}
             className="w-full"
           >

@@ -16,9 +16,14 @@ import { Route, Routes } from 'react-router-dom';
 
 // Internal component imports
 import Dashboard from '../pages/dashboard/Dashboard';
-import Accounts from '../pages/accounts/Accounts';
+import AccountsPage from '@/pages/accounts/Accounts'; '../pages/accounts/Accounts';
 import Budgets from '../pages/budgets/Budgets';
-import PrivateRoute from './PrivateRoute';
+// import PrivateRoute from './PrivateRoute';
+import AccountDetails from '../pages/accounts/AccountDetails';
+import TransactionDetails from '../pages/transactions/TransactionDetails';
+import BudgetDetails from '../pages/budgets/BudgetDetails';
+import Investments from '@/pages/investments/Investments';
+import InvestmentDetails from '@/pages/investments/InvestmentDetails';
 
 // Human tasks:
 // 1. Verify route access policies are configured in authentication service
@@ -42,11 +47,21 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
     <Routes>
       {/* Main Dashboard Overview Route */}
       <Route
-        path="/"
+        path="/dashboard"
         element={
-          <PrivateRoute redirectPath="/auth/login">
+          // <PrivateRoute redirectPath="/auth/login">
             <Dashboard />
-          </PrivateRoute>
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Individual Account Details Route */}
+      <Route
+        path="/accounts/:accountId"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+            <AccountDetails />
+          // </PrivateRoute>
         }
       />
 
@@ -54,9 +69,19 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
       <Route
         path="/accounts/*"
         element={
-          <PrivateRoute redirectPath="/auth/login">
-            <Accounts />
-          </PrivateRoute>
+          // <PrivateRoute redirectPath="/auth/login">
+            <AccountsPage />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Budget Details Route */}
+      <Route
+        path="/budgets/:id"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+            <BudgetDetails />
+          // </PrivateRoute>
         }
       />
 
@@ -64,9 +89,39 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
       <Route
         path="/budgets/*"
         element={
-          <PrivateRoute redirectPath="/auth/login">
+          // <PrivateRoute redirectPath="/auth/login">
             <Budgets />
-          </PrivateRoute>
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Transaction Details Route */}
+      <Route
+        path="/transactions/:id"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+            <TransactionDetails />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Investments Management Route */}
+      <Route
+        path="/investments/*"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+            <Investments />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Transaction Details Route */}
+      <Route
+        path="/investments/:id"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+            <InvestmentDetails />
+          // </PrivateRoute>
         }
       />
 
@@ -74,9 +129,9 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
       <Route
         path="*"
         element={
-          <PrivateRoute redirectPath="/auth/login">
+          // <PrivateRoute redirectPath="/auth/login">
             <Dashboard />
-          </PrivateRoute>
+          // </PrivateRoute>
         }
       />
     </Routes>

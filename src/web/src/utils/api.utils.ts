@@ -1,6 +1,6 @@
 // @version axios ^1.4.0
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { BASE_URL, TIMEOUT, RETRY_ATTEMPTS } from '../config/api.config';
+import { API_CONFIG } from '../config/api.config';
 import { ApiResponse, ApiError, ApiRequestOptions, isAxiosError } from '../types/api.types';
 import { getLocalStorageItem } from './storage.utils';
 
@@ -19,8 +19,8 @@ import { getLocalStorageItem } from './storage.utils';
  */
 export function createApiRequest(options: ApiRequestOptions): AxiosInstance {
   const instance = axios.create({
-    baseURL: BASE_URL,
-    timeout: TIMEOUT,
+    baseURL: API_CONFIG.BASE_URL,
+    timeout: API_CONFIG.TIMEOUT,
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export function createApiRequest(options: ApiRequestOptions): AxiosInstance {
         try {
           const refreshToken = getLocalStorageItem('refresh_token', true);
           if (refreshToken) {
-            const response = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+            const response = await axios.post(`${API_CONFIG.BASE_URL}/auth/refresh`, { refreshToken });
             if (response.data.token) {
               localStorage.setItem('auth_token', response.data.token);
               originalRequest.headers = {
@@ -78,7 +78,7 @@ export function createApiRequest(options: ApiRequestOptions): AxiosInstance {
       }
 
       // Implement retry logic with exponential backoff
-      if (originalRequest && options.retryOnError && (!originalRequest._retry || originalRequest._retry < RETRY_ATTEMPTS)) {
+      if (originalRequest && options.retryOnError && (!originalRequest._retry || originalRequest._retry < API_CONFIG.RETRY_ATTEMPTS)) {
         originalRequest._retry = (originalRequest._retry || 0) + 1;
         const delay = Math.min(1000 * Math.pow(2, originalRequest._retry - 1), 10000);
         

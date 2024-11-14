@@ -6,8 +6,8 @@ import {
   getInvestmentById, 
   getInvestmentPerformance, 
   syncInvestments 
-} from '../../services/api/investments.api';
-import { Investment } from '../../types/models.types';
+} from '../services/api/investments.api';
+import { Investment } from '../types/models.types';
 
 /**
  * Human Tasks:

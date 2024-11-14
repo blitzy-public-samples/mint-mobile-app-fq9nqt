@@ -1,6 +1,6 @@
 // @version axios ^1.4.0
 import axios, { AxiosRequestConfig, AxiosError, AxiosInstance } from 'axios';
-import { AUTH, ACCOUNTS } from '../constants/api.constants';
+import { API_ENDPOINTS } from '../constants/api.constants';
 import { ApiRequestOptions } from '../types/api.types';
 
 /**
@@ -21,7 +21,7 @@ export const API_CONFIG = {
   BASE_URL: process.env.VITE_API_BASE_URL || 'http://localhost:3000',
   TIMEOUT: 30000,
   WITH_CREDENTIALS: true,
-  RETRY_ATTEMPTS: 3,
+  RETRY_ATTEMPTS: 0,
   RETRY_DELAY: 1000,
   MAX_RETRY_DELAY: 5000,
   BACKOFF_FACTOR: 2
@@ -136,7 +136,7 @@ const createApiClient = (options: ApiRequestOptions): AxiosInstance => {
           try {
             // Attempt to refresh the token
             const response = await axios.post(
-              `${API_CONFIG.BASE_URL}${AUTH.REFRESH_TOKEN}`,
+              `${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`,
               {},
               { withCredentials: true }
             );

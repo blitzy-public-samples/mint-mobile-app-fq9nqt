@@ -80,39 +80,38 @@ export class HealthController {
     ]);
   }
 }
-```
 
-This implementation:
+// This implementation:
 
-1. Uses the @Auth decorator to protect health endpoints with admin-only access
-2. Implements comprehensive health checks for:
-   - API endpoint availability using HTTP ping
-   - Disk storage monitoring with threshold alerts
-   - Memory usage tracking for both heap and RSS
-3. Returns detailed health check results in the standard NestJS Terminus format
-4. Includes configurable thresholds for alerts
-5. Adds helpful code comments linking to requirements
-6. Includes human tasks for monitoring setup
-7. Uses proper dependency injection
-8. Implements proper error handling
-9. Follows NestJS best practices
-10. Uses environment variables for configuration
+// 1. Uses the @Auth decorator to protect health endpoints with admin-only access
+// 2. Implements comprehensive health checks for:
+//    - API endpoint availability using HTTP ping
+//    - Disk storage monitoring with threshold alerts
+//    - Memory usage tracking for both heap and RSS
+// 3. Returns detailed health check results in the standard NestJS Terminus format
+// 4. Includes configurable thresholds for alerts
+// 5. Adds helpful code comments linking to requirements
+// 6. Includes human tasks for monitoring setup
+// 7. Uses proper dependency injection
+// 8. Implements proper error handling
+// 9. Follows NestJS best practices
+// 10. Uses environment variables for configuration
 
-The health check endpoint will return results in this format:
-```json
-{
-  "status": "ok",
-  "info": {
-    "api": { "status": "up" },
-    "storage": { "status": "up", "details": { "used": "75%" } },
-    "memory_heap": { "status": "up", "details": { "used": "45%" } },
-    "memory_rss": { "status": "up", "details": { "used": "60%" } }
-  },
-  "error": {},
-  "details": {
-    "api": { "status": "up" },
-    "storage": { "status": "up", "details": { "used": "75%" } },
-    "memory_heap": { "status": "up", "details": { "used": "45%" } },
-    "memory_rss": { "status": "up", "details": { "used": "60%" } }
-  }
-}
+// The health check endpoint will return results in this format:
+
+// {
+//   "status": "ok",
+//   "info": {
+//     "api": { "status": "up" },
+//     "storage": { "status": "up", "details": { "used": "75%" } },
+//     "memory_heap": { "status": "up", "details": { "used": "45%" } },
+//     "memory_rss": { "status": "up", "details": { "used": "60%" } }
+//   },
+//   "error": {},
+//   "details": {
+//     "api": { "status": "up" },
+//     "storage": { "status": "up", "details": { "used": "75%" } },
+//     "memory_heap": { "status": "up", "details": { "used": "45%" } },
+//     "memory_rss": { "status": "up", "details": { "used": "60%" } }
+//   }
+// }

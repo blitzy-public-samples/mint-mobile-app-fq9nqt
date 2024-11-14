@@ -14,10 +14,14 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Internal imports
-import AuthRoutes from './AuthRoutes';
+// import AuthRoutes from './AuthRoutes';
 import DashboardRoutes from './DashboardRoutes';
 import PrivateRoute from './PrivateRoute';
-import PublicRoute from './PublicRoute';
+// import PublicRoute from './PublicRoute';
+import AuthLayout from '@/layouts/AuthLayout';
+import Login from '@/pages/auth/Login';
+import { Register } from '@/pages/auth/Register';
+import ResetPassword from '@/pages/auth/ResetPassword';
 
 /**
  * Application route path definitions with proper security considerations
@@ -28,6 +32,12 @@ const APP_ROUTES = {
   AUTH: '/auth/*',
   DASHBOARD: '/dashboard/*',
   NOT_FOUND: '*'
+} as const;
+
+const AUTH_ROUTES = {
+  LOGIN: '/auth/login',
+  REGISTER: '/auth/register',
+  RESET_PASSWORD: '/auth/reset-password'
 } as const;
 
 /**
@@ -51,33 +61,79 @@ const AppRoutes: React.FC = (): JSX.Element => {
         {/* Root route - Redirect to dashboard if authenticated */}
         <Route
           path={APP_ROUTES.ROOT}
-          element={<Navigate to={APP_ROUTES.DASHBOARD} replace />}
+          element={<Navigate to='/dashboard' replace />}
         />
 
         {/* Public authentication routes */}
-        <Route
+        {/* <Route
           path={APP_ROUTES.AUTH}
           element={
-            <PublicRoute redirectPath={APP_ROUTES.DASHBOARD}>
+            // <PublicRoute redirectPath={APP_ROUTES.DASHBOARD}>
               <AuthRoutes />
-            </PublicRoute>
+            // </PublicRoute>
           }
-        />
+        /> */}
+
+      <Route
+        path={AUTH_ROUTES.LOGIN}
+        element={
+          <AuthLayout authMode="login">
+            <Login
+              // onLoginSuccess={handleLoginSuccess}
+              // onLoginError={handleLoginError}
+            />
+          </AuthLayout>
+        }
+      />
+
+      {/* Registration route with security controls */}
+      <Route
+        path={AUTH_ROUTES.REGISTER}
+        element={
+          <AuthLayout authMode="register">
+            <Register />
+          </AuthLayout>
+        }
+      />
+
+      {/* Password reset route */}
+      <Route
+        path={AUTH_ROUTES.RESET_PASSWORD}
+        element={
+          <AuthLayout authMode="reset">
+            {/* Reset password component will be implemented separately */}
+            <ResetPassword />
+          </AuthLayout>
+        }
+      />
+
+      {/* Redirect unmatched auth routes to login */}
+      <Route
+        path="/auth/*"
+        element={
+          <AuthLayout authMode="login">
+            <Login
+              // onLoginSuccess={handleLoginSuccess}
+              // onLoginError={handleLoginError}
+            />
+          </AuthLayout>
+        }
+      />
 
         {/* Protected dashboard routes with JWT validation */}
         <Route
           path={APP_ROUTES.DASHBOARD}
           element={
-            <PrivateRoute redirectPath="/auth/login">
+            // <PrivateRoute redirectPath="/auth/login">
               <DashboardRoutes />
-            </PrivateRoute>
+            // </PrivateRoute>
           }
         />
 
         {/* 404 Not Found - Redirect to dashboard */}
         <Route
           path={APP_ROUTES.NOT_FOUND}
-          element={<Navigate to={APP_ROUTES.DASHBOARD} replace />}
+          element={<Navigate to='/dashboard' replace />}
         />
       </Routes>
     </BrowserRouter>

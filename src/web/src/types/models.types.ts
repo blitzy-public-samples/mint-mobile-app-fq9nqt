@@ -41,6 +41,9 @@ export type GoalStatus =
   | 'AT_RISK' 
   | 'COMPLETED';
 
+// Type for different kinds of assets
+export type AssetType = 'STOCK' | 'ETF' | 'MUTUAL_FUND' | 'BOND' | 'CRYPTO' | 'OTHER';
+
 // Interface representing a user in the system with complete profile and security information
 export interface User {
   id: string;
@@ -121,4 +124,7 @@ export interface Investment {
   costBasis: number;
   currentPrice: number;
   lastUpdated: Date;
+  assetType: AssetType;
+  currentValue: number;
+  return: number;
 }

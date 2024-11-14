@@ -14,7 +14,7 @@
 import React, { StrictMode } from 'react';
 
 // Internal imports
-import { Routes } from './routes/Routes';
+import Routes from './routes/Routes';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';

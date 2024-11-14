@@ -1,7 +1,7 @@
 // @version react ^18.2.0
 
 import { useState, useCallback, useEffect } from 'react';
-import { Budget, BudgetPeriod } from '../../types/models.types';
+import { Budget, BudgetPeriod } from '../types/models.types';
 import {
   getBudgets,
   getBudgetById,
@@ -9,8 +9,8 @@ import {
   updateBudget,
   deleteBudget,
   getBudgetSpending
-} from '../../services/api/budgets.api';
-import { useNotifications } from '../../contexts/NotificationContext';
+} from '../services/api/budgets.api';
+import { useNotifications } from '../contexts/NotificationContext';
 
 /**
  * Human Tasks:
@@ -212,10 +212,10 @@ export default function useBudgets() {
         spendingAnalysis: response.data
       }));
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: 'Failed to update spending analysis'
-      }));
+      // setState(prev => ({
+      //   ...prev,
+      //   error: 'Failed to update spending analysis'
+      // }));
     }
   }, [state.budgets]);
 

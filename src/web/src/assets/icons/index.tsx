@@ -40,17 +40,15 @@ export interface IconProps extends SVGProps<SVGSVGElement> {
 export type IconType = {
   size?: IconProps['size'];
   color?: IconProps['color'];
-};
-
-// Utility function to resolve icon size
+};// Utility function to resolve icon size
 // Ensures minimum touch target size of 44px for interactive icons
 export const getIconSize = (size?: IconProps['size']): number => {
   if (!size) return Number(DEFAULT_ICON_PROPS.size);
-  
+
   if (typeof size === 'string' && size in ICON_SIZES) {
     return Number(ICON_SIZES[size as keyof typeof ICON_SIZES]);
   }
-  
+
   const numericSize = Number(size);
   // Enforce minimum touch target size of 44px for interactive elements
   return numericSize >= 44 ? numericSize : Number(DEFAULT_ICON_PROPS.size);
@@ -65,26 +63,23 @@ export const AccountIcon: FC<IconProps> = ({
   focusable = DEFAULT_ICON_PROPS.focusable,
   ariaLabel = 'Account',
   ...props
-}) => (
-  <svg
-    width={getIconSize(size)}
-    height={getIconSize(size)}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={color}
-    role={role}
-    focusable={focusable}
-    aria-label={ariaLabel}
-    {...props}
-  >
-    <path
-      d="M3 9h18M3 15h18"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+}) => (<svg
+  width={getIconSize(size)}
+  height={getIconSize(size)}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke={color}
+  role={role}
+  focusable={focusable}
+  aria-label={ariaLabel}
+  {...props}
+>
+  <path
+    d="M3 9h18M3 15h18"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round" />
+</svg>)
 
 export const BudgetIcon: FC<IconProps> = ({
   size,
@@ -281,3 +276,4 @@ export const ActionIcon: FC<IconProps> = ({
     />
   </svg>
 );
+
