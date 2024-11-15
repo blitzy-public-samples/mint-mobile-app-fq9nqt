@@ -4,6 +4,7 @@ import { ApiResponse, PaginatedResponse } from '../../types/api.types';
 import { Goal, GoalType, GoalStatus } from '../../types/models.types';
 import { createApiRequest, handleApiError } from '../../utils/api.utils';
 import { API_CONFIG } from '../../config/api.config';
+import { AxiosError } from 'axios';
 
 /**
  * Human Tasks:
@@ -77,7 +78,7 @@ export async function getGoals(params: GetGoalsParams = {}): Promise<PaginatedRe
 
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }
 
@@ -95,7 +96,7 @@ export async function getGoalById(id: string): Promise<ApiResponse<Goal>> {
     const response = await api.get(GOALS_API_ENDPOINTS.GET_GOAL.replace(':id', id));
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }
 
@@ -132,7 +133,7 @@ export async function createGoal(goalData: CreateGoalParams): Promise<ApiRespons
 
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }
 
@@ -167,7 +168,7 @@ export async function updateGoal(id: string, goalData: UpdateGoalParams): Promis
 
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }
 
@@ -185,7 +186,7 @@ export async function deleteGoal(id: string): Promise<ApiResponse<void>> {
     const response = await api.delete(GOALS_API_ENDPOINTS.DELETE_GOAL.replace(':id', id));
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }
 
@@ -221,6 +222,6 @@ export async function updateGoalProgress(
 
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw handleApiError(error as AxiosError);
   }
 }

@@ -302,7 +302,7 @@ const Portfolio: React.FC = () => {
           bottom: 1rem;
           right: 1rem;
           padding: 0.75rem 1rem;
-          background-color: var(--color-primary);
+          background-color: var(--color-primary-400);
           color: white;
           border-radius: 0.5rem;
           box-shadow: var(--shadow-md);

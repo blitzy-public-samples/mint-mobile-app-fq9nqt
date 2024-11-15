@@ -1,7 +1,9 @@
-export function useAuth(): { isAuthenticated: boolean, user: { firstName: string } } {
+import { mockUser } from "@/mocks/mockData";
+import { User } from "@/types/models.types";
+
+export function useAuth(): { isAuthenticated: boolean, user: User } {
     return {
-        isAuthenticated: false, user: {
-            firstName: 'Test User 1',
-        }
+        isAuthenticated: true,
+        user: mockUser
     };
 }

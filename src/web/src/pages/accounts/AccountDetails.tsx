@@ -265,7 +265,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
         .sync-button {
           padding: 0.5rem 1rem;
-          background: var(--color-primary);
+          background: var(--color-primary-400);
           color: white;
           border: none;
           border-radius: 4px;
@@ -337,7 +337,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
         .loading-spinner {
           border: 4px solid var(--color-background);
-          border-top: 4px solid var(--color-primary);
+          border-top: 4px solid var(--color-primary-400);
           border-radius: 50%;
           width: 40px;
           height: 40px;
@@ -349,7 +349,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
         .back-button {
           margin-top: 1rem;
           padding: 0.5rem 1rem;
-          background: var(--color-primary);
+          background: var(--color-primary-400);
           color: white;
           border: none;
           border-radius: 4px;

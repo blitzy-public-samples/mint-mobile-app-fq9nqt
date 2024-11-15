@@ -16,6 +16,8 @@ import { Goal } from '../../types/models.types';
 import { useGoals } from '../../hooks/useGoals';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
+import MainLayout from '@/layouts/MainLayout';
+import DashboardLayout from '@/layouts/DashboardLayout';
 
 // Human tasks:
 // 1. Configure analytics tracking for goal interactions
@@ -39,11 +41,11 @@ const Goals: React.FC = () => {
 
   // Navigation handlers
   const handleCreateGoal = () => {
-    navigate('/goals/create');
+    navigate('/dashboard/goals/create');
   };
 
   const handleGoalClick = (goalId: string) => {
-    navigate(`/goals/${goalId}`);
+    navigate(`/dashboard/goals/${goalId}`);
   };
 
   // Calculate progress percentage for goal
@@ -72,6 +74,7 @@ const Goals: React.FC = () => {
   };
 
   return (
+    <DashboardLayout>
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       {/* Page header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -205,6 +208,7 @@ const Goals: React.FC = () => {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 };
 

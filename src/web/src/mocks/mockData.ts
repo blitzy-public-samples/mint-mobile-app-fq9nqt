@@ -1,4 +1,15 @@
-import { Account, Budget, Investment, Transaction } from '../types/models.types';
+import { Account, Budget, Investment, Transaction, Goal, User } from '../types/models.types';
+
+export const mockUser: User = {
+  id: 'usr_01',
+  email: 'john.smith@example.com',
+  firstName: 'John',
+  lastName: 'Smith',
+  passwordHash: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HsVqZFm',
+  createdAt: new Date('2023-09-15T08:30:00Z'),
+  updatedAt: new Date('2024-02-20T14:22:31Z'),
+  preferences: {}
+};
 
 export const mockAccounts: Account[] = [
   {
@@ -209,5 +220,58 @@ export const mockInvestments: Investment[] = [
     assetType: 'ETF',
     currentValue: 5381.25,
     return: 10.00
+  }
+];
+
+export const mockGoals: Goal[] = [
+  {
+    id: 'goal-1',
+    userId: 'usr_01',
+    name: 'Emergency Fund',
+    type: 'EMERGENCY_FUND',
+    targetAmount: 10000,
+    currentAmount: 5000,
+    targetDate: new Date('2024-12-31'),
+    status: 'IN_PROGRESS'
+  },
+  {
+    id: 'goal-2',
+    userId: 'usr_01',
+    name: 'Down Payment',
+    type: 'SAVINGS',
+    targetAmount: 50000,
+    currentAmount: 15000,
+    targetDate: new Date('2025-06-30'),
+    status: 'ON_TRACK'
+  },
+  {
+    id: 'goal-3',
+    userId: 'usr_01',
+    name: 'Student Loan',
+    type: 'DEBT_PAYMENT',
+    targetAmount: 25000,
+    currentAmount: 5000,
+    targetDate: new Date('2024-09-30'),
+    status: 'AT_RISK'
+  },
+  {
+    id: 'goal-4',
+    userId: 'usr_01',
+    name: 'Retirement Fund',
+    type: 'INVESTMENT',
+    targetAmount: 100000,
+    currentAmount: 0,
+    targetDate: new Date('2030-12-31'),
+    status: 'NOT_STARTED'
+  },
+  {
+    id: 'goal-5',
+    userId: 'usr_01',
+    name: 'Vacation Fund',
+    type: 'CUSTOM',
+    targetAmount: 5000,
+    currentAmount: 5000,
+    targetDate: new Date('2024-03-01'),
+    status: 'COMPLETED'
   }
 ]; 

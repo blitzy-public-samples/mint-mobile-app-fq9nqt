@@ -39,7 +39,7 @@ export type ChartType = 'line' | 'bar' | 'pie' | 'doughnut' | 'area' | 'radar';
  */
 export interface ButtonProps {
   variant: ButtonVariant;
-  size: ButtonSize;
+  size?: ButtonSize;
   disabled?: boolean;
   onClick: () => void;
   children: ReactNode;
@@ -52,12 +52,13 @@ export interface ButtonProps {
  * Props interface for card container component with loading state
  */
 export interface CardProps {
-  title: string;
+  title?: string;
   children: ReactNode;
   loading?: boolean;
   className?: string;
   testId?: string;
   elevated?: boolean;
+  onClick?: () => void;
 }
 
 /**

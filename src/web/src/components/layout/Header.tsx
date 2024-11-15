@@ -16,13 +16,7 @@ import classNames from 'classnames';
 import { useTheme } from '../../hooks/useTheme';
 import Button from '../common/Button';
 import Dropdown from '../common/Dropdown';
-
-// Interface for user object in HeaderProps
-interface User {
-  name: string;
-  email: string;
-  avatar?: string;
-}
+import { User } from '@/types/models.types';
 
 // Props interface for Header component
 interface HeaderProps {
@@ -132,12 +126,12 @@ export const Header: React.FC<HeaderProps> = ({
             {user.avatar ? (
               <img
                 src={user.avatar}
-                alt={`${user.name}'s avatar`}
+                alt={`${user.firstName} ${user.lastName}'s avatar`}
                 className="w-8 h-8 rounded-full"
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
-                {user.name.charAt(0)}
+                {user.firstName.charAt(0)}{user.lastName.charAt(0)}
               </div>
             )}
           </div>

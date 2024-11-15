@@ -51,6 +51,7 @@ export interface User {
   firstName: string;
   lastName: string;
   passwordHash: string;
+  avatar?: string;
   createdAt: Date;
   updatedAt: Date;
   preferences: Record<string, any>;

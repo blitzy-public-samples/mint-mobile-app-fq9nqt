@@ -248,7 +248,7 @@ const TransactionDetails: React.FC = () => {
         }
 
         .edit-button:hover {
-          background-color: var(--primary-color-dark);
+          background-color: var(--primary-color-700);
         }
 
         .edit-button:focus {

@@ -285,7 +285,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .table-row.clickable:focus {
-            outline: 2px solid var(--color-primary);
+            outline: 2px solid var(--color-primary-400);
             outline-offset: -2px;
           }
 
@@ -304,7 +304,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .sort-button:focus {
-            outline: 2px solid var(--color-primary);
+            outline: 2px solid var(--color-primary-400);
             outline-offset: 2px;
           }
 
@@ -349,7 +349,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .pagination-button:focus {
-            outline: 2px solid var(--color-primary);
+            outline: 2px solid var(--color-primary-400);
             outline-offset: 2px;
           }
 

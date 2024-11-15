@@ -9,6 +9,7 @@ import Button from '../../components/common/Button';
 import useBudgets from '../../hooks/useBudgets';
 import { formatCurrency } from '../../utils/currency.utils';
 import type { Budget } from '../../types/models.types';
+import DashboardLayout from '@/layouts/DashboardLayout';
 
 // Human tasks:
 // 1. Verify WCAG 2.1 compliance for budget table interactions
@@ -156,7 +157,7 @@ const Budgets: React.FC = () => {
    * Implements requirement: Budget Management UI - Data Organization
    */
   const handleSort = useCallback((key: string) => {
-    setSortDirection(prev => 
+    setSortDirection(prev =>
       sortKey === key ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'
     );
     setSortKey(key);
@@ -175,7 +176,7 @@ const Budgets: React.FC = () => {
       }
 
       if (aValue instanceof Date && bValue instanceof Date) {
-        return sortDirection === 'asc' 
+        return sortDirection === 'asc'
           ? aValue.getTime() - bValue.getTime()
           : bValue.getTime() - aValue.getTime();
       }
@@ -189,88 +190,90 @@ const Budgets: React.FC = () => {
   }, [budgets, sortKey, sortDirection]);
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Budget Management
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Create and manage your budgets to track spending
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={handleCreateBudget}
-          ariaLabel="Create new budget"
-        >
-          Create Budget
-        </Button>
-      </div>
-
-      {/* Spending Analysis Summary */}
-      {spendingAnalysis && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white rounded-lg shadow">
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600">Total Budget</p>
-            <p className="mt-1 text-xl font-semibold text-gray-900">
-              {formatCurrency(spendingAnalysis.spent + spendingAnalysis.remaining)}
+    <DashboardLayout>
+      <div className="space-y-6 p-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Budget Management
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Create and manage your budgets to track spending
             </p>
           </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600">Spent</p>
-            <p className="mt-1 text-xl font-semibold text-green-600">
-              {formatCurrency(spendingAnalysis.spent)}
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-600">Remaining</p>
-            <p className="mt-1 text-xl font-semibold text-blue-600">
-              {formatCurrency(spendingAnalysis.remaining)}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <div
-          role="alert"
-          className="p-4 bg-red-50 border border-red-200 rounded-md"
-        >
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* Budgets Table */}
-      <Table
-        data={sortedBudgets}
-        columns={columns}
-        loading={isLoading}
-        sortKey={sortKey}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        ariaLabel="Budgets table"
-        summary="List of all budgets with their amounts and status"
-        hoverable
-        striped
-      />
-
-      {/* Load More Button */}
-      {budgets.length > 0 && (
-        <div className="flex justify-center">
           <Button
-            variant="secondary"
-            onClick={loadMore}
-            disabled={isLoading}
-            ariaLabel="Load more budgets"
+            variant="primary"
+            onClick={handleCreateBudget}
+            ariaLabel="Create new budget"
           >
-            {isLoading ? 'Loading...' : 'Load More'}
+            Create Budget
           </Button>
         </div>
-      )}
-    </div>
+
+        {/* Spending Analysis Summary */}
+        {spendingAnalysis && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white rounded-lg shadow">
+            <div className="text-center">
+              <p className="text-sm font-medium text-gray-600">Total Budget</p>
+              <p className="mt-1 text-xl font-semibold text-gray-900">
+                {formatCurrency(spendingAnalysis.spent + spendingAnalysis.remaining)}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-gray-600">Spent</p>
+              <p className="mt-1 text-xl font-semibold text-green-600">
+                {formatCurrency(spendingAnalysis.spent)}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-gray-600">Remaining</p>
+              <p className="mt-1 text-xl font-semibold text-blue-600">
+                {formatCurrency(spendingAnalysis.remaining)}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div
+            role="alert"
+            className="p-4 bg-red-50 border border-red-200 rounded-md"
+          >
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Budgets Table */}
+        <Table
+          data={sortedBudgets}
+          columns={columns}
+          loading={isLoading}
+          sortKey={sortKey}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          ariaLabel="Budgets table"
+          summary="List of all budgets with their amounts and status"
+          hoverable
+          striped
+        />
+
+        {/* Load More Button */}
+        {budgets.length > 0 && (
+          <div className="flex justify-center">
+            <Button
+              variant="secondary"
+              onClick={loadMore}
+              disabled={isLoading}
+              ariaLabel="Load more budgets"
+            >
+              {isLoading ? 'Loading...' : 'Load More'}
+            </Button>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
   );
 };
 

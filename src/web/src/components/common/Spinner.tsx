@@ -22,22 +22,22 @@ interface SpinnerProps {
    * Size of the spinner: 'small' (16px), 'medium' (24px), or 'large' (32px)
    */
   size?: 'small' | 'medium' | 'large';
-  
+
   /**
    * Color of the spinner: 'primary', 'secondary', or any valid CSS color value
    */
   color?: string;
-  
+
   /**
    * Additional CSS classes to apply to the spinner
    */
   className?: string;
-  
+
   /**
    * Custom aria-label for screen readers
    */
   ariaLabel?: string;
-  
+
   /**
    * Test ID for component testing
    */
@@ -60,8 +60,8 @@ const Spinner: React.FC<SpinnerProps> = ({
 
   // Map color values to CSS variables
   const colorMap = {
-    primary: 'var(--color-primary)',
-    secondary: 'var(--color-secondary)',
+    primary: 'var(--color-primary-400)',
+    secondary: 'var(--color-secondary-400)',
   };
 
   // Determine final size and color values
@@ -70,39 +70,23 @@ const Spinner: React.FC<SpinnerProps> = ({
 
   // Styles for the spinner container
   const spinnerStyles: React.CSSProperties = {
-    display: 'inline-block',
     width: spinnerSize,
     height: spinnerSize,
-    borderRadius: '50%',
-    border: `2px solid ${spinnerColor}`,
-    borderTopColor: 'transparent',
-    animation: 'spin 0.8s linear infinite',
-    verticalAlign: 'middle',
+    borderTopColor: spinnerColor,
   };
 
-  // Keyframe animation for rotation
-  const keyframes = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
-
   return (
-    <>
-      <style>{keyframes}</style>
-      <div
-        className={`spinner ${className}`.trim()}
-        style={spinnerStyles}
-        role="status"
-        aria-label={ariaLabel}
-        data-testid={testId ? 'spinner' : undefined}
-      >
-        <span className="sr-only" style={{ display: 'none' }}>
-          {ariaLabel}
-        </span>
-      </div>
-    </>
+    <div
+      className={`spinner ${className}`.trim()}
+      style={spinnerStyles}
+      role="status"
+      aria-label={ariaLabel}
+      data-testid={testId ? 'spinner' : undefined}
+    >
+      <span className="sr-only" style={{ display: 'none' }}>
+        {ariaLabel}
+      </span>
+    </div>
   );
 };
 

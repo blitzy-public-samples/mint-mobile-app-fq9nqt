@@ -17,6 +17,7 @@ import { Outlet } from 'react-router-dom';
 import { Header } from '../components/layout/Header';
 import { Sidebar } from '../components/layout/Sidebar';
 import { useAuth } from '../contexts/AuthContext';
+import Navigation from '@/components/layout/Navigation';
 
 // Props interface
 interface DashboardLayoutProps {
@@ -31,7 +32,7 @@ interface DashboardLayoutProps {
  * - Mobile Responsive Considerations (Technical Specification/8.1.7)
  * - Accessibility Features (Technical Specification/8.1.8)
  */
-const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // Authentication state
   const { authState: { isAuthenticated, user } } = useAuth();
 
@@ -100,6 +101,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
     <div 
       className="dashboard-layout"
       role="main"
+      style={styles['.dashboard-layout']}
     >
       {/* Header component */}
       <Header
@@ -108,22 +110,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       />
 
       {/* Main content area with sidebar */}
-      <div className="dashboard-content">
+      <div className="dashboard-content" style={styles['.dashboard-content']}>
         {/* Sidebar navigation */}
-        <Sidebar
+        {/* <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           isMobile={isMobile}
-        />
+        /> */}
+        <Navigation />
 
         {/* Main content with proper ARIA landmarks */}
         <main 
           className="main-content"
           role="region"
           aria-label="Dashboard content"
+          style={styles['.main-content']}
         >
           {/* Render child routes */}
-          <Outlet />
+          {children}
         </main>
 
         {/* Mobile overlay */}
@@ -150,20 +154,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
 // CSS Modules
 const styles = {
   '.dashboard-layout': {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-    backgroundColor: 'var(--color-background)'
+    "display": 'flex',
+    "flex-direction": 'column',
+    "min-height": '100vh',
+    "background-color": 'var(--color-background)'
   },
   '.dashboard-content': {
     display: 'flex',
     flex: '1',
-    marginTop: '64px'
   },
   '.main-content': {
     flex: '1',
     padding: 'var(--spacing-6)',
-    overflowY: 'auto'
+    "overflow-y": 'auto'
   },
   '@media (max-width: 768px)': {
     '.main-content': {

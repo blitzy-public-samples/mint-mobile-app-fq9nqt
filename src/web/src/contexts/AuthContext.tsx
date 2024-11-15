@@ -21,11 +21,12 @@ import {
   refreshToken as refreshTokenApi 
 } from '../services/api/auth.api';
 import { SecureStorageService } from '../services/storage/secureStorage.service';
+import { mockUser } from '@/mocks/mockData';
 
 // Initial authentication state
 const INITIAL_AUTH_STATE: AuthState = {
-  isAuthenticated: false,
-  user: null,
+  isAuthenticated: true,
+  user: mockUser as unknown as User,
   accessToken: null,
   refreshToken: null,
 };

@@ -197,7 +197,7 @@ const Dashboard: React.FC = () => {
           padding: var(--spacing-2) var(--spacing-4);
           min-height: 44px;
           min-width: 44px;
-          background-color: var(--color-primary);
+          background-color: var(--color-primary-400);
           color: var(--color-text-inverse);
           border: none;
           border-radius: var(--border-radius-md);
@@ -206,11 +206,11 @@ const Dashboard: React.FC = () => {
         }
 
         .retry-button:hover {
-          background-color: var(--color-primary-dark);
+          background-color: var(--color-primary-700);
         }
 
         .retry-button:focus {
-          outline: 2px solid var(--color-primary);
+          outline: 2px solid var(--color-primary-400);
           outline-offset: 2px;
         }
 

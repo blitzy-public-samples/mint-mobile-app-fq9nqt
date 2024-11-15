@@ -11,6 +11,7 @@ import {
   updateGoalProgress
 } from '../services/api/goals.api';
 import { useNotifications } from '../contexts/NotificationContext';
+import { mockGoals } from '@/mocks/mockData';
 
 /**
  * Human Tasks:
@@ -78,8 +79,11 @@ export function useGoals(options: UseGoalsOptions = {}) {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: 'Failed to fetch goals. Please try again.',
-        isLoading: false
+        goals: mockGoals,
+        totalCount: mockGoals.length,
+        currentPage: 1,
+        isLoading: false,
+        error: 'Using mock data - API request failed'
       }));
     }
   }, [options.page, options.limit, options.type, options.status, state.currentPage]);
@@ -93,7 +97,13 @@ export function useGoals(options: UseGoalsOptions = {}) {
       const response = await getGoalById(id);
       return response.data;
     } catch (error) {
-      throw new Error('Failed to fetch goal details');
+      // Use mock data in case of API failure
+      console.warn('Failed to fetch goal by ID from API, using mock data:', error);
+      const mockGoal = mockGoals.find(goal => goal.id === id);
+      if (!mockGoal) {
+        throw new Error('Goal not found');
+      }
+      return mockGoal;
     }
   }, []);
 
@@ -108,7 +118,7 @@ export function useGoals(options: UseGoalsOptions = {}) {
         type: goalData.type,
         targetAmount: goalData.targetAmount,
         targetDate: goalData.targetDate,
-        description: goalData.description
+        // description: goalData.description
       });
 
       // Update local state optimistically

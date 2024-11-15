@@ -24,6 +24,10 @@ import TransactionDetails from '../pages/transactions/TransactionDetails';
 import BudgetDetails from '../pages/budgets/BudgetDetails';
 import Investments from '@/pages/investments/Investments';
 import InvestmentDetails from '@/pages/investments/InvestmentDetails';
+import Goals from '@/pages/goals/Goals';
+import GoalDetails from '@/pages/goals/GoalDetails';
+import CreateGoal from '@/pages/goals/CreateGoal';
+import CreateBudget from '@/pages/budgets/CreateBudget';
 
 // Human tasks:
 // 1. Verify route access policies are configured in authentication service
@@ -34,7 +38,7 @@ import InvestmentDetails from '@/pages/investments/InvestmentDetails';
 /**
  * Props interface for DashboardRoutes component
  */
-interface DashboardRoutesProps {}
+interface DashboardRoutesProps { }
 
 /**
  * DashboardRoutes component that defines the routing structure for the dashboard section
@@ -50,7 +54,7 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="/dashboard"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <Dashboard />
+          <Dashboard />
           // </PrivateRoute>
         }
       />
@@ -60,7 +64,7 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="/accounts/:accountId"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <AccountDetails />
+          <AccountDetails />
           // </PrivateRoute>
         }
       />
@@ -70,7 +74,17 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="/accounts/*"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <AccountsPage />
+          <AccountsPage />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Budget creation Route */}
+      <Route
+        path="/budgets/create"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+          <CreateBudget />
           // </PrivateRoute>
         }
       />
@@ -80,7 +94,7 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="/budgets/:id"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <BudgetDetails />
+          <BudgetDetails />
           // </PrivateRoute>
         }
       />
@@ -90,7 +104,7 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="/budgets/*"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <Budgets />
+          <Budgets />
           // </PrivateRoute>
         }
       />
@@ -100,7 +114,17 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="/transactions/:id"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <TransactionDetails />
+          <TransactionDetails />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Investment Details Route */}
+      <Route
+        path="/investments/:id"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+          <InvestmentDetails />
           // </PrivateRoute>
         }
       />
@@ -110,17 +134,37 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="/investments/*"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <Investments />
+          <Investments />
           // </PrivateRoute>
         }
       />
 
-      {/* Transaction Details Route */}
+      {/* Goal creation Route */}
       <Route
-        path="/investments/:id"
+        path="/goals/create"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <InvestmentDetails />
+          <CreateGoal />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Goal Details Route */}
+      <Route
+        path="/goals/:id"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+          <GoalDetails />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Goals Management Route */}
+      <Route
+        path="/goals/*"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+          <Goals />
           // </PrivateRoute>
         }
       />
@@ -130,7 +174,7 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         path="*"
         element={
           // <PrivateRoute redirectPath="/auth/login">
-            <Dashboard />
+          <Dashboard />
           // </PrivateRoute>
         }
       />

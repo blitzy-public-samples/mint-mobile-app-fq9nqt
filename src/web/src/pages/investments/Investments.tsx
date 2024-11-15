@@ -14,6 +14,8 @@ import { useInvestments } from '../../hooks/useInvestments';
 import DonutChart from '../../components/charts/DonutChart';
 import Spinner from '../../components/common/Spinner';
 import { Investment } from '@/types/models.types';
+import DashboardLayout from '@/layouts/DashboardLayout';
+import { useNavigate } from 'react-router-dom';
 
 // Asset allocation color mapping
 const ASSET_COLORS = {
@@ -48,9 +50,11 @@ interface AssetAllocationData {
  * - User Interface Design (Technical Specification/8.1 User Interface Design)
  */
 const Investments: React.FC = () => {
+  const navigate = useNavigate();
+
   // Initialize investment data and operations
   const { investments, loading, error, syncing, fetchInvestments, syncInvestments } = useInvestments();
-  
+
   // Local state for portfolio metrics
   const [metrics, setMetrics] = useState<PortfolioMetrics>({
     totalValue: 0,
@@ -106,7 +110,7 @@ const Investments: React.FC = () => {
   };
 
   // Memoized asset allocation data
-  const assetAllocationData = useMemo(() => 
+  const assetAllocationData = useMemo(() =>
     prepareAssetAllocationData(investments),
     [investments]
   );
@@ -123,6 +127,10 @@ const Investments: React.FC = () => {
     }
   }, [investments]);
 
+  function handleInvestmentClick(id: string) {
+    navigate(`/dashboard/investments/${id}`);
+  }
+
   // Handle sync button click
   const handleSync = async () => {
     try {
@@ -135,131 +143,137 @@ const Investments: React.FC = () => {
   // Render loading state
   if (loading) {
     return (
-      <div className="investments-loading" role="status">
-        <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
-      </div>
+      <DashboardLayout>
+        <div className="investments-loading" role="status">
+          <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   // Render error state
   if (error) {
     return (
-      <div className="investments-error" role="alert">
-        <h2>Error Loading Investments</h2>
-        <p>{error.message}</p>
-        <button onClick={fetchInvestments} className="retry-button">
-          Retry
-        </button>
-      </div>
+      <DashboardLayout>
+        <div className="investments-error" role="alert">
+          <h2>Error Loading Investments</h2>
+          <p>{error.message}</p>
+          <button onClick={fetchInvestments} className="retry-button">
+            Retry
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="investments-container">
-      {/* Portfolio Overview Section */}
-      <section className="portfolio-overview" aria-label="Portfolio Overview">
-        <div className="portfolio-header">
-          <h1>Investment Portfolio</h1>
-          <button 
-            onClick={handleSync} 
-            disabled={syncing}
-            className="sync-button"
-            aria-label={syncing ? "Syncing investments" : "Sync investments"}
-          >
-            {syncing ? <Spinner size="small" color="white" /> : 'Sync'}
-          </button>
-        </div>
+    <DashboardLayout>
+      <div className="investments-container">
+        {/* Portfolio Overview Section */}
+        <section className="portfolio-overview" aria-label="Portfolio Overview">
+          <div className="portfolio-header">
+            <h1>Investment Portfolio</h1>
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="sync-button"
+              aria-label={syncing ? "Syncing investments" : "Sync investments"}
+            >
+              {syncing ? <Spinner size="small" color="white" /> : 'Sync'}
+            </button>
+          </div>
 
-        <div className="portfolio-metrics">
-          <div className="metric-card">
-            <h3>Total Value</h3>
-            <p className="value">${metrics.totalValue.toLocaleString()}</p>
+          <div className="portfolio-metrics">
+            <div className="metric-card">
+              <h3>Total Value</h3>
+              <p className="value">${metrics.totalValue.toLocaleString()}</p>
+            </div>
+            <div className="metric-card">
+              <h3>Total Gain/Loss</h3>
+              <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
+                ${Math.abs(metrics.totalGainLoss).toLocaleString()}
+                {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
+              </p>
+            </div>
+            <div className="metric-card">
+              <h3>Return</h3>
+              <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
+                {metrics.percentageReturn.toFixed(2)}%
+                {metrics.percentageReturn >= 0 ? ' ▲' : ' ▼'}
+              </p>
+            </div>
           </div>
-          <div className="metric-card">
-            <h3>Total Gain/Loss</h3>
-            <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
-              ${Math.abs(metrics.totalGainLoss).toLocaleString()}
-              {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
-            </p>
-          </div>
-          <div className="metric-card">
-            <h3>Return</h3>
-            <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
-              {metrics.percentageReturn.toFixed(2)}%
-              {metrics.percentageReturn >= 0 ? ' ▲' : ' ▼'}
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Asset Allocation Section */}
-      <section className="asset-allocation" aria-label="Asset Allocation">
-        <h2>Asset Allocation</h2>
-        <div className="chart-container">
-          <DonutChart
-            data={assetAllocationData}
-            height={300}
-            options={{
-              plugins: {
-                legend: {
-                  position: 'bottom',
-                  labels: {
-                    padding: 20,
-                    usePointStyle: true
-                  }
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (context: any) => {
-                      const value = context.raw as number;
-                      return `${context.label}: ${value.toFixed(1)}%`;
+        {/* Asset Allocation Section */}
+        <section className="asset-allocation" aria-label="Asset Allocation">
+          <h2>Asset Allocation</h2>
+          <div className="chart-container">
+            <DonutChart
+              data={assetAllocationData}
+              height={300}
+              options={{
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                    labels: {
+                      padding: 20,
+                      usePointStyle: true
+                    }
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: (context: any) => {
+                        const value = context.raw as number;
+                        return `${context.label}: ${value.toFixed(1)}%`;
+                      }
                     }
                   }
                 }
-              }
-            }}
-            ariaLabel="Asset allocation donut chart"
-          />
-        </div>
-      </section>
+              }}
+              ariaLabel="Asset allocation donut chart"
+            />
+          </div>
+        </section>
 
-      {/* Holdings List Section */}
-      <section className="holdings-list" aria-label="Investment Holdings">
-        <h2>Holdings</h2>
-        <div className="holdings-table">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Asset</th>
-                <th scope="col">Type</th>
-                <th scope="col">Value</th>
-                <th scope="col">Return</th>
-              </tr>
-            </thead>
-            <tbody>
-              {investments.map((investment) => (
-                <tr key={investment.id}>
-                  <td>{investment.symbol}</td>
-                  <td>{investment.assetType}</td>
-                  <td>${investment.currentValue.toLocaleString()}</td>
-                  <td className={investment.return >= 0 ? 'positive' : 'negative'}>
-                    {investment.return.toFixed(2)}%
-                    {investment.return >= 0 ? ' ▲' : ' ▼'}
-                  </td>
+        {/* Holdings List Section */}
+        <section className="holdings-list" aria-label="Investment Holdings">
+          <h2>Holdings</h2>
+          <div className="holdings-table">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Asset</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Return</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              </thead>
+              <tbody>
+                {investments.map((investment) => (
+                  <tr key={investment.id} onClick={() => handleInvestmentClick(investment.id)} style={{ cursor: 'pointer' }}>
+                    <td>{investment.symbol}</td>
+                    <td>{investment.assetType}</td>
+                    <td>${investment.currentValue.toLocaleString()}</td>
+                    <td className={investment.return >= 0 ? 'positive' : 'negative'}>
+                      {investment.return.toFixed(2)}%
+                      {investment.return >= 0 ? ' ▲' : ' ▼'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      {/* Last Updated Information */}
-      <footer className="investments-footer">
-        <p className="last-updated">
-          Last updated: {metrics.lastUpdated.toLocaleString()}
-        </p>
-      </footer>
-    </div>
+        {/* Last Updated Information */}
+        <footer className="investments-footer">
+          <p className="last-updated">
+            Last updated: {metrics.lastUpdated.toLocaleString()}
+          </p>
+        </footer>
+      </div>
+    </DashboardLayout>
   );
 };
 

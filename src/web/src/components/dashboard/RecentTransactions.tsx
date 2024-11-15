@@ -170,7 +170,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
             cursor: pointer;
           }
           .retry-button:hover {
-            background-color: var(--color-error-dark);
+            background-color: var(--color-error-700);
           }
           .retry-button:focus {
             outline: 2px solid var(--color-error);

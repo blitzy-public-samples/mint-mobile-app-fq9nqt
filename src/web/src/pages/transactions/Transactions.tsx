@@ -187,7 +187,7 @@ const TransactionsPage: React.FC = () => {
 
         .export-button {
           padding: var(--spacing-2) var(--spacing-4);
-          background-color: var(--color-primary);
+          background-color: var(--color-primary-400);
           color: var(--color-white);
           border: none;
           border-radius: var(--radius-md);
@@ -201,7 +201,7 @@ const TransactionsPage: React.FC = () => {
         }
 
         .export-button:focus {
-          outline: 2px solid var(--color-primary);
+          outline: 2px solid var(--color-primary-400);
           outline-offset: 2px;
         }
 
