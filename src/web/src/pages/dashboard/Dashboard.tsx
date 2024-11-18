@@ -20,6 +20,7 @@ import BudgetOverview from '../../components/dashboard/BudgetOverview';
 import  RecentTransactions from '../../components/dashboard/RecentTransactions';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../hooks/useAuth';
+import InvestmentSummary from '../../components/dashboard/InvestmentSummary';
 
 // Human tasks:
 // 1. Verify color contrast ratios meet WCAG 2.1 AA standards
@@ -30,7 +31,7 @@ import { useAuth } from '../../hooks/useAuth';
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Check authentication status on mount
@@ -45,13 +46,13 @@ const Dashboard: React.FC = () => {
   // Handle account click navigation
   const handleAccountClick = (accountId: string) => {
     if (!accountId) return;
-    navigate(`/accounts/${accountId}`);
+    navigate(`/dashboard/accounts/${accountId}`);
   };
 
   // Handle transaction click navigation
   const handleTransactionClick = (transactionId: string) => {
     if (!transactionId) return;
-    navigate(`/transactions/${transactionId}`);
+    navigate(`/dashboard/transactions/${transactionId}`);
   };
 
   if (loading) {
@@ -137,12 +138,19 @@ const Dashboard: React.FC = () => {
               onTransactionClick={handleTransactionClick}
             />
           </section>
+
+          <section 
+            className="dashboard-section"
+            aria-label="Investments section"
+          >
+            <InvestmentSummary/>
+          </section>
         </div>
       </div>
 
       <style jsx>{`
         .dashboard-container {
-          padding: var(--spacing-4);
+          // padding: var(--spacing-4);
           max-width: 1200px;
           margin: 0 auto;
           min-height: 100vh;
@@ -227,9 +235,9 @@ const Dashboard: React.FC = () => {
 
         /* Desktop breakpoint */
         @media (min-width: 1024px) {
-          .dashboard-container {
-            padding: var(--spacing-6);
-          }
+          // .dashboard-container {
+          //   padding: var(--spacing-6);
+          // }
 
           .dashboard-grid {
             grid-template-columns: repeat(3, 1fr);

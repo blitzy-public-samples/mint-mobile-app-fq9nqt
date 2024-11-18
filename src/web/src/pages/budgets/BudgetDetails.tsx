@@ -56,9 +56,7 @@ const BudgetDetails: React.FC = () => {
     isLoading,
     error,
     updateBudget,
-    deleteBudget,
-    spendingAnalysis
-  } = useBudgets();
+    deleteBudget } = useBudgets();
 
   // Local state for current budget and edit mode
   const [currentBudget, setCurrentBudget] = useState<Budget | null>(null);
@@ -220,26 +218,6 @@ const BudgetDetails: React.FC = () => {
             })}
           </div>
         </div>
-
-        {/* Spending Analysis */}
-        {spendingAnalysis && (
-          <div className="bg-white rounded-lg shadow p-6 mt-8">
-            <h2 className="text-xl font-semibold mb-4">Spending Analysis</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {spendingAnalysis.categories.map(category => (
-                <div key={category.name} className="bg-gray-50 p-4 rounded">
-                  <h3 className="font-medium mb-2">{category.name}</h3>
-                  <p className="text-2xl font-bold">
-                    ${category.spent.toLocaleString()}
-                  </p>
-                  <p className="text-gray-600">
-                    {category.percentage.toFixed(1)}% of total spending
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Edit Modal */}
         {isEditing && currentBudget && (

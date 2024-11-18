@@ -15,6 +15,7 @@ import { Account, Transaction } from '../../types/models.types';
 import { getAccountById, syncAccount } from '../../services/api/accounts.api';
 import TransactionList from '../../components/transactions/TransactionList';
 import AreaChart from '../../components/charts/AreaChart';
+import DashboardLayout from '@/layouts/DashboardLayout';
 
 // Human Tasks:
 // 1. Configure error monitoring service integration
@@ -23,7 +24,7 @@ import AreaChart from '../../components/charts/AreaChart';
 // 4. Test real-time sync performance with different network conditions
 // 5. Review and adjust error message content with UX team
 
-interface AccountDetailsProps {}
+interface AccountDetailsProps { }
 
 const AccountDetails: React.FC<AccountDetailsProps> = () => {
   const { accountId } = useParams<{ accountId: string }>();
@@ -45,7 +46,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
       setError(null);
       const response = await getAccountById(accountId);
       setAccount(response.data);
-      
+
       // Simulate balance history data (replace with actual API call)
       const today = new Date();
       const history = Array.from({ length: 30 }, (_, i) => ({
@@ -108,7 +109,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
       <div className="account-details-error" role="alert">
         <h2>Error Loading Account</h2>
         <p>{error}</p>
-        <button 
+        <button
           onClick={fetchAccountDetails}
           className="retry-button"
         >
@@ -123,7 +124,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
       <div className="account-details-not-found" role="alert">
         <h2>Account Not Found</h2>
         <p>The requested account could not be found.</p>
-        <button 
+        <button
           onClick={() => navigate('/dashboard/accounts')}
           className="back-button"
         >
@@ -134,46 +135,47 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
   }
 
   return (
-    <div className="account-details">
-      {/* Account Summary Section */}
-      <section className="account-summary">
-        <div className="account-header">
-          <h1>Account Details</h1>
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="sync-button"
-            aria-busy={syncing}
-          >
-            {syncing ? 'Syncing...' : 'Sync Account'}
-          </button>
-        </div>
+    <DashboardLayout>
+      <div className="account-details">
+        {/* Account Summary Section */}
+        <section className="account-summary">
+          <div className="account-header">
+            <h1>Account Details</h1>
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="sync-button"
+              aria-busy={syncing}
+            >
+              {syncing ? 'Syncing...' : 'Sync Account'}
+            </button>
+          </div>
 
-        <div className="account-info">
-          <div className="info-group">
-            <label>Account Type</label>
-            <span>{account.accountType}</span>
+          <div className="account-info">
+            <div className="info-group">
+              <label>Account Type</label>
+              <span>{account.accountType}</span>
+            </div>
+            <div className="info-group">
+              <label>Current Balance</label>
+              <span className="balance">
+                {account.balance.toLocaleString('en-US', {
+                  style: 'currency',
+                  currency: account.currency
+                })}
+              </span>
+            </div>
+            <div className="info-group">
+              <label>Last Synced</label>
+              <span>
+                {new Date(account.lastSynced).toLocaleString()}
+              </span>
+            </div>
           </div>
-          <div className="info-group">
-            <label>Current Balance</label>
-            <span className="balance">
-              {account.balance.toLocaleString('en-US', {
-                style: 'currency',
-                currency: account.currency
-              })}
-            </span>
-          </div>
-          <div className="info-group">
-            <label>Last Synced</label>
-            <span>
-              {new Date(account.lastSynced).toLocaleString()}
-            </span>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Balance History Chart */}
-      {/* <section className="balance-history">
+        {/* Balance History Chart */}
+        {/* <section className="balance-history">
         <h2>Balance History</h2>
         <div className="chart-container">
           <AreaChart
@@ -223,19 +225,19 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
         </div>
       </section> */}
 
-      {/* Transactions Section */}
-      <section className="transactions">
-        <h2>Recent Transactions</h2>
-        <TransactionList
-          accountId={accountId}
-          pageSize={10}
-          onTransactionClick={handleTransactionClick}
-          className="transactions-list"
-          ariaLabel={`Recent transactions for ${account.accountType} account`}
-        />
-      </section>
+        {/* Transactions Section */}
+        <section className="transactions">
+          <h2>Recent Transactions</h2>
+          <TransactionList
+            accountId={accountId}
+            pageSize={10}
+            onTransactionClick={handleTransactionClick}
+            className="transactions-list"
+            ariaLabel={`Recent transactions for ${account.accountType} account`}
+          />
+        </section>
 
-      <style jsx>{`
+        <style jsx>{`
         .account-details {
           padding: 2rem;
           max-width: 1200px;
@@ -394,7 +396,8 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

@@ -19,7 +19,7 @@ import { ApiRequestOptions } from '../types/api.types';
  */
 export const API_CONFIG = {
   BASE_URL: process.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  TIMEOUT: 30000,
+  TIMEOUT: 1500,
   WITH_CREDENTIALS: true,
   RETRY_ATTEMPTS: 0,
   RETRY_DELAY: 1000,

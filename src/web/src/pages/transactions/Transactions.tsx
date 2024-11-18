@@ -1,11 +1,14 @@
 // @version: react ^18.0.0
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TransactionList, TransactionListProps } from '../../components/transactions/TransactionList';
-import { TransactionFilters } from '../../components/transactions/TransactionFilters';
+import TransactionList from '../../components/transactions/TransactionList';
+import TransactionFilters from '../../components/transactions/TransactionFilters';
 import { useTransactions } from '../../hooks/useTransactions';
 import { Transaction } from '../../types/models.types';
-import styles from './Transactions.module.css';
+import DashboardLayout from '@/layouts/DashboardLayout';
+// import styles from './Transactions.module.css';
+
+const styles = {};
 
 // Human tasks:
 // 1. Verify WCAG 2.1 AA compliance for all interactive elements
@@ -22,7 +25,7 @@ import styles from './Transactions.module.css';
  */
 const TransactionsPage: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // Initialize filter state
   const [filters, setFilters] = useState<TransactionPageFilters>({
     startDate: null,
@@ -53,7 +56,7 @@ const TransactionsPage: React.FC = () => {
   // Handle filter changes with debouncing
   const handleFilterChange = useCallback((newFilters: TransactionPageFilters) => {
     setFilters(newFilters);
-    
+
     // Update URL query parameters
     const searchParams = new URLSearchParams();
     if (newFilters.startDate) searchParams.set('startDate', newFilters.startDate.toISOString());
@@ -62,7 +65,7 @@ const TransactionsPage: React.FC = () => {
     if (newFilters.searchTerm) searchParams.set('search', newFilters.searchTerm);
     if (newFilters.amountRange.min) searchParams.set('minAmount', newFilters.amountRange.min.toString());
     if (newFilters.amountRange.max) searchParams.set('maxAmount', newFilters.amountRange.max.toString());
-    
+
     window.history.replaceState(null, '', `?${searchParams.toString()}`);
 
     // Announce filter changes to screen readers
@@ -79,7 +82,7 @@ const TransactionsPage: React.FC = () => {
 
   // Handle transaction row click navigation
   const handleTransactionClick = useCallback((transaction: Transaction) => {
-    navigate(`/transactions/${transaction.id}`, {
+    navigate(`/dashboard/transactions/${transaction.id}`, {
       state: { transaction }
     });
   }, [navigate]);
@@ -94,7 +97,7 @@ const TransactionsPage: React.FC = () => {
         },
         body: JSON.stringify(filters)
       });
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -128,49 +131,50 @@ const TransactionsPage: React.FC = () => {
   }, [pageSize, fetchTransactions]);
 
   return (
-    <main className={styles['transactions-page']} role="main">
-      <header className={styles.header}>
-        <h1>Transactions</h1>
-        <button
-          onClick={handleExport}
-          className={styles['export-button']}
-          aria-label="Export transactions"
-        >
-          Export
-        </button>
-      </header>
-
-      <section className={styles.content}>
-        <TransactionFilters
-          onFilterChange={handleFilterChange}
-          initialFilters={filters}
-          className={styles.filters}
-          ariaLabel="Transaction filters"
-        />
-
-        {error ? (
-          <div 
-            className={styles.error} 
-            role="alert"
-            aria-live="assertive"
+    <DashboardLayout>
+      <main className={styles['transactions-page']} role="main">
+        <header className={styles.header}>
+          <h1>Transactions</h1>
+          <button
+            onClick={handleExport}
+            className={styles['export-button']}
+            aria-label="Export transactions"
           >
-            Failed to load transactions: {error}
-          </div>
-        ) : (
-          <TransactionList
-            transactions={transactions}
-            loading={loading}
-            totalCount={totalCount}
-            hasMore={hasMore}
-            onTransactionClick={handleTransactionClick}
-            className={styles['transaction-list']}
-            pageSize={pageSize}
-            ariaLabel="Transactions list"
-          />
-        )}
-      </section>
+            Export
+          </button>
+        </header>
 
-      <style jsx>{`
+        <section className={styles.content}>
+          <TransactionFilters
+            onFilterChange={handleFilterChange}
+            initialFilters={filters}
+            className={styles.filters}
+            ariaLabel="Transaction filters"
+          />
+
+          {error ? (
+            <div
+              className={styles.error}
+              role="alert"
+              aria-live="assertive"
+            >
+              Failed to load transactions: {error}
+            </div>
+          ) : (
+            <TransactionList
+              transactions={transactions}
+              loading={loading}
+              totalCount={totalCount}
+              hasMore={hasMore}
+              onTransactionClick={handleTransactionClick}
+              className={styles['transaction-list']}
+              pageSize={pageSize}
+              ariaLabel="Transactions list"
+            />
+          )}
+        </section>
+
+        <style jsx>{`
         .transactions-page {
           padding: var(--spacing-4);
           max-width: 1200px;
@@ -268,7 +272,8 @@ const TransactionsPage: React.FC = () => {
           }
         }
       `}</style>
-    </main>
+      </main>
+    </DashboardLayout>
   );
 };
 

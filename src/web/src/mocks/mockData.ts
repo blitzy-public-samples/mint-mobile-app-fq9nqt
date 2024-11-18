@@ -17,7 +17,7 @@ export const mockAccounts: Account[] = [
     userId: 'user_001',
     accountType: 'CHECKING',
     balance: 2547.83,
-    institutionId: 'ins_chase',
+    institutionId: 'Chase',
     currency: 'USD',
     lastSynced: new Date(),
     isActive: true
@@ -27,7 +27,7 @@ export const mockAccounts: Account[] = [
     userId: 'user_001',
     accountType: 'SAVINGS',
     balance: 15000.00,
-    institutionId: 'ins_chase',
+    institutionId: 'Chase',
     currency: 'USD',
     lastSynced: new Date(),
     isActive: true
@@ -37,7 +37,7 @@ export const mockAccounts: Account[] = [
     userId: 'user_001',
     accountType: 'CREDIT',
     balance: -1250.45,
-    institutionId: 'ins_amex',
+    institutionId: 'Amex',
     currency: 'USD',
     lastSynced: new Date(),
     isActive: true

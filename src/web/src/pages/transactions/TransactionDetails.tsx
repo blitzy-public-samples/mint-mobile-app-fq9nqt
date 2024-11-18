@@ -16,6 +16,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Transaction } from '../../types/models.types';
 import { TransactionForm } from '../../components/transactions/TransactionForm';
 import { getTransactionById, updateTransaction } from '../../services/api/transactions.api';
+import { mockTransactions } from '@/mocks/mockData';
+import DashboardLayout from '@/layouts/DashboardLayout';
 
 /**
  * Interface for component state management
@@ -51,11 +53,25 @@ const useTransactionDetails = (transactionId: string) => {
           isLoading: false
         }));
       } catch (error) {
+        const transaction = mockTransactions.find(t => t.id === transactionId);
+        if (!transaction) {
+          setState(prev => ({
+            ...prev,
+            isLoading: false,
+            error: 'Transaction not found'
+          }));
+          return;
+        }
         setState(prev => ({
           ...prev,
-          isLoading: false,
-          error: 'Failed to load transaction details. Please try again.'
+          transaction,
+          isLoading: false
         }));
+        // setState(prev => ({
+        //   ...prev,
+        //   isLoading: false,
+        //   error: 'Failed to load transaction details. Please try again.'
+        // }));
       }
     };
 
@@ -118,7 +134,7 @@ const TransactionDetails: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div 
+      <div
         className="loading-container"
         role="alert"
         aria-busy="true"
@@ -130,7 +146,7 @@ const TransactionDetails: React.FC = () => {
 
   if (error) {
     return (
-      <div 
+      <div
         className="error-container"
         role="alert"
         aria-live="polite"
@@ -149,7 +165,7 @@ const TransactionDetails: React.FC = () => {
 
   if (!transaction) {
     return (
-      <div 
+      <div
         className="not-found-container"
         role="alert"
       >
@@ -166,58 +182,59 @@ const TransactionDetails: React.FC = () => {
   }
 
   return (
-    <div className="transaction-details-container">
-      <header className="details-header">
-        <h1 id="page-title">Transaction Details</h1>
-        {!isEditing && (
-          <button
-            onClick={() => setEditing(true)}
-            className="edit-button"
-            aria-label="Edit transaction"
+    <DashboardLayout>
+      <div className="transaction-details-container">
+        <header className="details-header">
+          <h1 id="page-title">Transaction Details</h1>
+          {!isEditing && (
+            <button
+              onClick={() => setEditing(true)}
+              className="edit-button"
+              aria-label="Edit transaction"
+            >
+              Edit
+            </button>
+          )}
+        </header>
+
+        {isEditing ? (
+          <TransactionForm
+            initialData={transaction}
+            onSubmit={handleUpdateTransaction}
+            onCancel={() => setEditing(false)}
+            isLoading={isLoading}
+          />
+        ) : (
+          <div
+            className="details-view"
+            role="region"
+            aria-labelledby="page-title"
           >
-            Edit
-          </button>
+            <dl className="details-list">
+              <div className="detail-item">
+                <dt>Description</dt>
+                <dd>{transaction.description}</dd>
+              </div>
+              <div className="detail-item">
+                <dt>Amount</dt>
+                <dd>{new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(transaction.amount)}</dd>
+              </div>
+              <div className="detail-item">
+                <dt>Date</dt>
+                <dd>{new Date(transaction.date).toLocaleDateString()}</dd>
+              </div>
+              <div className="detail-item">
+                <dt>Category</dt>
+                <dd>{transaction.categoryId}</dd>
+              </div>
+            </dl>
+          </div>
         )}
-      </header>
 
-      {isEditing ? (
-        <TransactionForm
-          initialData={transaction}
-          onSubmit={handleUpdateTransaction}
-          onCancel={() => setEditing(false)}
-          isLoading={isLoading}
-        />
-      ) : (
-        <div 
-          className="details-view"
-          role="region"
-          aria-labelledby="page-title"
-        >
-          <dl className="details-list">
-            <div className="detail-item">
-              <dt>Description</dt>
-              <dd>{transaction.description}</dd>
-            </div>
-            <div className="detail-item">
-              <dt>Amount</dt>
-              <dd>{new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(transaction.amount)}</dd>
-            </div>
-            <div className="detail-item">
-              <dt>Date</dt>
-              <dd>{new Date(transaction.date).toLocaleDateString()}</dd>
-            </div>
-            <div className="detail-item">
-              <dt>Category</dt>
-              <dd>{transaction.categoryId}</dd>
-            </div>
-          </dl>
-        </div>
-      )}
-
-      <style jsx>{`
+        <style jsx>{`
         .transaction-details-container {
           max-width: 800px;
           margin: 0 auto;
@@ -317,7 +334,8 @@ const TransactionDetails: React.FC = () => {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

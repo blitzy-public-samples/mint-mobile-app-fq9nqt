@@ -18,6 +18,7 @@ import { Header } from '../components/layout/Header';
 import { Sidebar } from '../components/layout/Sidebar';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '@/components/layout/Navigation';
+import './dashboard-layout.css';
 
 // Props interface
 interface DashboardLayoutProps {
@@ -65,7 +66,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
    */
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
-    
+
     const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
       setIsMobile(e.matches);
       if (!e.matches && isSidebarOpen) {
@@ -98,42 +99,42 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [isSidebarOpen]);
 
   return (
-    <div 
+    <div
       className="dashboard-layout"
       role="main"
-      style={styles['.dashboard-layout']}
     >
       {/* Header component */}
-      <Header
+      {/* <Header
         isAuthenticated={isAuthenticated}
         user={user}
-      />
+      /> */}
 
       {/* Main content area with sidebar */}
-      <div className="dashboard-content" style={styles['.dashboard-content']}>
+      <div className="dashboard-content">
         {/* Sidebar navigation */}
         {/* <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           isMobile={isMobile}
         /> */}
-        <Navigation />
+
+        {!isMobile && <Navigation />}
 
         {/* Main content with proper ARIA landmarks */}
-        <main 
+        <main
           className="main-content"
           role="region"
-          aria-label="Dashboard content"
-          style={styles['.main-content']}
-        >
+          aria-label="Dashboard content">
           {/* Render child routes */}
           {children}
         </main>
 
+        {isMobile && <Navigation />}
+
         {/* Mobile overlay */}
         {isMobile && isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-20"
+            className="inset-0 bg-black bg-opacity-50 z-20"
             onClick={() => setIsSidebarOpen(false)}
             aria-hidden="true"
           />
@@ -149,30 +150,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </a>
     </div>
   );
-};
-
-// CSS Modules
-const styles = {
-  '.dashboard-layout': {
-    "display": 'flex',
-    "flex-direction": 'column',
-    "min-height": '100vh',
-    "background-color": 'var(--color-background)'
-  },
-  '.dashboard-content': {
-    display: 'flex',
-    flex: '1',
-  },
-  '.main-content': {
-    flex: '1',
-    padding: 'var(--spacing-6)',
-    "overflow-y": 'auto'
-  },
-  '@media (max-width: 768px)': {
-    '.main-content': {
-      padding: 'var(--spacing-4)'
-    }
-  }
 };
 
 export default DashboardLayout;

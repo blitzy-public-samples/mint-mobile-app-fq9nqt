@@ -27,7 +27,7 @@ import { useTransactions } from '../../hooks/useTransactions';
 interface RecentTransactionsProps {
   limit?: number;
   className?: string;
-  onTransactionClick?: (transaction: Transaction) => void;
+  onTransactionClick?: (transactionId: string) => void;
 }
 
 const formatAmount = (amount: number): React.ReactNode => {
@@ -132,7 +132,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
 
   // Handle row click with keyboard support
   const handleRowClick = useCallback((transaction: Transaction) => {
-    onTransactionClick?.(transaction);
+    onTransactionClick?.(transaction.id);
   }, [onTransactionClick]);
 
   if (error) {

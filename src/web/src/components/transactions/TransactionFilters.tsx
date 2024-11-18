@@ -1,11 +1,13 @@
 // @version: react ^18.0.0
 import React, { useState, useCallback } from 'react';
 import { Transaction, TransactionCategory } from '../../types/models.types';
-import { Dropdown } from '../common/Dropdown';
+import Dropdown from '../common/Dropdown';
 import { formatDate, getDateRange } from '../../utils/date.utils';
 
+const styles = {};
+
 // Styles are defined in the CSS modules specification
-import styles from './TransactionFilters.module.css';
+// import styles from './TransactionFilters.module.css';
 
 /**
  * Interface defining available transaction filters

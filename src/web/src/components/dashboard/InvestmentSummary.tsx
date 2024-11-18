@@ -227,7 +227,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
         }
 
         .positive {
-          color: var(--color-success);
+          color: var(--color-success-400);
         }
 
         .negative {

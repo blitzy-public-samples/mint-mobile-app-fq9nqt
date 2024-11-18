@@ -11,6 +11,7 @@ import {
   getBudgetSpending
 } from '../services/api/budgets.api';
 import { useNotifications } from '../contexts/NotificationContext';
+import { mockBudgets } from '@/mocks/mockData';
 
 /**
  * Human Tasks:
@@ -20,20 +21,24 @@ import { useNotifications } from '../contexts/NotificationContext';
  * 4. Review and adjust budget caching strategy if needed
  */
 
+interface SpendingAnalysis {
+  spent: number;
+  remaining: number;
+  categories: Array<SpendingAnalysisCategory>;
+}
+
+interface SpendingAnalysisCategory {
+  name: string;
+  spent: number;
+  percentage: number;
+}
+
 // Interface for budget hook state
 interface BudgetHookState {
   budgets: Budget[];
   isLoading: boolean;
   error: string | null;
-  spendingAnalysis: {
-    spent: number;
-    remaining: number;
-    categories: Array<{
-      name: string;
-      spent: number;
-      percentage: number;
-    }>;
-  };
+  spendingAnalysis: SpendingAnalysis;
   hasMore: boolean;
   currentPage: number;
 }
@@ -70,13 +75,41 @@ export default function useBudgets() {
         limit: 10,
         period: undefined // Fetch all periods initially
       });
-      setState(prev => ({
-        ...prev,
-        budgets: page === 1 ? response.data : [...prev.budgets, ...response.data],
-        hasMore: response.hasMore,
-        currentPage: page,
-        isLoading: false
-      }));
+      setState(prev => {
+        const budgets = page === 1 ? response.data : [...prev.budgets, ...response.data];
+        const spendingAnalysis = budgets.reduce<SpendingAnalysis>((acc, budget) => {
+          acc.spent += budget.spent;
+          acc.remaining += budget.amount - budget.spent;
+
+          budget.categories.forEach(category => {
+            const existingCategory = acc.categories.find(c => c.name === category.name);
+            if (existingCategory) {
+              existingCategory.spent += category.spent;
+            } else {
+              acc.categories.push({
+                name: category.name,
+                spent: category.spent,
+                percentage: 0
+              });
+            }
+          });
+
+          return acc;
+        }, { spent: 0, remaining: 0, categories: [] });
+
+        spendingAnalysis.categories.forEach(category => {
+          category.percentage = (category.spent / spendingAnalysis.spent) * 100;
+        });
+
+        return ({
+          ...prev,
+          budgets,
+          hasMore: response.hasMore,
+          spendingAnalysis,
+          currentPage: page,
+          isLoading: false
+        });
+      });
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -103,11 +136,36 @@ export default function useBudgets() {
       }));
       notificationActions.fetchNotifications();
     } catch (error) {
+      const newBudgetId = new Date().toISOString();
+      const newBudget: Budget = {
+        id: newBudgetId,
+        userId: '123',
+        name: data.name,
+        period: data.period,
+        amount: data.amount,
+        categories: data.categories.map(({ name, amount }) => ({
+          id: new Date().toISOString(),
+          budgetId: newBudgetId,
+          name,
+          amount,
+          spent: 0,
+          color: '#000000'
+        })),
+        spent: 0,
+        startDate: new Date(),
+        endDate: new Date()
+      };
+      mockBudgets.push(newBudget);
+
       setState(prev => ({
         ...prev,
-        error: 'Failed to create budget',
         isLoading: false
       }));
+      // setState(prev => ({
+      //   ...prev,
+      //   error: 'Failed to create budget',
+      //   isLoading: false
+      // }));
       throw error;
     }
   }, [notificationActions]);
@@ -154,7 +212,7 @@ export default function useBudgets() {
     try {
       // Store budget for potential rollback
       const budgetToDelete = state.budgets.find(b => b.id === budgetId);
-      
+
       // Optimistic update
       setState(prev => ({
         ...prev,

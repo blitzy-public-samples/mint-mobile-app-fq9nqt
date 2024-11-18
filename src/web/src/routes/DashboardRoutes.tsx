@@ -28,6 +28,7 @@ import Goals from '@/pages/goals/Goals';
 import GoalDetails from '@/pages/goals/GoalDetails';
 import CreateGoal from '@/pages/goals/CreateGoal';
 import CreateBudget from '@/pages/budgets/CreateBudget';
+import Transactions from '@/pages/transactions/Transactions';
 
 // Human tasks:
 // 1. Verify route access policies are configured in authentication service
@@ -115,6 +116,16 @@ const DashboardRoutes: React.FC<DashboardRoutesProps> = (): JSX.Element => {
         element={
           // <PrivateRoute redirectPath="/auth/login">
           <TransactionDetails />
+          // </PrivateRoute>
+        }
+      />
+
+      {/* Transaction Details Route */}
+      <Route
+        path="/transactions"
+        element={
+          // <PrivateRoute redirectPath="/auth/login">
+          <Transactions />
           // </PrivateRoute>
         }
       />

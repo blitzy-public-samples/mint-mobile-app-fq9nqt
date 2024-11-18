@@ -81,7 +81,7 @@ const Navigation: React.FC = () => {
    * Implements Technical Specification/8.1.8 Accessibility Features
    */
   const renderDesktopNav = () => (
-    <nav className="hidden md:flex flex-col w-64 h-screen bg-white shadow-lg" role="navigation">
+    <nav className="hidden md:flex flex-col w-64 bg-white shadow-lg" role="navigation">
       <div className="p-4">
         <h1 className="text-xl font-bold text-primary-900">MintReplica Lite</h1>
       </div>
@@ -123,7 +123,7 @@ const Navigation: React.FC = () => {
    */
   const renderMobileNav = () => (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-white shadow-lg md:hidden z-10"
+      className="bottom-0 left-0 right-0 bg-white shadow-lg md:hidden z-10"
       role="navigation"
       aria-label="Mobile navigation"
     >
@@ -155,7 +155,7 @@ const Navigation: React.FC = () => {
       {isMobile ? renderMobileNav() : renderDesktopNav()}
 
       {/* Mobile navigation offset to prevent content overlap */}
-      {isMobile && <div className="h-16" aria-hidden="true" />}
+      {/* {isMobile && <div className="h-16" aria-hidden="true" />} */}
     </>
   );
 };
