@@ -40,6 +40,7 @@ ChartJS.register(
 
 interface LineChartProps extends Omit<ChartProps, 'type'> {
   data: Array<{ x: string | number; y: number }>;
+  lineName: string;
   options?: ChartProps['options'];
   height?: string | number;
   className?: string;
@@ -49,7 +50,8 @@ const LineChart: React.FC<LineChartProps> = ({
   data,
   options = {},
   height = 300,
-  className = ''
+  className = '',
+  lineName,
 }) => {
   const chartRef = useRef<ChartJS>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,9 +66,9 @@ const LineChart: React.FC<LineChartProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
+  
   // Format data for Chart.js consumption
-  const formattedData = formatChartData(data, {
+  const formattedData = formatChartData({ lineName: lineName, data }, {
     type: 'line',
     theme: 'light', // TODO: Integrate with app theme
     enableAnimation: true,
@@ -76,7 +78,6 @@ const LineChart: React.FC<LineChartProps> = ({
   // Generate chart options with defaults and custom settings
   const chartOptions = generateChartOptions('line', 'light', {
     ...chartConfig,
-    ...options,
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
@@ -126,7 +127,8 @@ const LineChart: React.FC<LineChartProps> = ({
           }
         }
       }
-    }
+    },
+    ...options,
   });
 
   return (

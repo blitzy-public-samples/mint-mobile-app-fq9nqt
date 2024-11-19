@@ -104,7 +104,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
   // Define table columns with proper accessibility and responsive design
   const columns: TableColumn[] = [
     {
-      key: 'institutionName',
+      key: 'institutionId',
       header: 'Institution',
       sortable: true,
       width: '25%',
@@ -120,7 +120,6 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
       header: 'Balance',
       sortable: true,
       width: '20%',
-      align: 'right',
       render: (account: Account) => (
         <span className={account.balance < 0 ? 'text-error-500' : 'text-success-500'}>
           {new Intl.NumberFormat('en-US', {

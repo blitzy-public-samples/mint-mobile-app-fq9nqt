@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import LineChart from '../../components/charts/LineChart';
 import { useInvestments } from '../../hooks/useInvestments';
-import { Investment } from '../../types/models.types';
+import { Investment, InvestmentPerformanceData } from '../../types/models.types';
 import DashboardLayout from '@/layouts/DashboardLayout';
 
 // Human Tasks:
@@ -26,13 +26,7 @@ interface InvestmentDetailsProps { }
 
 interface InvestmentDetailsState {
   investment: Investment | null;
-  performance: {
-    returnRate: number;
-    totalValue: number;
-    gainLoss: number;
-    lastUpdated: Date;
-    historicalData: Array<{ x: string; y: number }>;
-  } | null;
+  performance: InvestmentPerformanceData | null;
   loading: boolean;
   error: Error | null;
 }
@@ -64,7 +58,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
         const investment = await fetchInvestmentById(id);
 
         // Fetch performance data for the last year
-        const performanceData = await fetchPerformance(id, 'yearly');
+        const performanceData = await fetchPerformance(id, 'ytd');
 
         setState(prev => ({
           ...prev,
@@ -206,6 +200,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
           <div className="chart-container">
             <LineChart
               data={state.performance.historicalData}
+              lineName={state.investment.symbol}
               height={400}
               options={{
                 plugins: {

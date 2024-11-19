@@ -96,21 +96,18 @@ const Budgets: React.FC = () => {
       key: 'amount',
       header: 'Total Amount',
       sortable: true,
-      align: 'right',
       render: (budget: Budget) => formatCurrency(budget.amount)
     },
     {
       key: 'spent',
       header: 'Spent',
       sortable: true,
-      align: 'right',
       render: (budget: Budget) => formatCurrency(budget.spent || 0)
     },
     {
       key: 'remaining',
       header: 'Remaining',
       sortable: true,
-      align: 'right',
       render: (budget: Budget) => formatCurrency(budget.amount - (budget.spent || 0))
     },
     {
@@ -128,9 +125,9 @@ const Budgets: React.FC = () => {
     {
       key: 'actions',
       header: 'Actions',
-      align: 'center',
+      align: 'left',
       render: (budget: Budget) => (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="secondary"
             size="small"

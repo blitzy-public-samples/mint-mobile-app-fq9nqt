@@ -91,6 +91,16 @@ export function useTransactions(filters: TransactionFilters = {}) {
     }
   }, [filters.accountId, filters.startDate, filters.endDate, filters.categoryId]);
 
+  const fetchTransactionsCurrentPage = useCallback(async (page: number,
+    limit: number) => {
+    fetchTransactions(page, limit, false);
+  }, [fetchTransactions]);
+
+
+  const fetchMoreTransactions = useCallback(async () => {
+      fetchTransactions(state.currentPage + 1, DEFAULT_PAGE_SIZE, true)
+  }, [state.currentPage, fetchTransactions]);
+
   // Handle transaction updates
   const handleUpdateTransaction = useCallback(async (
     transactionId: string,
@@ -98,13 +108,13 @@ export function useTransactions(filters: TransactionFilters = {}) {
   ) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const response = await updateTransaction(transactionId, updateData);
-      
+
       setState(prev => ({
         ...prev,
         loading: false,
-        transactions: prev.transactions.map(t => 
+        transactions: prev.transactions.map(t =>
           t.id === transactionId ? response.data : t
         ),
       }));
@@ -124,13 +134,13 @@ export function useTransactions(filters: TransactionFilters = {}) {
   ) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const response = await categorizeTransaction(transactionId, categoryId);
-      
+
       setState(prev => ({
         ...prev,
         loading: false,
-        transactions: prev.transactions.map(t => 
+        transactions: prev.transactions.map(t =>
           t.id === transactionId ? response.data : t
         ),
       }));
@@ -151,7 +161,7 @@ export function useTransactions(filters: TransactionFilters = {}) {
   ) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const response = await searchTransactions({
         query,
         page,
@@ -159,7 +169,7 @@ export function useTransactions(filters: TransactionFilters = {}) {
         sortBy: 'date',
         sortDirection: 'desc',
       });
-      
+
       setState(prev => ({
         transactions: response.data,
         loading: false,
@@ -181,16 +191,16 @@ export function useTransactions(filters: TransactionFilters = {}) {
   useEffect(() => {
     // Reset state when filters change
     setState(INITIAL_STATE);
-    
+
     // Initial fetch with new filters
     fetchTransactions(1, DEFAULT_PAGE_SIZE, false);
 
     // Set up WebSocket connection for real-time updates
     const ws = new WebSocket(process.env.REACT_APP_WS_URL || 'ws://localhost:8080');
-    
+
     ws.onmessage = (event) => {
       const update = JSON.parse(event.data);
-      
+
       if (update.type === 'TRANSACTION_UPDATE') {
         setState(prev => ({
           ...prev,
@@ -208,10 +218,8 @@ export function useTransactions(filters: TransactionFilters = {}) {
 
   return {
     ...state,
-    fetchTransactions: (page?: number, limit?: number) => 
-      fetchTransactions(page, limit, false),
-    fetchMoreTransactions: () => 
-      fetchTransactions(state.currentPage + 1, DEFAULT_PAGE_SIZE, true),
+    fetchTransactions: fetchTransactionsCurrentPage,
+    fetchMoreTransactions: () => fetchMoreTransactions,
     updateTransaction: handleUpdateTransaction,
     categorizeTransaction: handleCategorizeTransaction,
     searchTransactions: handleSearchTransactions,

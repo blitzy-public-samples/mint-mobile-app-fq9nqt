@@ -31,30 +31,40 @@ interface ChartDimensions {
   padding: typeof CHART_DIMENSIONS.padding;
 }
 
+type AreaChartData = Array<{ label: string; value: number }>;
+type BarChartData = Array<{ categoryId: string; amount: number }>;
+type LineChartData = { lineName: string; data: Array<{ x: string; y: number }> };
+type DoughnutChartData = Array<{ label: string; value: number }>; 
 /**
  * Formats raw data into Chart.js compatible structure with theme support
  * Addresses requirement: Analytics and Reporting - Enable analytics and reporting engine
  */
-export function formatChartData(data: any[], options: FormatOptions): ChartData {
+export function formatChartData(data: AreaChartData | BarChartData | LineChartData, options: FormatOptions): ChartData {
   // Initialize base chart data structure
   const chartData: ChartData = {
     labels: [],
     datasets: []
   };
 
-  // Validate input data
-  if (!Array.isArray(data) || data.length === 0) {
-    return chartData;
-  }
-
   // Apply chart type specific formatting
   switch (options.type) {
-    case 'line':
+    case 'line': {
+      const lineChartData = data as unknown as LineChartData;
+      chartData.labels = lineChartData.data.map(item => item.x);
+      chartData.datasets = [{
+        label: lineChartData.lineName,
+        data: lineChartData.data.map(item => item.y),
+        borderColor: options.customColors?.[0] || CHART_COLORS.primary,
+        tension: 0.2
+      }];
+      break;
+    };
     case 'area': {
       // Extract labels and values
-      chartData.labels = data.map(item => item.label);
+      const areaChartData = data as AreaChartData;
+      chartData.labels = areaChartData.map(item => item.label);
       chartData.datasets = [{
-        data: data.map(item => item.value),
+        data: areaChartData.map(item => item.value),
         borderColor: options.customColors?.[0] || CHART_COLORS.primary,
         backgroundColor: options.type === 'area' 
           ? createChartGradient(document.createElement('canvas').getContext('2d')!, 
@@ -66,21 +76,23 @@ export function formatChartData(data: any[], options: FormatOptions): ChartData 
       break;
     }
     case 'bar': {
-      chartData.labels = data.map(item => item.category);
+      const barChartData = data as BarChartData;
+      chartData.labels = barChartData.map(item => item.categoryId);
       chartData.datasets = [{
-        data: data.map(item => item.amount),
-        backgroundColor: data.map(item => 
+        data: barChartData.map(item => item.amount),
+        backgroundColor: barChartData.map(item => 
           TRANSACTION_CATEGORY_COLORS[item.categoryId] || CHART_COLORS.secondary
         )
       }];
       break;
     }
     case 'doughnut': {
-      chartData.labels = data.map(item => item.label);
+      const doughnutChartData = data as DoughnutChartData;
+      chartData.labels = doughnutChartData.map(item => item.label);
       chartData.datasets = [{
-        data: data.map(item => item.value),
+        data: doughnutChartData.map(item => item.value),
         backgroundColor: options.customColors || 
-          Object.values(CHART_COLORS).slice(0, data.length)
+          Object.values(CHART_COLORS).slice(0, doughnutChartData.length)
       }];
       break;
     }

@@ -134,50 +134,56 @@ const TransactionDetails: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div
-        className="loading-container"
-        role="alert"
-        aria-busy="true"
-      >
-        <span className="loading-text">Loading transaction details...</span>
-      </div>
+      <DashboardLayout>
+        <div
+          className="loading-container"
+          role="alert"
+          aria-busy="true"
+        >
+          <span className="loading-text">Loading transaction details...</span>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <div
-        className="error-container"
-        role="alert"
-        aria-live="polite"
-      >
-        <p className="error-message">{error}</p>
-        <button
-          onClick={() => navigate('/dashboard/transactions')}
-          className="back-button"
-          aria-label="Return to transactions list"
+      <DashboardLayout>
+        <div
+          className="error-container"
+          role="alert"
+          aria-live="polite"
         >
-          Back to Transactions
-        </button>
-      </div>
+          <p className="error-message">{error}</p>
+          <button
+            onClick={() => navigate('/dashboard/transactions')}
+            className="back-button"
+            aria-label="Return to transactions list"
+          >
+            Back to Transactions
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!transaction) {
     return (
-      <div
-        className="not-found-container"
-        role="alert"
-      >
-        <p>Transaction not found</p>
-        <button
-          onClick={() => navigate('/transactions')}
-          className="back-button"
-          aria-label="Return to transactions list"
+      <DashboardLayout>
+        <div
+          className="not-found-container"
+          role="alert"
         >
-          Back to Transactions
-        </button>
-      </div>
+          <p>Transaction not found</p>
+          <button
+            onClick={() => navigate('/transactions')}
+            className="back-button"
+            aria-label="Return to transactions list"
+          >
+            Back to Transactions
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 

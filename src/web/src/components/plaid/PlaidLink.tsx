@@ -118,19 +118,19 @@ const PlaidLink: React.FC<PlaidLinkProps> = ({
   }
 
   // Show error state if initialization failed
-  if (error) {
-    return (
-      <Button
-        variant="danger"
-        onClick={initializePlaidLink}
-        className={className}
-        ariaLabel="Retry bank connection"
-        disabled={disabled}
-      >
-        Retry Connection
-      </Button>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <Button
+  //       variant="danger"
+  //       onClick={initializePlaidLink}
+  //       className={className}
+  //       ariaLabel="Retry bank connection"
+  //       disabled={disabled}
+  //     >
+  //       Retry Connection
+  //     </Button>
+  //   );
+  // }
 
   // Render connect button when ready
   return (

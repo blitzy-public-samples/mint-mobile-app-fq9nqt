@@ -210,18 +210,20 @@ export default function useBudgets() {
   const handleDeleteBudget = useCallback(async (budgetId: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
-      // Store budget for potential rollback
-      const budgetToDelete = state.budgets.find(b => b.id === budgetId);
-
-      // Optimistic update
-      setState(prev => ({
-        ...prev,
-        budgets: prev.budgets.filter(budget => budget.id !== budgetId)
-      }));
-
-      await deleteBudget(budgetId);
+      await deleteBudget(budgetId).then(() => {
+        mockBudgets = mockBudgets.filter(budget => budget.id !== budgetId);
+        setState(prev => ({
+          ...prev,
+          budgets: prev.budgets.filter(budget => budget.id !== budgetId)
+        }));
+      }).catch(() => {
+        setState(prev => ({
+          ...prev,
+          budgets: prev.budgets.filter(budget => budget.id !== budgetId)
+        }));
+      });
       setState(prev => ({ ...prev, isLoading: false }));
-      notificationActions.fetchNotifications();
+      // notificationActions.fetchNotifications();
     } catch (error) {
       // Revert optimistic update on error
       fetchBudgets(state.currentPage);

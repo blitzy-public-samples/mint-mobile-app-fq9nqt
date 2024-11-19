@@ -15,7 +15,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 // Internal imports
 import { Button } from '../common/Button';
 import { useAuth } from '../../contexts/AuthContext';
-import { AccountIcon, BudgetIcon, DashboardIcon, GoalIcon, InvestmentIcon, LogoutIcon } from '@/assets/icons';
+import { AccountIcon, BudgetIcon, DashboardIcon, GoalIcon, InvestmentIcon, LogoutIcon, TransactionIcon } from '@/assets/icons';
 
 // Navigation items constant from specification
 const NAVIGATION_ITEMS = [
@@ -23,7 +23,8 @@ const NAVIGATION_ITEMS = [
   { path: '/dashboard/accounts', label: 'Accounts', icon: <AccountIcon size={24} />, ariaLabel: 'Navigate to Accounts' },
   { path: '/dashboard/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
   { path: '/dashboard/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
-  { path: '/dashboard/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' }
+  { path: '/dashboard/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
+  { path: '/dashboard/transactions', label: 'Transactions', icon: <TransactionIcon size={24} />, ariaLabel: 'Navigate to Transactions' }
 ];
 
 /**

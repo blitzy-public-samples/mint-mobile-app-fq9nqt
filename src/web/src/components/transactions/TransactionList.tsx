@@ -61,12 +61,12 @@ const TransactionList: React.FC<TransactionListProps> = ({
     setSortDirection(prev => {
       const newDirection = key === sortKey ? (prev === 'asc' ? 'desc' : 'asc') : 'asc';
       // Announce sort change to screen readers
-      const announcement = `Table sorted by ${key} ${newDirection === 'asc' ? 'ascending' : 'descending'}`;
-      const ariaLive = document.createElement('div');
-      ariaLive.setAttribute('aria-live', 'polite');
-      ariaLive.textContent = announcement;
-      document.body.appendChild(ariaLive);
-      setTimeout(() => document.body.removeChild(ariaLive), 1000);
+      // const announcement = `Table sorted by ${key} ${newDirection === 'asc' ? 'ascending' : 'descending'}`;
+      // const ariaLive = document.createElement('div');
+      // ariaLive.setAttribute('aria-live', 'polite');
+      // ariaLive.textContent = announcement;
+      // document.body.appendChild(ariaLive);
+      // setTimeout(() => document.body.removeChild(ariaLive), 1000);
       return newDirection;
     });
   }, [sortKey]);
@@ -110,7 +110,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
       header: 'Amount',
       sortable: true,
       width: '20%',
-      align: 'right',
       render: (transaction: Transaction) => (
         <span 
           className={classNames('amount-cell', {

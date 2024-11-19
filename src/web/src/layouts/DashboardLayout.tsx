@@ -39,7 +39,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   // Sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
 
   /**
    * Handle sidebar toggle with accessibility considerations
@@ -118,7 +118,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           isMobile={isMobile}
         /> */}
 
-        {!isMobile && <Navigation />}
+        {isMobile === false && <Navigation />}
 
         {/* Main content with proper ARIA landmarks */}
         <main
@@ -129,7 +129,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           {children}
         </main>
 
-        {isMobile && <Navigation />}
+        {isMobile === true && <Navigation />}
 
         {/* Mobile overlay */}
         {isMobile && isSidebarOpen && (

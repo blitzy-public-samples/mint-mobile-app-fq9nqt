@@ -97,40 +97,46 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
   if (loading) {
     return (
-      <div className="account-details-loading" role="status">
-        <div className="loading-spinner" aria-hidden="true" />
-        <span>Loading account details...</span>
-      </div>
+      <DashboardLayout>
+        <div className="account-details-loading" role="status">
+          <div className="loading-spinner" aria-hidden="true" />
+          <span>Loading account details...</span>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="account-details-error" role="alert">
-        <h2>Error Loading Account</h2>
-        <p>{error}</p>
-        <button
-          onClick={fetchAccountDetails}
-          className="retry-button"
-        >
-          Retry
-        </button>
-      </div>
+      <DashboardLayout>
+        <div className="account-details-error" role="alert">
+          <h2>Error Loading Account</h2>
+          <p>{error}</p>
+          <button
+            onClick={fetchAccountDetails}
+            className="retry-button"
+          >
+            Retry
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!account) {
     return (
-      <div className="account-details-not-found" role="alert">
-        <h2>Account Not Found</h2>
-        <p>The requested account could not be found.</p>
-        <button
-          onClick={() => navigate('/dashboard/accounts')}
-          className="back-button"
-        >
-          Back to Accounts
-        </button>
-      </div>
+      <DashboardLayout>
+        <div className="account-details-not-found" role="alert">
+          <h2>Account Not Found</h2>
+          <p>The requested account could not be found.</p>
+          <button
+            onClick={() => navigate('/dashboard/accounts')}
+            className="back-button"
+          >
+            Back to Accounts
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 

@@ -129,3 +129,12 @@ export interface Investment {
   currentValue: number;
   return: number;
 }
+
+// Interface for investment performance metrics
+export interface InvestmentPerformanceData {
+  returnRate: number;
+  totalValue: number;
+  gainLoss: number;
+  lastUpdated: Date;
+  historicalData: Array<{ x: string; y: number }>;
+}

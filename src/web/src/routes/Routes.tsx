@@ -74,58 +74,58 @@ const AppRoutes: React.FC = (): JSX.Element => {
           }
         /> */}
 
-      <Route
-        path={AUTH_ROUTES.LOGIN}
-        element={
-          <AuthLayout authMode="login">
-            <Login
+        <Route
+          path={AUTH_ROUTES.LOGIN}
+          element={
+            <AuthLayout authMode="login">
+              <Login
               // onLoginSuccess={handleLoginSuccess}
               // onLoginError={handleLoginError}
-            />
-          </AuthLayout>
-        }
-      />
+              />
+            </AuthLayout>
+          }
+        />
 
-      {/* Registration route with security controls */}
-      <Route
-        path={AUTH_ROUTES.REGISTER}
-        element={
-          <AuthLayout authMode="register">
-            <Register />
-          </AuthLayout>
-        }
-      />
+        {/* Registration route with security controls */}
+        <Route
+          path={AUTH_ROUTES.REGISTER}
+          element={
+            <AuthLayout authMode="register">
+              <Register />
+            </AuthLayout>
+          }
+        />
 
-      {/* Password reset route */}
-      <Route
-        path={AUTH_ROUTES.RESET_PASSWORD}
-        element={
-          <AuthLayout authMode="reset">
-            {/* Reset password component will be implemented separately */}
-            <ResetPassword />
-          </AuthLayout>
-        }
-      />
+        {/* Password reset route */}
+        <Route
+          path={AUTH_ROUTES.RESET_PASSWORD}
+          element={
+            <AuthLayout authMode="reset">
+              {/* Reset password component will be implemented separately */}
+              <ResetPassword />
+            </AuthLayout>
+          }
+        />
 
-      {/* Redirect unmatched auth routes to login */}
-      <Route
-        path="/auth/*"
-        element={
-          <AuthLayout authMode="login">
-            <Login
+        {/* Redirect unmatched auth routes to login */}
+        <Route
+          path="/auth/*"
+          element={
+            <AuthLayout authMode="login">
+              <Login
               // onLoginSuccess={handleLoginSuccess}
               // onLoginError={handleLoginError}
-            />
-          </AuthLayout>
-        }
-      />
+              />
+            </AuthLayout>
+          }
+        />
 
         {/* Protected dashboard routes with JWT validation */}
         <Route
           path={APP_ROUTES.DASHBOARD}
           element={
             // <PrivateRoute redirectPath="/auth/login">
-              <DashboardRoutes />
+            <DashboardRoutes />
             // </PrivateRoute>
           }
         />
@@ -144,7 +144,7 @@ const AppRoutes: React.FC = (): JSX.Element => {
  * Props interface for AppRoutes component
  * Currently empty as component doesn't require props
  */
-interface AppRoutesProps {}
+interface AppRoutesProps { }
 
 // Export the main routing configuration
 export default AppRoutes;
