@@ -15,13 +15,25 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Internal imports
 // import AuthRoutes from './AuthRoutes';
-import DashboardRoutes from './DashboardRoutes';
-import PrivateRoute from './PrivateRoute';
+// import PrivateRoute from './PrivateRoute';
 // import PublicRoute from './PublicRoute';
 import AuthLayout from '@/layouts/AuthLayout';
 import Login from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
 import ResetPassword from '@/pages/auth/ResetPassword';
+import Dashboard from '@/pages/dashboard/Dashboard';
+import Goals from '@/pages/goals/Goals';
+import CreateGoal from '@/pages/goals/CreateGoal';
+import GoalDetails from '@/pages/goals/GoalDetails';
+import Investments from '@/pages/investments/Investments';
+import InvestmentDetails from '@/pages/investments/InvestmentDetails';
+import Transactions from '@/pages/transactions/Transactions';
+import TransactionDetails from '@/pages/transactions/TransactionDetails';
+import Budgets from '@/pages/budgets/Budgets';
+import BudgetDetails from '@/pages/budgets/BudgetDetails';
+import CreateBudget from '@/pages/budgets/CreateBudget';
+import AccountsPage from '@/pages/accounts/Accounts';
+import AccountDetails from '@/pages/accounts/AccountDetails';
 
 /**
  * Application route path definitions with proper security considerations
@@ -120,12 +132,132 @@ const AppRoutes: React.FC = (): JSX.Element => {
           }
         />
 
-        {/* Protected dashboard routes with JWT validation */}
+        {/* Main Dashboard Overview Route */}
         <Route
-          path={APP_ROUTES.DASHBOARD}
+          path="/dashboard"
           element={
             // <PrivateRoute redirectPath="/auth/login">
-            <DashboardRoutes />
+            <Dashboard />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Individual Account Details Route */}
+        <Route
+          path="/accounts/:accountId"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <AccountDetails />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Accounts Management Route */}
+        <Route
+          path="/accounts/*"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <AccountsPage />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Budget creation Route */}
+        <Route
+          path="/budgets/create"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <CreateBudget />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Budget Details Route */}
+        <Route
+          path="/budgets/:id"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <BudgetDetails />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Budgets Management Route */}
+        <Route
+          path="/budgets/*"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <Budgets />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Transaction Details Route */}
+        <Route
+          path="/transactions/:id"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <TransactionDetails />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Transaction Details Route */}
+        <Route
+          path="/transactions"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <Transactions />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Investment Details Route */}
+        <Route
+          path="/investments/:id"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <InvestmentDetails />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Investments Management Route */}
+        <Route
+          path="/investments/*"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <Investments />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Goal creation Route */}
+        <Route
+          path="/goals/create"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <CreateGoal />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Goal Details Route */}
+        <Route
+          path="/goals/:id"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <GoalDetails />
+            // </PrivateRoute>
+          }
+        />
+
+        {/* Goals Management Route */}
+        <Route
+          path="/goals/*"
+          element={
+            // <PrivateRoute redirectPath="/auth/login">
+            <Goals />
             // </PrivateRoute>
           }
         />

@@ -20,11 +20,11 @@ import { AccountIcon, BudgetIcon, DashboardIcon, GoalIcon, InvestmentIcon, Logou
 // Navigation items constant from specification
 const NAVIGATION_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon size={24} />, ariaLabel: 'Navigate to Dashboard' },
-  { path: '/dashboard/accounts', label: 'Accounts', icon: <AccountIcon size={24} />, ariaLabel: 'Navigate to Accounts' },
-  { path: '/dashboard/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
-  { path: '/dashboard/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
-  { path: '/dashboard/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
-  { path: '/dashboard/transactions', label: 'Transactions', icon: <TransactionIcon size={24} />, ariaLabel: 'Navigate to Transactions' }
+  { path: '/accounts', label: 'Accounts', icon: <AccountIcon size={24} />, ariaLabel: 'Navigate to Accounts' },
+  { path: '/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
+  { path: '/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
+  { path: '/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
+  { path: '/transactions', label: 'Transactions', icon: <TransactionIcon size={24} />, ariaLabel: 'Navigate to Transactions' }
 ];
 
 /**
@@ -55,7 +55,7 @@ const Navigation: React.FC = () => {
    * Implements Technical Specification/8.1.1 Mobile Navigation Structure
    */
   const isActiveRoute = (path: string): boolean => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   /**

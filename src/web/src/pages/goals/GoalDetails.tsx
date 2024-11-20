@@ -76,6 +76,10 @@ const GoalDetails: React.FC = () => {
     loadGoalData();
   }, [loadGoalData]);
 
+  function updateProgressState(newAmount: number) {
+    setState(prev => ({ ...prev, goal: { ...prev.goal, currentAmount: newAmount } }));
+  }
+
   /**
    * Handles goal progress updates with validation
    * Implements Technical Specification/8.1.4 Budget Creation/Edit
@@ -88,7 +92,12 @@ const GoalDetails: React.FC = () => {
 
       // Validate input amount
       if (newAmount < 0 || newAmount > state.goal.targetAmount) {
-        throw new Error('Invalid progress amount');
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          error: 'Invalid progress amount'
+        }));
+        return;
       }
 
       await updateProgress(state.goal.id, newAmount);
@@ -138,9 +147,10 @@ const GoalDetails: React.FC = () => {
 
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
-      await updateExistingGoal(state.goal.id, formData);
-      setState(prev => ({ ...prev, isEditing: false }));
-      await loadGoalData();
+      await updateExistingGoal(state.goal.id, formData).then(async () => {
+        setState(prev => ({ ...prev, isEditing: false, }));
+        await loadGoalData();
+      }).catch(e => setState(prev => ({ ...prev, error: e.message, isLoading: false })));
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -173,20 +183,21 @@ const GoalDetails: React.FC = () => {
     }
   };
 
-  if (state.isLoading) {
-    return <div aria-label="Loading goal details">Loading...</div>;
-  }
+  const ErrorDetails = state.error ? (
+    <div
+      role="alert"
+      className="p-3 text-sm text-red-700 bg-red-100 border border-red-300 rounded-md"
+    >
+      {state.error}
+    </div>
+  ) : null;
 
-  if (state.error) {
-    return (
-      <div role="alert" className="error-message">
-        {state.error}
-      </div>
-    );
+  if (state.isLoading) {
+    return <DashboardLayout><div aria-label="Loading goal details">Loading...</div></DashboardLayout>;
   }
 
   if (!state.goal) {
-    return <div>Goal not found</div>;
+    return <DashboardLayout><div>Goal not found</div></DashboardLayout>;
   }
 
   return (
@@ -231,8 +242,8 @@ const GoalDetails: React.FC = () => {
                 id="targetAmount"
                 value={formData.targetAmount || ''}
                 onChange={e => setFormData(prev => ({ ...prev, targetAmount: Number(e.target.value) }))}
-                min="0"
-                step="0.01"
+                min={0}
+                step={1}
                 required
               />
             </div>
@@ -242,12 +253,12 @@ const GoalDetails: React.FC = () => {
               <input
                 type="date"
                 id="targetDate"
-                value={formData.targetDate ? new Date(formData.targetDate).toISOString().split('T')[0] : ''}
-                onChange={e => setFormData(prev => ({ ...prev, targetDate: new Date(e.target.value) }))}
+                value={formData.targetDate}
+                onChange={e => setFormData(prev => ({ ...prev, targetDate: e.target.value as Date }))}
                 required
               />
             </div>
-
+            {ErrorDetails}
             <div className="flex justify-end gap-4">
               {/* <Button type="submit" disabled={state.isLoading}>
                 Save Changes
@@ -287,7 +298,7 @@ const GoalDetails: React.FC = () => {
               </div>
               <div className="flex gap-4">
                 <button
-                  onClick={() => setState(prev => ({ ...prev, isEditing: true }))}
+                  onClick={() => setState(prev => ({ ...prev, isEditing: true, error: null }))}
                   className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
                   aria-label="Edit goal"
                 >
@@ -344,16 +355,17 @@ const GoalDetails: React.FC = () => {
               <div className="flex flex-col justify-end gap-4">
                 <input
                   type="number"
-                  min="0"
+                  min={0}
                   max={state.goal.targetAmount}
-                  step="0.01"
+                  step={1}
                   value={state.goal.currentAmount}
-                  onChange={e => handleUpdateProgress(Number(e.target.value))}
+                  onChange={e => updateProgressState(Number(e.target.value))}
                   aria-label="Update current amount"
                 />
+                {ErrorDetails}
                 <Button
                   variant="secondary"
-                  onClick={() => navigate('/dashboard/goals')}
+                  onClick={() => navigate('/goals')}
                   type="button"
                 >
                   Cancel

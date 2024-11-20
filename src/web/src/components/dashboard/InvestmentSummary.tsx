@@ -77,14 +77,14 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
    */
   const prepareAssetAllocationData = useCallback((investments: Investment[]): AssetAllocationData[] => {
     // Calculate total portfolio value
-    const totalValue = investments.reduce((sum, inv) => 
+    const totalValue = investments.reduce((sum, inv) =>
       sum + (inv.quantity * inv.currentPrice), 0);
 
     // Group investments by symbol and calculate allocations
     const allocations = investments.reduce((acc, inv) => {
       const value = inv.quantity * inv.currentPrice;
       const percentage = (value / totalValue) * 100;
-      
+
       return [...acc, {
         label: inv.symbol,
         value: Number(percentage.toFixed(2)),
@@ -151,54 +151,55 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
   }
 
   return (
-    <Card
-      title="Investment Summary"
-      className={className}
-      testId={testId}
-      loading={loading}
-    >
-      <div className="investment-summary">
-        {/* Portfolio Value Section */}
-        <div className="portfolio-metrics">
-          <div className="metric-item">
-            <h3>Total Portfolio Value</h3>
-            <span className="value">
-              {portfolioMetrics ? formatValue(portfolioMetrics.totalValue) : '$0.00'}
-            </span>
+    <div>      <h2 className="budget-overview__title">Investment Summary</h2>
+
+      <Card
+        className={className}
+        testId={testId}
+        loading={loading}
+      >
+        <div className="investment-summary">
+          {/* Portfolio Value Section */}
+          <div className="portfolio-metrics">
+            <div className="metric-item">
+              <h3>Total Portfolio Value</h3>
+              <span className="value">
+                {portfolioMetrics ? formatValue(portfolioMetrics.totalValue) : '$0.00'}
+              </span>
+            </div>
+
+            {portfolioMetrics && (
+              <>
+                <div className="metric-item">
+                  <h3>Total Gain/Loss</h3>
+                  <span className={`value ${portfolioMetrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
+                    {formatValue(portfolioMetrics.totalGainLoss)}
+                  </span>
+                </div>
+
+                <div className="metric-item">
+                  <h3>Return</h3>
+                  <span className={`value ${portfolioMetrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
+                    {portfolioMetrics.percentageReturn.toFixed(2)}%
+                  </span>
+                </div>
+              </>
+            )}
           </div>
-          
-          {portfolioMetrics && (
-            <>
-              <div className="metric-item">
-                <h3>Total Gain/Loss</h3>
-                <span className={`value ${portfolioMetrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
-                  {formatValue(portfolioMetrics.totalGainLoss)}
-                </span>
-              </div>
-              
-              <div className="metric-item">
-                <h3>Return</h3>
-                <span className={`value ${portfolioMetrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
-                  {portfolioMetrics.percentageReturn.toFixed(2)}%
-                </span>
-              </div>
-            </>
-          )}
+
+          {/* Asset Allocation Chart */}
+          <div className="allocation-chart">
+            <h3>Asset Allocation</h3>
+            <DonutChart
+              data={allocationData}
+              options={chartOptions}
+              height={300}
+              ariaLabel="Investment portfolio asset allocation chart"
+            />
+          </div>
         </div>
 
-        {/* Asset Allocation Chart */}
-        <div className="allocation-chart">
-          <h3>Asset Allocation</h3>
-          <DonutChart
-            data={allocationData}
-            options={chartOptions}
-            height={300}
-            ariaLabel="Investment portfolio asset allocation chart"
-          />
-        </div>
-      </div>
-
-      <style jsx>{`
+        <style jsx>{`
         .investment-summary {
           display: flex;
           flex-direction: column;
@@ -264,7 +265,8 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
           }
         }
       `}</style>
-    </Card>
+      </Card>
+    </div>
   );
 });
 

@@ -35,6 +35,7 @@ const Card: React.FC<CardProps> = ({
   testId,
   onClick,
   elevated = false,
+  style,
 }) => {
   // Combine CSS classes based on props
   const cardClasses = classNames(
@@ -95,6 +96,7 @@ const Card: React.FC<CardProps> = ({
   const cardStyle = {
     ...styles.card,
     ...(elevated ? styles.elevated : {}),
+    ...style,
   };
 
   return (

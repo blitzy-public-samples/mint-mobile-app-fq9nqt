@@ -5,6 +5,7 @@ import { Goal, GoalType, GoalStatus } from '../../types/models.types';
 import { createApiRequest, handleApiError } from '../../utils/api.utils';
 import { API_CONFIG } from '../../config/api.config';
 import { AxiosError } from 'axios';
+import { mockGoals, mockUser } from '@/mocks/mockData';
 
 /**
  * Human Tasks:
@@ -74,6 +75,9 @@ export async function getGoals(params: GetGoalsParams = {}): Promise<PaginatedRe
         type: params.type,
         status: params.status
       }
+    }).catch(e => {
+      console.error(e);
+      return { data: { data: mockGoals, page: 1, total: mockGoals.length } };
     });
 
     return response.data;
@@ -93,7 +97,14 @@ export async function getGoalById(id: string): Promise<ApiResponse<Goal>> {
       timeout: API_CONFIG.TIMEOUT
     });
 
-    const response = await api.get(GOALS_API_ENDPOINTS.GET_GOAL.replace(':id', id));
+    const response = await api.get(GOALS_API_ENDPOINTS.GET_GOAL.replace(':id', id)).catch(e => {
+      console.error(e);
+      const mockGoal = mockGoals.find(goal => goal.id === id);
+      if (!mockGoal) {
+        throw new Error('Goal not found');
+      }
+      return { data: { data: mockGoal } };
+    });
     return response.data;
   } catch (error) {
     throw handleApiError(error as AxiosError);
@@ -129,6 +140,21 @@ export async function createGoal(goalData: CreateGoalParams): Promise<ApiRespons
     const response = await api.post(GOALS_API_ENDPOINTS.CREATE_GOAL, {
       ...goalData,
       targetDate: new Date(goalData.targetDate).toISOString()
+    }).catch(e => {
+      console.error(e);
+      const newGoalId = Date.now().toString();
+      const newGoal: Goal = {
+        id: newGoalId,
+        userId: mockUser.id,
+        name: goalData.name,
+        type: goalData.type,
+        targetAmount: goalData.targetAmount,
+        currentAmount: 0,
+        targetDate: goalData.targetDate.toISOString(),
+        status: 'NOT_STARTED'
+      };
+      mockGoals.push(newGoal);
+      return { data: newGoal };
     });
 
     return response.data;
@@ -142,29 +168,38 @@ export async function createGoal(goalData: CreateGoalParams): Promise<ApiRespons
  * Updates an existing goal with partial data
  */
 export async function updateGoal(id: string, goalData: UpdateGoalParams): Promise<ApiResponse<Goal>> {
+
+  const api = createApiRequest({
+    includeAuth: true,
+    timeout: API_CONFIG.TIMEOUT
+  });
+
+  // Validate target amount if provided
+  if (goalData.targetAmount !== undefined && goalData.targetAmount <= 0) {
+    throw new Error('Target amount must be greater than zero');
+  }
+
+  // Validate target date if provided
+  if (goalData.targetDate && new Date(goalData.targetDate) <= new Date()) {
+    throw new Error('Target date must be in the future');
+  }
+
   try {
-    const api = createApiRequest({
-      includeAuth: true,
-      timeout: API_CONFIG.TIMEOUT
-    });
-
-    // Validate target amount if provided
-    if (goalData.targetAmount !== undefined && goalData.targetAmount <= 0) {
-      throw new Error('Target amount must be greater than zero');
-    }
-
-    // Validate target date if provided
-    if (goalData.targetDate && new Date(goalData.targetDate) <= new Date()) {
-      throw new Error('Target date must be in the future');
-    }
-
     const response = await api.put(
       GOALS_API_ENDPOINTS.UPDATE_GOAL.replace(':id', id),
       {
         ...goalData,
         targetDate: goalData.targetDate ? new Date(goalData.targetDate).toISOString() : undefined
       }
-    );
+    ).catch(e => {
+      console.error(e);
+      const goalIndex = mockGoals.findIndex(goal => goal.id === id);
+      if (goalIndex === -1 || !mockGoals[goalIndex]) {
+        throw new Error('Goal not found');
+      }
+      mockGoals[goalIndex] = { ...mockGoals[goalIndex], ...goalData };
+      return { data: { data: mockGoals[goalIndex] } };
+    });
 
     return response.data;
   } catch (error) {
@@ -218,7 +253,14 @@ export async function updateGoalProgress(
     const response = await api.patch(
       GOALS_API_ENDPOINTS.UPDATE_PROGRESS.replace(':id', id),
       progressData
-    );
+    ).catch(e => {
+      const goalIndex = mockGoals.findIndex(goal => goal.id === id);
+      if (goalIndex === -1 || !mockGoals[goalIndex]) {
+        throw new Error('Goal not found');
+      }
+      mockGoals[goalIndex].currentAmount = progressData.currentAmount;
+      return { data: mockGoals[goalIndex] };
+    });
 
     return response.data;
   } catch (error) {

@@ -90,7 +90,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
   // Handle transaction click
   const handleTransactionClick = useCallback((transaction: Transaction) => {
-    navigate(`/dashboard/transactions/${transaction.id}`, {
+    navigate(`/transactions/${transaction.id}`, {
       state: { accountId, transaction }
     });
   }, [accountId, navigate]);
@@ -130,7 +130,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
           <h2>Account Not Found</h2>
           <p>The requested account could not be found.</p>
           <button
-            onClick={() => navigate('/dashboard/accounts')}
+            onClick={() => navigate('/accounts')}
             className="back-button"
           >
             Back to Accounts

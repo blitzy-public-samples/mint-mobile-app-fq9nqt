@@ -17,10 +17,11 @@ import { useNavigate } from 'react-router-dom';
 // Internal components
 import AccountsSummary from '../../components/dashboard/AccountsSummary';
 import BudgetOverview from '../../components/dashboard/BudgetOverview';
-import  RecentTransactions from '../../components/dashboard/RecentTransactions';
+import RecentTransactions from '../../components/dashboard/RecentTransactions';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../hooks/useAuth';
 import InvestmentSummary from '../../components/dashboard/InvestmentSummary';
+import SpendingTrends from '@/components/dashboard/SpendingTrends';
 
 // Human tasks:
 // 1. Verify color contrast ratios meet WCAG 2.1 AA standards
@@ -46,19 +47,19 @@ const Dashboard: React.FC = () => {
   // Handle account click navigation
   const handleAccountClick = (accountId: string) => {
     if (!accountId) return;
-    navigate(`/dashboard/accounts/${accountId}`);
+    navigate(`/accounts/${accountId}`);
   };
 
   // Handle transaction click navigation
   const handleTransactionClick = (transactionId: string) => {
     if (!transactionId) return;
-    navigate(`/dashboard/transactions/${transactionId}`);
+    navigate(`/transactions/${transactionId}`);
   };
 
   if (loading) {
     return (
       <DashboardLayout>
-        <div 
+        <div
           className="dashboard-loading"
           role="status"
           aria-busy="true"
@@ -73,13 +74,13 @@ const Dashboard: React.FC = () => {
   if (error) {
     return (
       <DashboardLayout>
-        <div 
+        <div
           className="dashboard-error"
           role="alert"
           aria-live="polite"
         >
           {error}
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="retry-button"
           >
@@ -92,7 +93,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div 
+      <div
         className="dashboard-container"
         role="main"
         aria-label="Dashboard content"
@@ -108,7 +109,7 @@ const Dashboard: React.FC = () => {
         {/* Main dashboard grid layout */}
         <div className="dashboard-grid">
           {/* Accounts summary section */}
-          <section 
+          <section
             className="dashboard-section"
             aria-label="Accounts section"
           >
@@ -118,7 +119,7 @@ const Dashboard: React.FC = () => {
           </section>
 
           {/* Budget overview section */}
-          <section 
+          <section
             className="dashboard-section"
             aria-label="Budget overview section"
           >
@@ -127,9 +128,8 @@ const Dashboard: React.FC = () => {
               maxItems={5}
             />
           </section>
-
           {/* Recent transactions section */}
-          <section 
+          <section
             className="dashboard-section"
             aria-label="Recent transactions section"
           >
@@ -138,13 +138,18 @@ const Dashboard: React.FC = () => {
               onTransactionClick={handleTransactionClick}
             />
           </section>
-
-          <section 
+          <section
             className="dashboard-section"
             aria-label="Investments section"
           >
-            <InvestmentSummary/>
+            <InvestmentSummary />
           </section>
+          {/* <section
+            className="dashboard-section"
+            aria-label="Spending trends section"
+          >
+            <SpendingTrends timeframe="monthly" />
+          </section> */}
         </div>
       </div>
 
@@ -181,7 +186,7 @@ const Dashboard: React.FC = () => {
         .dashboard-section {
           background: var(--color-background-card);
           border-radius: var(--border-radius-lg);
-          box-shadow: var(--shadow-sm);
+          box-shadow: var(--shadow-md);
           overflow: hidden;
         }
 
@@ -239,9 +244,9 @@ const Dashboard: React.FC = () => {
           //   padding: var(--spacing-6);
           // }
 
-          .dashboard-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
+          // .dashboard-grid {
+          //   grid-template-columns: repeat(3, 1fr);
+          // }
 
           .dashboard-section:last-child {
             grid-column: 2 / -1;

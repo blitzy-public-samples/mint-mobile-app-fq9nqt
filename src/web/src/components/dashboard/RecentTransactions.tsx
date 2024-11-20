@@ -93,7 +93,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
         <div className="description-cell">
           <span className="description">{transaction.description}</span>
           {transaction.categoryId && (
-            <span 
+            <span
               className="category-tag"
               aria-label={`Category: ${transaction.categoryId}`}
             >
@@ -137,8 +137,8 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
 
   if (error) {
     return (
-      <div 
-        className="error-container" 
+      <div
+        className="error-container"
         role="alert"
         aria-live="polite"
       >
@@ -182,10 +182,12 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
   }
 
   return (
-    <div 
+    <div
       className={`recent-transactions ${className || ''}`}
       aria-busy={loading}
     >
+      <h2 className="budget-overview__title">Recent Transactions</h2>
+
       <Table
         data={transactions.slice(0, limit)}
         columns={columns}

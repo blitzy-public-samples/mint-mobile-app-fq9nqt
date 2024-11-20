@@ -79,11 +79,8 @@ export function useGoals(options: UseGoalsOptions = {}) {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        goals: mockGoals,
-        totalCount: mockGoals.length,
-        currentPage: 1,
-        isLoading: false,
-        error: 'Using mock data - API request failed'
+        error: 'Failed to fetch goals. Please try again.',
+        isLoading: false
       }));
     }
   }, [options.page, options.limit, options.type, options.status, state.currentPage]);
@@ -97,13 +94,7 @@ export function useGoals(options: UseGoalsOptions = {}) {
       const response = await getGoalById(id);
       return response.data;
     } catch (error) {
-      // Use mock data in case of API failure
-      console.warn('Failed to fetch goal by ID from API, using mock data:', error);
-      const mockGoal = mockGoals.find(goal => goal.id === id);
-      if (!mockGoal) {
-        throw new Error('Goal not found');
-      }
-      return mockGoal;
+      throw new Error('Failed to fetch goal details');
     }
   }, []);
 
@@ -141,19 +132,19 @@ export function useGoals(options: UseGoalsOptions = {}) {
   const updateExistingGoal = useCallback(async (id: string, goalData: Partial<Goal>): Promise<Goal> => {
     try {
       // Optimistic update
-      setState(prev => ({
-        ...prev,
-        goals: prev.goals.map(goal =>
-          goal.id === id ? { ...goal, ...goalData } : goal
-        )
-      }));
-
+      // setState(prev => ({
+      //   ...prev,
+      //   goals: prev.goals.map(goal =>
+      //     goal.id === id ? { ...goal, ...goalData } : goal
+      //   )
+      // }));
+// 
       const response = await updateGoal(id, goalData);
       return response.data;
     } catch (error) {
       // Revert optimistic update on error
-      fetchGoals();
-      throw new Error('Failed to update goal');
+      // fetchGoals();
+      throw error;
     }
   }, [fetchGoals]);
 

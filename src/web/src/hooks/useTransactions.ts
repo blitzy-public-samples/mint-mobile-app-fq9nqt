@@ -89,7 +89,7 @@ export function useTransactions(filters: TransactionFilters = {}) {
         error: error instanceof Error ? error.message : 'Failed to fetch transactions',
       }));
     }
-  }, [filters.accountId, filters.startDate, filters.endDate, filters.categoryId]);
+  }, [filters.accountId, filters.startDate, filters.endDate, filters.categoryId, filters.startDate, filters.endDate]);
 
   const fetchTransactionsCurrentPage = useCallback(async (page: number,
     limit: number) => {

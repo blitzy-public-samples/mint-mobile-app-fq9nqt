@@ -89,8 +89,8 @@ const SpendingTrends: React.FC<SpendingTrendsProps> = ({
       const currentAmount = groupedData.get(periodKey) || 0;
       groupedData.set(periodKey, currentAmount + transaction.amount);
 
-      if (transaction.category) {
-        categories.add(transaction.category);
+      if (transaction.categoryId) {
+        categories.add(transaction.categoryId);
       }
     });
 

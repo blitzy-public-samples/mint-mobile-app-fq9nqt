@@ -128,7 +128,7 @@ const Investments: React.FC = () => {
   }, [investments]);
 
   function handleInvestmentClick(id: string) {
-    navigate(`/dashboard/investments/${id}`);
+    navigate(`/investments/${id}`);
   }
 
   // Handle sync button click
@@ -144,7 +144,7 @@ const Investments: React.FC = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="investments-loading" role="status">
+        <div className="w-full h-full flex justify-center items-center" role="status">
           <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
         </div>
       </DashboardLayout>
@@ -168,35 +168,35 @@ const Investments: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="investments-container">
+      <div className="max-w-2xl mx-auto space-y-6">
         {/* Portfolio Overview Section */}
         <section className="portfolio-overview" aria-label="Portfolio Overview">
           <div className="portfolio-header">
-            <h1>Investment Portfolio</h1>
-            <button
+            <h1 className="text-2xl font-bold mb-6">Investment Portfolio</h1>
+            {/* <button
               onClick={handleSync}
               disabled={syncing}
-              className="sync-button"
+              className="mt-4 px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
               aria-label={syncing ? "Syncing investments" : "Sync investments"}
             >
               {syncing ? <Spinner size="small" color="white" /> : 'Sync'}
-            </button>
+            </button> */}
           </div>
 
-          <div className="portfolio-metrics">
+          <div className="portfolio-metrics space-y-4">
             <div className="metric-card">
-              <h3>Total Value</h3>
+              <h3 className="font-medium">Total Value</h3>
               <p className="value">${metrics.totalValue.toLocaleString()}</p>
             </div>
             <div className="metric-card">
-              <h3>Total Gain/Loss</h3>
+              <h3 className="font-medium">Total Gain/Loss</h3>
               <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
                 ${Math.abs(metrics.totalGainLoss).toLocaleString()}
                 {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
               </p>
             </div>
             <div className="metric-card">
-              <h3>Return</h3>
+              <h3 className="font-medium">Return</h3>
               <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
                 {metrics.percentageReturn.toFixed(2)}%
                 {metrics.percentageReturn >= 0 ? ' ▲' : ' ▼'}
@@ -207,11 +207,11 @@ const Investments: React.FC = () => {
 
         {/* Asset Allocation Section */}
         <section className="asset-allocation" aria-label="Asset Allocation">
-          <h2>Asset Allocation</h2>
+          <h2 className="font-medium">Asset Allocation</h2>
           <div className="chart-container">
             <DonutChart
               data={assetAllocationData}
-              height={300}
+              // height={300}
               options={{
                 plugins: {
                   legend: {
@@ -237,8 +237,8 @@ const Investments: React.FC = () => {
         </section>
 
         {/* Holdings List Section */}
-        <section className="holdings-list" aria-label="Investment Holdings">
-          <h2>Holdings</h2>
+        <section className="space-y-4" aria-label="Investment Holdings">
+          <h2 className="font-medium">Holdings</h2>
           <div className="holdings-table">
             <table>
               <thead>

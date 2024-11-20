@@ -89,7 +89,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
 
   // Handle navigation to account details
   const handleAccountClick = useCallback((account: Account) => {
-    navigate(`/dashboard/accounts/${account.id}`);
+    navigate(`/accounts/${account.id}`);
   }, [navigate]);
 
   // Handle successful Plaid account linking

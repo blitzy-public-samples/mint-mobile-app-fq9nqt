@@ -58,6 +58,7 @@ export interface CardProps {
   className?: string;
   testId?: string;
   elevated?: boolean;
+  style?: React.CSSProperties;
   onClick?: () => void;
 }
 

@@ -41,11 +41,11 @@ const Goals: React.FC = () => {
 
   // Navigation handlers
   const handleCreateGoal = () => {
-    navigate('/dashboard/goals/create');
+    navigate('/goals/create');
   };
 
   const handleGoalClick = (goalId: string) => {
-    navigate(`/dashboard/goals/${goalId}`);
+    navigate(`/goals/${goalId}`);
   };
 
   // Calculate progress percentage for goal

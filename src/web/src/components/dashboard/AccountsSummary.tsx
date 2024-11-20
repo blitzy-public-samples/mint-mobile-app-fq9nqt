@@ -159,6 +159,9 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
       title="Accounts Overview"
       loading={loading}
       testId="accounts-summary"
+      style={{
+        height: '100%',
+      }}
     >
       <div style={styles.container}>
         {error ? (

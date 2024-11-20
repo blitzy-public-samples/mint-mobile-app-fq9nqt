@@ -41,11 +41,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isMobile }) =
   // Navigation items defined in specification
   const navigationItems = [
     { route: '/dashboard', label: 'Dashboard', icon: 'dashboard', ariaLabel: 'Navigate to Dashboard' },
-    { route: '/dashboard/accounts', label: 'Accounts', icon: <AccountIcon size={24} />, ariaLabel: 'Navigate to Accounts' },
-    { route: '/dashboard/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
-    { route: '/dashboard/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
-    { route: '/dashboard/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
-    { route: '/dashboard/settings', label: 'Settings', icon: 'settings', ariaLabel: 'Navigate to Settings' }
+    { route: '/accounts', label: 'Accounts', icon: <AccountIcon size={24} />, ariaLabel: 'Navigate to Accounts' },
+    { route: '/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
+    { route: '/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
+    { route: '/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
+    { route: '/settings', label: 'Settings', icon: 'settings', ariaLabel: 'Navigate to Settings' }
   ];
 
   /**

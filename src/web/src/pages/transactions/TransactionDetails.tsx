@@ -156,7 +156,7 @@ const TransactionDetails: React.FC = () => {
         >
           <p className="error-message">{error}</p>
           <button
-            onClick={() => navigate('/dashboard/transactions')}
+            onClick={() => navigate('/transactions')}
             className="back-button"
             aria-label="Return to transactions list"
           >

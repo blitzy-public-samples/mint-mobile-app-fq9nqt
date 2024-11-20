@@ -416,7 +416,7 @@ export const mockGoals: Goal[] = [
     type: 'EMERGENCY_FUND',
     targetAmount: 10000,
     currentAmount: 5000,
-    targetDate: new Date('2024-12-31'),
+    targetDate: '2024-12-31',
     status: 'IN_PROGRESS'
   },
   {
@@ -426,7 +426,7 @@ export const mockGoals: Goal[] = [
     type: 'SAVINGS',
     targetAmount: 50000,
     currentAmount: 15000,
-    targetDate: new Date('2025-06-30'),
+    targetDate: '2025-06-30',
     status: 'ON_TRACK'
   },
   {
@@ -436,7 +436,7 @@ export const mockGoals: Goal[] = [
     type: 'DEBT_PAYMENT',
     targetAmount: 25000,
     currentAmount: 5000,
-    targetDate: new Date('2024-09-30'),
+    targetDate: '2024-09-30',
     status: 'AT_RISK'
   },
   {
@@ -446,7 +446,7 @@ export const mockGoals: Goal[] = [
     type: 'INVESTMENT',
     targetAmount: 100000,
     currentAmount: 0,
-    targetDate: new Date('2030-12-31'),
+    targetDate: '2030-12-31',
     status: 'NOT_STARTED'
   },
   {
@@ -456,7 +456,7 @@ export const mockGoals: Goal[] = [
     type: 'CUSTOM',
     targetAmount: 5000,
     currentAmount: 5000,
-    targetDate: new Date('2024-03-01'),
+    targetDate: '2024-03-01',
     status: 'COMPLETED'
   }
 ]; 

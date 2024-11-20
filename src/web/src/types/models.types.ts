@@ -112,7 +112,7 @@ export interface Goal {
   type: GoalType;
   targetAmount: number;
   currentAmount: number;
-  targetDate: Date;
+  targetDate: string;
   status: GoalStatus;
 }
 

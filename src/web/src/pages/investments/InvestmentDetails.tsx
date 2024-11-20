@@ -7,6 +7,7 @@ import LineChart from '../../components/charts/LineChart';
 import { useInvestments } from '../../hooks/useInvestments';
 import { Investment, InvestmentPerformanceData } from '../../types/models.types';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import Spinner from '@/components/common/Spinner';
 
 // Human Tasks:
 // 1. Configure error monitoring and alerting for investment data fetch failures
@@ -97,8 +98,8 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
   if (state.loading) {
     return (
       <DashboardLayout>
-        <div className="investment-details-loading" role="alert" aria-busy="true">
-          <h2>Loading investment details...</h2>
+        <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+          <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
         </div>
       </DashboardLayout>
     );
@@ -118,7 +119,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
 
   // Return null if no investment data
   if (!state.investment || !state.performance) {
-    return <DashboardLayout/>;
+    return <DashboardLayout />;
   }
 
   const metrics = calculateMetrics();
@@ -126,19 +127,19 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
 
   return (
     <DashboardLayout>
-      <div className="investment-details-container">
+      <div className="max-w-2xl mx-auto space-y-4">
         {/* Investment Header */}
         <header className="investment-header">
-          <h1>{state.investment.symbol}</h1>
-          <div className="last-updated">
+          <h1 className="text-2xl font-bold mb-6">{state.investment.symbol}</h1>
+          <div className="last-updated font-medium">
             Last updated: {new Date(state.investment.lastUpdated).toLocaleString()}
           </div>
         </header>
 
         {/* Investment Summary */}
-        <section className="investment-summary" aria-label="Investment Summary">
+        <section className="investment-summary space-y-2" aria-label="Investment Summary">
           <div className="metric-card">
-            <h3>Current Value</h3>
+            <h3 className="font-medium">Current Value</h3>
             <p className="value">
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
@@ -148,7 +149,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
           </div>
 
           <div className="metric-card">
-            <h3>Gain/Loss</h3>
+            <h3 className="font-medium">Gain/Loss</h3>
             <p className={`value ${metrics.gainLoss >= 0 ? 'positive' : 'negative'}`}>
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
@@ -159,7 +160,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
           </div>
 
           <div className="metric-card">
-            <h3>Return Rate</h3>
+            <h3 className="font-medium">Return Rate</h3>
             <p className={`value ${metrics.returnRate >= 0 ? 'positive' : 'negative'}`}>
               {metrics.returnRate.toFixed(2)}%
             </p>
@@ -167,36 +168,34 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
         </section>
 
         {/* Investment Details */}
-        <section className="investment-details" aria-label="Investment Details">
-          <div className="details-grid">
-            <div className="detail-item">
-              <h3>Quantity</h3>
-              <p>{state.investment.quantity.toFixed(4)}</p>
-            </div>
-            <div className="detail-item">
-              <h3>Cost Basis</h3>
-              <p>
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD'
-                }).format(state.investment.costBasis)}
-              </p>
-            </div>
-            <div className="detail-item">
-              <h3>Current Price</h3>
-              <p>
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD'
-                }).format(state.investment.currentPrice)}
-              </p>
-            </div>
+        <section className="investment-details space-y-2" aria-label="Investment Details">
+          <div className="detail-item">
+            <h3 className="font-medium">Quantity</h3>
+            <p>{state.investment.quantity.toFixed(4)}</p>
+          </div>
+          <div className="detail-item">
+            <h3 className="font-medium">Cost Basis</h3>
+            <p>
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+              }).format(state.investment.costBasis)}
+            </p>
+          </div>
+          <div className="detail-item">
+            <h3 className="font-medium">Current Price</h3>
+            <p>
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+              }).format(state.investment.currentPrice)}
+            </p>
           </div>
         </section>
 
         {/* Performance Chart */}
-        <section className="performance-chart" aria-label="Performance Chart">
-          <h2>Performance History</h2>
+        <section className="performance-chart space-y-2" aria-label="Performance Chart">
+          <h2 className="font-medium">Performance History</h2>
           <div className="chart-container">
             <LineChart
               data={state.performance.historicalData}
