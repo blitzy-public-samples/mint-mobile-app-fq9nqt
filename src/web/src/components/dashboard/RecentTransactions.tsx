@@ -186,9 +186,10 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
       className={`recent-transactions ${className || ''}`}
       aria-busy={loading}
     >
-      <h2 className="budget-overview__title">Recent Transactions</h2>
+      <h2 className="text-xl font-semibold text-text-primary text-center">Recent Transactions</h2>
 
       <Table
+        className="p-6"
         data={transactions.slice(0, limit)}
         columns={columns}
         loading={loading}

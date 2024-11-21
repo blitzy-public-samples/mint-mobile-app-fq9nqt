@@ -76,7 +76,7 @@ const CreateGoal: React.FC = () => {
         type: data.type,
         targetAmount: Number(data.targetAmount),
         currentAmount: Number(data.currentAmount),
-        targetDate: new Date(data.targetDate),
+        targetDate: data.targetDate.toISOString(),
         status: data.currentAmount === 0 ? 'NOT_STARTED' : 'IN_PROGRESS',
         userId: '' // Will be set by the API based on authenticated user
       };
@@ -85,7 +85,7 @@ const CreateGoal: React.FC = () => {
       await createNewGoal(goalData);
 
       // Navigate to goals list on success
-      navigate('/dashboard/goals');
+      navigate('/goals');
     } catch (err) {
       setError('root', {
         type: 'manual',

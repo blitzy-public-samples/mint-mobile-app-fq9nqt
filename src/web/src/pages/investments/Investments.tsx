@@ -16,16 +16,26 @@ import Spinner from '../../components/common/Spinner';
 import { Investment } from '@/types/models.types';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
+import Table, { TableColumn } from '@/components/common/Table';
 
 // Asset allocation color mapping
 const ASSET_COLORS = {
-  stocks: '#4CAF50',
+  stock: '#4CAF50',
   bonds: '#2196F3',
   cash: '#FFC107',
   realEstate: '#9C27B0',
   commodities: '#FF5722',
+  etf: '#FF9800',
+  crypto: '#E91E63',
   other: '#607D8B'
 };
+
+const INVESTMENT_COLUMNS: TableColumn[] = [
+  { key: 'symbol', header: 'Asset', sortable: true },
+  { key: 'assetType', header: 'Type', sortable: true, },
+  { key: 'currentValue', header: 'Value', sortable: true, render: (investment: Investment) => investment.currentValue.toLocaleString() },
+  { key: 'return', header: 'Return', sortable: true, render: (investment: Investment) => (<div>{investment.return.toFixed(2)} %{investment.return >= 0 ? ' ▲' : ' ▼'}</div>) }
+];
 
 // Interface for portfolio metrics
 interface PortfolioMetrics {
@@ -99,14 +109,19 @@ const Investments: React.FC = () => {
     // Calculate total value for percentage calculation
     const total = Object.values(groupedByType).reduce((sum, value) => sum + value, 0);
 
-    // Transform into chart data format
-    return Object.entries(groupedByType)
-      .map(([type, value]) => ({
-        label: type.charAt(0).toUpperCase() + type.slice(1),
-        value: total > 0 ? (value / total) * 100 : 0,
-        color: ASSET_COLORS[type as keyof typeof ASSET_COLORS] || ASSET_COLORS.other
-      }))
+    const chartData = Object.entries(groupedByType)
+      .map(([type, value]) => {
+        const chartValue = total > 0 ? (value / total) * 100 : 0;
+        return ({
+          label: type.charAt(0).toUpperCase() + type.slice(1),
+          value: +chartValue.toFixed(1),
+          color: ASSET_COLORS[type as keyof typeof ASSET_COLORS] || ASSET_COLORS.other
+        });
+      })
       .sort((a, b) => b.value - a.value);
+
+    // Transform into chart data format
+    return chartData;
   };
 
   // Memoized asset allocation data
@@ -183,19 +198,19 @@ const Investments: React.FC = () => {
             </button> */}
           </div>
 
-          <div className="portfolio-metrics space-y-4">
-            <div className="metric-card">
+          <div className="flex items-center justify-between">
+            <div>
               <h3 className="font-medium">Total Value</h3>
               <p className="value">${metrics.totalValue.toLocaleString()}</p>
             </div>
-            <div className="metric-card">
+            <div>
               <h3 className="font-medium">Total Gain/Loss</h3>
               <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
                 ${Math.abs(metrics.totalGainLoss).toLocaleString()}
                 {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
               </p>
             </div>
-            <div className="metric-card">
+            <div>
               <h3 className="font-medium">Return</h3>
               <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
                 {metrics.percentageReturn.toFixed(2)}%
@@ -207,18 +222,20 @@ const Investments: React.FC = () => {
 
         {/* Asset Allocation Section */}
         <section className="asset-allocation" aria-label="Asset Allocation">
-          <h2 className="font-medium">Asset Allocation</h2>
           <div className="chart-container">
             <DonutChart
               data={assetAllocationData}
-              // height={300}
+              height={400}
               options={{
                 plugins: {
                   legend: {
                     position: 'bottom',
                     labels: {
+                      font: {
+                        size: 16
+                      },
                       padding: 20,
-                      usePointStyle: true
+                      usePointStyle: true,
                     }
                   },
                   tooltip: {
@@ -228,8 +245,18 @@ const Investments: React.FC = () => {
                         return `${context.label}: ${value.toFixed(1)}%`;
                       }
                     }
+                  },
+                },
+                scales: {
+                  x: {
+                    display: false,
+                  },
+                  y: {
+                    display: false,
                   }
-                }
+                },
+                // responsive: true,
+                // maintainAspectRatio: false,
               }}
               ariaLabel="Asset allocation donut chart"
             />
@@ -238,32 +265,13 @@ const Investments: React.FC = () => {
 
         {/* Holdings List Section */}
         <section className="space-y-4" aria-label="Investment Holdings">
-          <h2 className="font-medium">Holdings</h2>
-          <div className="holdings-table">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Asset</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Value</th>
-                  <th scope="col">Return</th>
-                </tr>
-              </thead>
-              <tbody>
-                {investments.map((investment) => (
-                  <tr key={investment.id} onClick={() => handleInvestmentClick(investment.id)} style={{ cursor: 'pointer' }}>
-                    <td>{investment.symbol}</td>
-                    <td>{investment.assetType}</td>
-                    <td>${investment.currentValue.toLocaleString()}</td>
-                    <td className={investment.return >= 0 ? 'positive' : 'negative'}>
-                      {investment.return.toFixed(2)}%
-                      {investment.return >= 0 ? ' ▲' : ' ▼'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table
+            data={investments}
+            columns={INVESTMENT_COLUMNS}
+            defaultSortKey="currentValue"
+            defaultSortDirection="desc"
+            onRowClick={(investment) => handleInvestmentClick(investment.id)}
+          />
         </section>
 
         {/* Last Updated Information */}

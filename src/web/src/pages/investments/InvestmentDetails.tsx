@@ -138,7 +138,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
 
         {/* Investment Summary */}
         <section className="investment-summary space-y-2" aria-label="Investment Summary">
-          <div className="metric-card">
+          <div>
             <h3 className="font-medium">Current Value</h3>
             <p className="value">
               {new Intl.NumberFormat('en-US', {
@@ -148,7 +148,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
             </p>
           </div>
 
-          <div className="metric-card">
+          <div>
             <h3 className="font-medium">Gain/Loss</h3>
             <p className={`value ${metrics.gainLoss >= 0 ? 'positive' : 'negative'}`}>
               {new Intl.NumberFormat('en-US', {
@@ -159,7 +159,7 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
             </p>
           </div>
 
-          <div className="metric-card">
+          <div>
             <h3 className="font-medium">Return Rate</h3>
             <p className={`value ${metrics.returnRate >= 0 ? 'positive' : 'negative'}`}>
               {metrics.returnRate.toFixed(2)}%

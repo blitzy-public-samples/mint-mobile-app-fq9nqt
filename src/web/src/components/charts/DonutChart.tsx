@@ -36,7 +36,7 @@ interface DonutChartProps {
 
 const DonutChart: React.FC<DonutChartProps> = React.memo(({
   data,
-  height = 300,
+  height,
   options = {},
   className = '',
   ariaLabel = 'Donut chart'

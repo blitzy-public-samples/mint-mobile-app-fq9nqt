@@ -15,6 +15,8 @@ import BarChart from '../charts/BarChart';
 import { useTransactions } from '../../hooks/useTransactions';
 import { formatCurrency } from '../../utils/currency.utils';
 import type { Transaction } from '../../types/models.types';
+import DashboardLayout from '@/layouts/DashboardLayout';
+import Spinner from '../common/Spinner';
 
 // Human Tasks:
 // 1. Verify Chart.js is properly configured for responsive displays
@@ -103,7 +105,7 @@ const SpendingTrends: React.FC<SpendingTrendsProps> = ({
 
     sortedPeriods.forEach(period => {
       const amount = groupedData.get(period) || 0;
-      
+
       // Format label based on timeframe
       const label = timeframe === 'yearly'
         ? period
@@ -163,9 +165,11 @@ const SpendingTrends: React.FC<SpendingTrendsProps> = ({
 
   if (loading) {
     return (
-      <div className={`spending-trends-loading ${className}`}>
-        <p>Loading spending trends...</p>
-      </div>
+      <DashboardLayout>
+        <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+          <Spinner size="large" color="primary" ariaLabel="Loading spending trends" />
+        </div>
+      </DashboardLayout >
     );
   }
 
@@ -186,7 +190,7 @@ const SpendingTrends: React.FC<SpendingTrendsProps> = ({
   }
 
   return (
-    <div 
+    <div
       className={`spending-trends ${className}`}
       role="region"
       aria-label={`Spending trends ${timeframe} visualization`}

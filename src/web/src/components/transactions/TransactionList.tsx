@@ -35,8 +35,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
   ariaLabel = 'Transaction list',
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortKey, setSortKey] = useState<string>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const {
     transactions,
@@ -55,21 +53,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [accountId, startDate, endDate, categoryId]);
-
-  const handleSort = useCallback((key: string) => {
-    setSortKey(key);
-    setSortDirection(prev => {
-      const newDirection = key === sortKey ? (prev === 'asc' ? 'desc' : 'asc') : 'asc';
-      // Announce sort change to screen readers
-      // const announcement = `Table sorted by ${key} ${newDirection === 'asc' ? 'ascending' : 'descending'}`;
-      // const ariaLive = document.createElement('div');
-      // ariaLive.setAttribute('aria-live', 'polite');
-      // ariaLive.textContent = announcement;
-      // document.body.appendChild(ariaLive);
-      // setTimeout(() => document.body.removeChild(ariaLive), 1000);
-      return newDirection;
-    });
-  }, [sortKey]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -169,9 +152,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
         pageSize={pageSize}
         currentPage={currentPage}
         onPageChange={handlePageChange}
-        sortKey={sortKey}
-        sortDirection={sortDirection}
-        onSort={handleSort}
+        defaultSortKey='date'
+        defaultSortDirection='desc'
         onRowClick={onTransactionClick}
         ariaLabel={ariaLabel}
         summary="List of financial transactions with date, description, amount, and category"

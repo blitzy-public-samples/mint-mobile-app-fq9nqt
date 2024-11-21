@@ -138,7 +138,7 @@ export const mockTransactions: Transaction[] = [
     id: '507f1f77bcf86cd799439011',
     accountId: 'acc_checking_001',
     amount: 1250.00,
-    date: new Date('2024-03-15'),
+    date: new Date('2024-11-15'),
     description: 'Monthly Salary',
     categoryId: 'INCOME',
     pending: false,
@@ -148,7 +148,7 @@ export const mockTransactions: Transaction[] = [
     id: '507f1f77bcf86cd799439012',
     accountId: 'acc_checking_001',
     amount: -85.50,
-    date: new Date('2024-03-14'),
+    date: new Date('2024-11-14'),
     description: 'Grocery Store',
     categoryId: 'GROCERIES',
     pending: true,
@@ -158,7 +158,7 @@ export const mockTransactions: Transaction[] = [
     id: '507f1f77bcf86cd799439013',
     accountId: 'acc_savings_001',
     amount: -125.00,
-    date: new Date('2024-03-13'),
+    date: new Date('2024-11-13'),
     description: 'Electric Bill',
     categoryId: 'UTILITIES',
     pending: true,
@@ -168,7 +168,7 @@ export const mockTransactions: Transaction[] = [
     id: '507f1f77bcf86cd799439014',
     accountId: 'acc_credit_001',
     amount: -45.99,
-    date: new Date('2024-03-12'),
+    date: new Date('2024-10-12'),
     description: 'Netflix Subscription',
     categoryId: 'ENTERTAINMENT',
     pending: false,
@@ -178,7 +178,7 @@ export const mockTransactions: Transaction[] = [
     id: '507f1f77bcf86cd799439015',
     accountId: 'acc_savings_001',
     amount: -250.00,
-    date: new Date('2024-03-11'),
+    date: new Date('2024-10-11'),
     description: 'Car Insurance',
     categoryId: 'TRANSPORT',
     pending: false,
@@ -282,6 +282,54 @@ export const mockInvestments: Investment[] = [
     assetType: 'ETF',
     currentValue: 4671.00,
     return: 4.85
+  },
+  {
+    id: "BTC",
+    accountId: "acc_003",
+    symbol: "BTC",
+    quantity: 0.75,
+    costBasis: 35000.00,
+    currentPrice: 68750.00,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    assetType: 'CRYPTO',
+    currentValue: 51562.50,
+    return: 96.43
+  },
+  {
+    id: "ETH",
+    accountId: "acc_003",
+    symbol: "ETH",
+    quantity: 4.5,
+    costBasis: 2200.00,
+    currentPrice: 3850.00,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    assetType: 'CRYPTO',
+    currentValue: 17325.00,
+    return: 75.00
+  },
+  {
+    id: "SOL",
+    accountId: "acc_003",
+    symbol: "SOL",
+    quantity: 85,
+    costBasis: 45.75,
+    currentPrice: 125.50,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    assetType: 'CRYPTO',
+    currentValue: 10667.50,
+    return: 174.32
+  },
+  {
+    id: "LINK",
+    accountId: "acc_003",
+    symbol: "LINK",
+    quantity: 250,
+    costBasis: 12.50,
+    currentPrice: 18.75,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    assetType: 'CRYPTO',
+    currentValue: 4687.50,
+    return: 50.00
   }
 ];
 
@@ -404,6 +452,66 @@ export const mockInvestmentPerformance: Record<string, InvestmentPerformanceData
       { x: "2024-01-15", y: 4620.00 },  // $77.00
       { x: "2024-02-15", y: 4680.00 },  // $78.00
       { x: "2024-03-15", y: 4671.00 }   // $77.85
+    ]
+  },
+  "BTC": {
+    returnRate: 96.43,
+    totalValue: 51562.50,
+    gainLoss: 25312.50,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    historicalData: [
+      { x: "2023-03-15", y: 22500.00 },  // $30000
+      { x: "2023-06-15", y: 24750.00 },  // $33000
+      { x: "2023-09-15", y: 30000.00 },  // $40000
+      { x: "2023-12-15", y: 37500.00 },  // $50000
+      { x: "2024-01-15", y: 41250.00 },  // $55000
+      { x: "2024-02-15", y: 48750.00 },  // $65000
+      { x: "2024-03-15", y: 51562.50 }   // $68750
+    ]
+  },
+  "ETH": {
+    returnRate: 75.00,
+    totalValue: 17325.00,
+    gainLoss: 7425.00,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    historicalData: [
+      { x: "2023-03-15", y: 9900.00 },   // $2200
+      { x: "2023-06-15", y: 11250.00 },  // $2500
+      { x: "2023-09-15", y: 13500.00 },  // $3000
+      { x: "2023-12-15", y: 15750.00 },  // $3500
+      { x: "2024-01-15", y: 16200.00 },  // $3600
+      { x: "2024-02-15", y: 16875.00 },  // $3750
+      { x: "2024-03-15", y: 17325.00 }   // $3850
+    ]
+  },
+  "SOL": {
+    returnRate: 174.32,
+    totalValue: 10667.50,
+    gainLoss: 6779.25,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    historicalData: [
+      { x: "2023-03-15", y: 3825.00 },   // $45.00
+      { x: "2023-06-15", y: 5100.00 },   // $60.00
+      { x: "2023-09-15", y: 6375.00 },   // $75.00
+      { x: "2023-12-15", y: 8500.00 },   // $100.00
+      { x: "2024-01-15", y: 9350.00 },   // $110.00
+      { x: "2024-02-15", y: 10200.00 },  // $120.00
+      { x: "2024-03-15", y: 10667.50 }   // $125.50
+    ]
+  },
+  "LINK": {
+    returnRate: 50.00,
+    totalValue: 4687.50,
+    gainLoss: 1562.50,
+    lastUpdated: new Date("2024-03-15T16:00:00Z"),
+    historicalData: [
+      { x: "2023-03-15", y: 3125.00 },   // $12.50
+      { x: "2023-06-15", y: 3500.00 },   // $14.00
+      { x: "2023-09-15", y: 3750.00 },   // $15.00
+      { x: "2023-12-15", y: 4000.00 },   // $16.00
+      { x: "2024-01-15", y: 4250.00 },   // $17.00
+      { x: "2024-02-15", y: 4500.00 },   // $18.00
+      { x: "2024-03-15", y: 4687.50 }    // $18.75
     ]
   }
 };

@@ -66,7 +66,7 @@ const calculateTotalBalance = (accounts: Account[]): number => {
 // Helper function to group accounts by type
 const groupAccountsByType = (accounts: Account[]): Record<AccountType, Account[]> => {
   const activeAccounts = accounts.filter(account => account.isActive);
-  
+
   return activeAccounts.reduce((groups, account) => {
     const type = account.accountType;
     if (!groups[type]) {
@@ -155,59 +155,62 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
   };
 
   return (
-    <Card
-      title="Accounts Overview"
-      loading={loading}
-      testId="accounts-summary"
-      style={{
-        height: '100%',
-      }}
-    >
-      <div style={styles.container}>
-        {error ? (
-          <div style={styles.error} role="alert">
-            Failed to load accounts. Please try again later.
-          </div>
-        ) : (
-          <>
-            <div style={styles.totalBalance}>
-              <div>Total Balance</div>
-              <div>{formatCurrency(totalBalance)}</div>
-            </div>
+    <div className="p-6">
+      <h2 className="text-xl font-semibold text-text-primary text-center">Accounts Summary</h2>
 
-            {Object.entries(groupedAccounts).map(([type, accounts]) => (
-              <div key={type} style={styles.accountGroup}>
-                <h3 style={styles.groupTitle}>{type}</h3>
-                <div style={styles.accountList}>
-                  {accounts.map((account) => (
-                    <div
-                      key={account.id}
-                      style={styles.accountItem}
-                      onClick={() => handleAccountClick(account.id)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          handleAccountClick(account.id);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`${type} account with balance ${formatCurrency(account.balance)}`}
-                    >
-                      <span style={styles.accountName}>
-                        {account.institutionId}
-                      </span>
-                      <span style={styles.accountBalance}>
-                        {formatCurrency(account.balance, account.currency)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+      {/* <Card
+        loading={loading}
+        testId="accounts-summary"
+        style={{
+          height: '100%',
+        }}
+      > */}
+        <div style={styles.container}>
+          {error ? (
+            <div style={styles.error} role="alert">
+              Failed to load accounts. Please try again later.
+            </div>
+          ) : (
+            <>
+              <div style={styles.totalBalance}>
+                <div>Total Balance</div>
+                <div>{formatCurrency(totalBalance)}</div>
               </div>
-            ))}
-          </>
-        )}
-      </div>
-    </Card>
+
+              {Object.entries(groupedAccounts).map(([type, accounts]) => (
+                <div key={type} style={styles.accountGroup}>
+                  <h3 style={styles.groupTitle}>{type}</h3>
+                  <div style={styles.accountList}>
+                    {accounts.map((account) => (
+                      <div
+                        key={account.id}
+                        style={styles.accountItem}
+                        onClick={() => handleAccountClick(account.id)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            handleAccountClick(account.id);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${type} account with balance ${formatCurrency(account.balance)}`}
+                      >
+                        <span style={styles.accountName}>
+                          {account.institutionId}
+                        </span>
+                        <span style={styles.accountBalance}>
+                          {formatCurrency(account.balance, account.currency)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      {/* </Card> */}
+    </div>
   );
 };
 

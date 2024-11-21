@@ -126,6 +126,14 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
         },
       },
     },
+    scales: {
+      x: {
+        display: false,
+      },
+      y: {
+        display: false,
+      }
+    },
     responsive: true,
     maintainAspectRatio: false,
   };
@@ -151,7 +159,8 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
   }
 
   return (
-    <div>      <h2 className="budget-overview__title">Investment Summary</h2>
+    <div>
+      <h2 className="text-xl font-semibold mb-4 text-text-primary text-center">Investment Summary</h2>
 
       <Card
         className={className}

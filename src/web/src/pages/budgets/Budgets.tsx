@@ -1,5 +1,5 @@
 // @version: react ^18.0.0
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 // @version: react-router-dom ^6.0.0
 import { useNavigate } from 'react-router-dom';
 
@@ -36,10 +36,6 @@ const Budgets: React.FC = () => {
     spendingAnalysis,
     loadMore
   } = useBudgets();
-
-  // State for table sorting
-  const [sortKey, setSortKey] = useState<string>('startDate');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   /**
    * Handles navigation to budget creation page
@@ -149,42 +145,12 @@ const Budgets: React.FC = () => {
     }
   ], [handleEditBudget, handleDeleteBudget]);
 
-  /**
-   * Handles table sorting
-   * Implements requirement: Budget Management UI - Data Organization
-   */
-  const handleSort = useCallback((key: string) => {
-    setSortDirection(prev =>
-      sortKey === key ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'
-    );
-    setSortKey(key);
-  }, [sortKey]);
-
-  // Sort budgets based on current sort key and direction
-  const sortedBudgets = useMemo(() => {
-    if (!budgets) return [];
-
-    return [...budgets].sort((a, b) => {
-      const aValue = a[sortKey];
-      const bValue = b[sortKey];
-
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-
-      if (aValue instanceof Date && bValue instanceof Date) {
-        return sortDirection === 'asc'
-          ? aValue.getTime() - bValue.getTime()
-          : bValue.getTime() - aValue.getTime();
-      }
-
-      const aString = String(aValue);
-      const bString = String(bValue);
-      return sortDirection === 'asc'
-        ? aString.localeCompare(bString)
-        : bString.localeCompare(aString);
-    });
-  }, [budgets, sortKey, sortDirection]);
+  const budgetsToDisplay = useMemo(() => {
+    return budgets.map(budget => ({
+      ...budget,
+      remaining: budget.amount - (budget.spent || 0),
+    }));
+  }, [budgets]);
 
   return (
     <DashboardLayout>
@@ -244,12 +210,11 @@ const Budgets: React.FC = () => {
 
         {/* Budgets Table */}
         <Table
-          data={sortedBudgets}
+          data={budgetsToDisplay}
           columns={columns}
           loading={isLoading}
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onSort={handleSort}
+          defaultSortKey='startDate'
+          defaultSortDirection='desc'
           ariaLabel="Budgets table"
           summary="List of all budgets with their amounts and status"
           hoverable

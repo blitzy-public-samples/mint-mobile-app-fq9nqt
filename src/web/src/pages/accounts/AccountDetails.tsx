@@ -16,6 +16,7 @@ import { getAccountById, syncAccount } from '../../services/api/accounts.api';
 import TransactionList from '../../components/transactions/TransactionList';
 import AreaChart from '../../components/charts/AreaChart';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import Spinner from '@/components/common/Spinner';
 
 // Human Tasks:
 // 1. Configure error monitoring service integration
@@ -98,11 +99,10 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="account-details-loading" role="status">
-          <div className="loading-spinner" aria-hidden="true" />
-          <span>Loading account details...</span>
+        <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+          <Spinner size="large" color="primary" ariaLabel="Loading account details" />
         </div>
-      </DashboardLayout>
+      </DashboardLayout >
     );
   }
 

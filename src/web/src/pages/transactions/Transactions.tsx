@@ -82,7 +82,7 @@ const TransactionsPage: React.FC = () => {
 
   // Handle transaction row click navigation
   const handleTransactionClick = useCallback((transaction: Transaction) => {
-    navigate(`/dashboard/transactions/${transaction.id}`, {
+    navigate(`/transactions/${transaction.id}`, {
       state: { transaction }
     });
   }, [navigate]);

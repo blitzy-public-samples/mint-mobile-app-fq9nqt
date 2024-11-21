@@ -8,6 +8,7 @@ import { useGoals } from '../../hooks/useGoals';
 import ProgressBar from '../../components/common/ProgressBar';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import Button from '@/components/common/Button';
+import Spinner from '@/components/common/Spinner';
 
 /**
  * HUMAN TASKS:
@@ -193,7 +194,13 @@ const GoalDetails: React.FC = () => {
   ) : null;
 
   if (state.isLoading) {
-    return <DashboardLayout><div aria-label="Loading goal details">Loading...</div></DashboardLayout>;
+    return (
+      <DashboardLayout>
+        <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+          <Spinner size="large" color="primary" ariaLabel="Loading goal details" />
+        </div>
+      </DashboardLayout >
+    );
   }
 
   if (!state.goal) {
@@ -251,6 +258,7 @@ const GoalDetails: React.FC = () => {
             <div className="space-y-2">
               <label htmlFor="targetDate" className="block font-medium">Target Date</label>
               <input
+                className="w-full px-4 py-2 border rounded-md"
                 type="date"
                 id="targetDate"
                 value={formData.targetDate}
@@ -273,7 +281,7 @@ const GoalDetails: React.FC = () => {
 
               <Button
                 variant="secondary"
-                onClick={() => setState(prev => ({ ...prev, isEditing: false }))}
+                onClick={() => setState(prev => ({ ...prev, isEditing: false, error: null }))}
               >
                 Cancel
               </Button>

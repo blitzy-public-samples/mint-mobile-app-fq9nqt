@@ -18,6 +18,7 @@ import { TransactionForm } from '../../components/transactions/TransactionForm';
 import { getTransactionById, updateTransaction } from '../../services/api/transactions.api';
 import { mockTransactions } from '@/mocks/mockData';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import Spinner from '@/components/common/Spinner';
 
 /**
  * Interface for component state management
@@ -135,14 +136,10 @@ const TransactionDetails: React.FC = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div
-          className="loading-container"
-          role="alert"
-          aria-busy="true"
-        >
-          <span className="loading-text">Loading transaction details...</span>
+        <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+          <Spinner size="large" color="primary" ariaLabel="Loading transaction details" />
         </div>
-      </DashboardLayout>
+      </DashboardLayout >
     );
   }
 
