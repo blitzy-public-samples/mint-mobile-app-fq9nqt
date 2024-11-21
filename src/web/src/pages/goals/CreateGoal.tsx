@@ -177,8 +177,8 @@ const CreateGoal: React.FC = () => {
               id="targetAmount"
               type="number"
               className="w-full px-4 py-2 border rounded-md"
-              min="0"
-              step="0.01"
+              min={0}
+              step={1}
               {...register('targetAmount', {
                 required: 'Target amount is required',
                 min: {
@@ -210,8 +210,8 @@ const CreateGoal: React.FC = () => {
               id="currentAmount"
               type="number"
               className="w-full px-4 py-2 border rounded-md"
-              min="0"
-              step="0.01"
+              min={0}
+              step={1}
               {...register('currentAmount', {
                 required: 'Current amount is required',
                 min: {

@@ -186,8 +186,8 @@ const CreateBudget: React.FC = () => {
             <input
               id="amount"
               type="number"
-              min="0"
-              step="0.01"
+              min={0}
+              step={1}
               className="w-full px-4 py-2 border rounded-md"
               {...register('amount', {
                 required: 'Total amount is required',
@@ -236,8 +236,8 @@ const CreateBudget: React.FC = () => {
                 <div className="flex-1 space-y-2">
                   <input
                     type="number"
-                    min="0"
-                    step="0.01"
+                    min={0}
+                    step={1}
                     className="w-full px-4 py-2 border rounded-md"
                     placeholder="Amount"
                     {...register(`categories.${index}.amount`, {

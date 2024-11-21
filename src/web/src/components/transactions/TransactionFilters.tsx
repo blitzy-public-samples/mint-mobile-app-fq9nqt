@@ -145,8 +145,8 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
           <div className={styles['amount-inputs']}>
             <input
               type="number"
-              min="0"
-              step="0.01"
+              min={0}
+              step={1}
               placeholder="Min"
               value={filters.amountRange.min ?? ''}
               onChange={(e) => handleFilterChange({
@@ -160,8 +160,8 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
             <span aria-hidden="true">to</span>
             <input
               type="number"
-              min="0"
-              step="0.01"
+              min={0}
+              step={1}
               placeholder="Max"
               value={filters.amountRange.max ?? ''}
               onChange={(e) => handleFilterChange({
