@@ -87,6 +87,7 @@ const useTransactionDetails = (transactionId: string) => {
 
   return {
     ...state,
+    setState,
     setEditing
   };
 };
@@ -103,8 +104,9 @@ const TransactionDetails: React.FC = () => {
   const navigate = useNavigate();
   const {
     transaction,
-    isLoading,
+    setState,
     isEditing,
+    isLoading,
     error,
     setEditing
   } = useTransactionDetails(id);
@@ -123,7 +125,7 @@ const TransactionDetails: React.FC = () => {
         isLoading: false,
         isEditing: false
       }));
-      navigate('/transactions');
+      setEditing(false);
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -191,12 +193,19 @@ const TransactionDetails: React.FC = () => {
           <h1 id="page-title">Transaction Details</h1>
           {!isEditing && (
             <button
-              onClick={() => setEditing(true)}
-              className="edit-button"
-              aria-label="Edit transaction"
-            >
-              Edit
-            </button>
+            onClick={() => setEditing(true)}
+            className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+            aria-label="Edit goal"
+          >
+            Edit
+          </button>
+            // <button
+            //   onClick={() => setEditing(true)}
+            //   className="edit-button"
+            //   aria-label="Edit transaction"
+            // >
+            //   Edit
+            // </button>
           )}
         </header>
 

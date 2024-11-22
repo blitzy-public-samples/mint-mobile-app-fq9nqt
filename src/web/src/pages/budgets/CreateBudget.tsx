@@ -49,6 +49,7 @@ const CreateBudget: React.FC = () => {
     control,
     handleSubmit: handleFormSubmit,
     formState: { errors },
+    setError,
     watch
   } = useForm<BudgetFormData>({
     defaultValues: {
@@ -107,7 +108,9 @@ const CreateBudget: React.FC = () => {
 
       // Validate category amounts
       if (!validateCategoryAmounts()) {
-        throw new Error('Category amounts exceed total budget');
+        setError('amount', { message: 'Category amounts exceed total budget' });
+        setSubmitting(false);
+        return;
       }
 
       // Create budget

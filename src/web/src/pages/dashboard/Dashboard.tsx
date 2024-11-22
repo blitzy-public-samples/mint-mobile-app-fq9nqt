@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Internal components
-import AccountsSummary from '../../components/dashboard/AccountsSummary';
+import AccountsSummary from '../../components/dashboard/AccountsSummary/AccountsSummary';
 import BudgetOverview from '../../components/dashboard/BudgetOverview';
 import RecentTransactions from '../../components/dashboard/RecentTransactions';
 import DashboardLayout from '../../layouts/DashboardLayout';
@@ -94,13 +94,13 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardLayout>
       <div
-        className="dashboard-container"
+        className="dashboard-container mx-auto max-w-6xl"
         role="main"
         aria-label="Dashboard content"
       >
         {/* Welcome message with user's name */}
         <header className="dashboard-header">
-          <h1>Welcome, {user?.firstName || 'User'}</h1>
+          <h1 className='font-semibold'>Welcome, {user?.firstName || 'User'}</h1>
           <p className="last-updated">
             Last updated: {new Date().toLocaleString()}
           </p>
@@ -154,20 +154,12 @@ const Dashboard: React.FC = () => {
       </div>
 
       <style jsx>{`
-        .dashboard-container {
-          // padding: var(--spacing-4);
-          max-width: 1200px;
-          margin: 0 auto;
-          min-height: 100vh;
-        }
-
         .dashboard-header {
           margin-bottom: var(--spacing-6);
         }
 
         .dashboard-header h1 {
           font-size: var(--font-size-2xl);
-          font-weight: var(--font-weight-bold);
           color: var(--color-text-primary);
           margin-bottom: var(--spacing-2);
         }

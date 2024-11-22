@@ -30,8 +30,6 @@ const Budgets: React.FC = () => {
     budgets,
     isLoading,
     error,
-    createBudget,
-    updateBudget,
     deleteBudget,
     spendingAnalysis,
     loadMore
@@ -154,11 +152,11 @@ const Budgets: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <div className='mx-auto max-w-6xl space-y-6'>
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-semibold text-gray-900">
               Budget Management
             </h1>
             <p className="mt-1 text-sm text-gray-500">

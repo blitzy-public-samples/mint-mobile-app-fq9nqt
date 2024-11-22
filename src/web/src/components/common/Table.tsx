@@ -311,11 +311,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .table-hoverable .table-row:hover {
-            background-color: var(--color-background-hover);
-          }
-
-          .table-striped .table-row:nth-child(even) {
-            background-color: var(--color-background-alternate);
+            background-color: var(--color-neutral-100);
           }
 
           .table-row.clickable {

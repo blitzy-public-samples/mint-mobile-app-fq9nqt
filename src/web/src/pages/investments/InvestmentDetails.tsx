@@ -131,9 +131,9 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
         {/* Investment Header */}
         <header className="investment-header">
           <h1 className="text-2xl font-bold mb-6">{state.investment.symbol}</h1>
-          <div className="last-updated font-medium">
+          {/* <div className="last-updated font-medium">
             Last updated: {new Date(state.investment.lastUpdated).toLocaleString()}
-          </div>
+          </div> */}
         </header>
 
         {/* Investment Summary */}

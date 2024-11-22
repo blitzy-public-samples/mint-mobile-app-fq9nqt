@@ -34,7 +34,11 @@ const INVESTMENT_COLUMNS: TableColumn[] = [
   { key: 'symbol', header: 'Asset', sortable: true },
   { key: 'assetType', header: 'Type', sortable: true, },
   { key: 'currentValue', header: 'Value', sortable: true, render: (investment: Investment) => investment.currentValue.toLocaleString() },
-  { key: 'return', header: 'Return', sortable: true, render: (investment: Investment) => (<div>{investment.return.toFixed(2)} %{investment.return >= 0 ? ' ▲' : ' ▼'}</div>) }
+  { key: 'return', header: 'Return', sortable: true, render: (investment: Investment) => {
+    const isPositive = investment.return >= 0;
+    const Icon = <span style={{ color: isPositive ? 'var(--color-success-400)' : 'var(--color-error-400)' }}>{isPositive ? ' ▲' : ' ▼'}</span>;
+    return (<div>{investment.return.toFixed(2)}% {Icon}</div>);
+  } }
 ];
 
 // Interface for portfolio metrics
@@ -147,140 +151,128 @@ const Investments: React.FC = () => {
   }
 
   // Handle sync button click
-  const handleSync = async () => {
-    try {
-      await syncInvestments();
-    } catch (error) {
-      console.error('Investment sync failed:', error);
-    }
-  };
+  // const handleSync = async () => {
+  //   try {
+  //     await syncInvestments();
+  //   } catch (error) {
+  //     console.error('Investment sync failed:', error);
+  //   }
+  // };
 
-  // Render loading state
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <div className="w-full h-full flex justify-center items-center" role="status">
-          <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const MainContent = <div className="mx-auto max-w-6xl space-y-6">
+    {/* Portfolio Overview Section */}
+    <section className="portfolio-overview" aria-label="Portfolio Overview">
+      <div className="portfolio-header">
+        <h1 className="text-2xl font-semibold mb-6">Investment Portfolio</h1>
+        {/* <button
+        onClick={handleSync}
+        disabled={syncing}
+        className="mt-4 px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+        aria-label={syncing ? "Syncing investments" : "Sync investments"}
+      >
+        {syncing ? <Spinner size="small" color="white" /> : 'Sync'}
+      </button> */}
+      </div>
 
-  // Render error state
-  if (error) {
-    return (
-      <DashboardLayout>
-        <div className="investments-error" role="alert">
-          <h2>Error Loading Investments</h2>
-          <p>{error.message}</p>
-          <button onClick={fetchInvestments} className="retry-button">
-            Retry
-          </button>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-medium">Total Value</h3>
+          <p className="value">${metrics.totalValue.toLocaleString()}</p>
         </div>
-      </DashboardLayout>
-    );
-  }
+        <div>
+          <h3 className="font-medium">Total Gain/Loss</h3>
+          <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
+            ${Math.abs(metrics.totalGainLoss).toLocaleString()}
+            {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
+          </p>
+        </div>
+        <div>
+          <h3 className="font-medium">Return</h3>
+          <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
+            {metrics.percentageReturn.toFixed(2)}%
+            {metrics.percentageReturn >= 0 ? ' ▲' : ' ▼'}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* Asset Allocation Section */}
+    <section className="asset-allocation" aria-label="Asset Allocation">
+      <div className="chart-container">
+        <DonutChart
+          data={assetAllocationData}
+          height={400}
+          options={{
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  font: {
+                    size: 16
+                  },
+                  padding: 20,
+                  usePointStyle: true,
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context: any) => {
+                    const value = context.raw as number;
+                    return `${context.label}: ${value.toFixed(1)}%`;
+                  }
+                }
+              },
+            },
+            scales: {
+              x: {
+                display: false,
+              },
+              y: {
+                display: false,
+              }
+            },
+          }}
+          ariaLabel="Asset allocation donut chart"
+        />
+      </div>
+    </section>
+
+    {/* Holdings List Section */}
+    <section className="space-y-4" aria-label="Investment Holdings">
+      <Table
+        data={investments}
+        columns={INVESTMENT_COLUMNS}
+        defaultSortKey="currentValue"
+        defaultSortDirection="desc"
+        onRowClick={(investment) => handleInvestmentClick(investment.id)}
+      />
+    </section>
+
+    {/* Last Updated Information */}
+    <footer className="investments-footer">
+      <p className="last-updated">
+        Last updated: {metrics.lastUpdated.toLocaleString()}
+      </p>
+    </footer>
+  </div>;
+
+  const Content = loading
+    ? (<div className="w-full h-full flex justify-center items-center" role="status">
+      <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
+    </div>)
+    : error
+      ? (<div className="investments-error" role="alert">
+        <h2>Error Loading Investments</h2>
+        <p>{error.message}</p>
+        <button onClick={fetchInvestments} className="retry-button">
+          Retry
+        </button>
+      </div>)
+      : MainContent;
 
   return (
     <DashboardLayout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Portfolio Overview Section */}
-        <section className="portfolio-overview" aria-label="Portfolio Overview">
-          <div className="portfolio-header">
-            <h1 className="text-2xl font-bold mb-6">Investment Portfolio</h1>
-            {/* <button
-              onClick={handleSync}
-              disabled={syncing}
-              className="mt-4 px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-              aria-label={syncing ? "Syncing investments" : "Sync investments"}
-            >
-              {syncing ? <Spinner size="small" color="white" /> : 'Sync'}
-            </button> */}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium">Total Value</h3>
-              <p className="value">${metrics.totalValue.toLocaleString()}</p>
-            </div>
-            <div>
-              <h3 className="font-medium">Total Gain/Loss</h3>
-              <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
-                ${Math.abs(metrics.totalGainLoss).toLocaleString()}
-                {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
-              </p>
-            </div>
-            <div>
-              <h3 className="font-medium">Return</h3>
-              <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
-                {metrics.percentageReturn.toFixed(2)}%
-                {metrics.percentageReturn >= 0 ? ' ▲' : ' ▼'}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Asset Allocation Section */}
-        <section className="asset-allocation" aria-label="Asset Allocation">
-          <div className="chart-container">
-            <DonutChart
-              data={assetAllocationData}
-              height={400}
-              options={{
-                plugins: {
-                  legend: {
-                    position: 'bottom',
-                    labels: {
-                      font: {
-                        size: 16
-                      },
-                      padding: 20,
-                      usePointStyle: true,
-                    }
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: (context: any) => {
-                        const value = context.raw as number;
-                        return `${context.label}: ${value.toFixed(1)}%`;
-                      }
-                    }
-                  },
-                },
-                scales: {
-                  x: {
-                    display: false,
-                  },
-                  y: {
-                    display: false,
-                  }
-                },
-                // responsive: true,
-                // maintainAspectRatio: false,
-              }}
-              ariaLabel="Asset allocation donut chart"
-            />
-          </div>
-        </section>
-
-        {/* Holdings List Section */}
-        <section className="space-y-4" aria-label="Investment Holdings">
-          <Table
-            data={investments}
-            columns={INVESTMENT_COLUMNS}
-            defaultSortKey="currentValue"
-            defaultSortDirection="desc"
-            onRowClick={(investment) => handleInvestmentClick(investment.id)}
-          />
-        </section>
-
-        {/* Last Updated Information */}
-        <footer className="investments-footer">
-          <p className="last-updated">
-            Last updated: {metrics.lastUpdated.toLocaleString()}
-          </p>
-        </footer>
-      </div>
+      {Content}
     </DashboardLayout>
   );
 };

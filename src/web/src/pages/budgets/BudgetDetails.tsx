@@ -8,7 +8,7 @@
 
 // React v18.2.0
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom'; // v6.0.0
+import { useNavigate, useParams } from 'react-router-dom'; // v6.0.0
 
 // Internal imports
 import { Budget } from '../../types/models.types';
@@ -49,6 +49,7 @@ const getProgressVariant = (percentage: number): 'success' | 'warning' | 'danger
 const BudgetDetails: React.FC = () => {
   // Get budget ID from URL parameters
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   // Initialize budget management hook
   const {
@@ -59,7 +60,7 @@ const BudgetDetails: React.FC = () => {
     deleteBudget } = useBudgets();
 
   // Local state for current budget and edit mode
-  const [currentBudget, setCurrentBudget] = useState<Budget | null>(null);
+  const [currentBudget, setCurrentBudget] = useState<Budget | null | undefined>(undefined);
   const [isEditing, setIsEditing] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
@@ -89,14 +90,14 @@ const BudgetDetails: React.FC = () => {
 
     try {
       await deleteBudget(currentBudget.id);
-      // Navigation will be handled by the router
+      navigate('/budgets');
     } catch (error) {
       console.error('Failed to delete budget:', error);
     }
   }, [currentBudget, deleteBudget]);
 
   // Loading state
-  if (isLoading) {
+  if (isLoading || currentBudget === undefined) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -107,7 +108,7 @@ const BudgetDetails: React.FC = () => {
   }
 
   // Error state
-  if (error || !currentBudget) {
+  if (error || currentBudget === null) {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center min-h-screen">

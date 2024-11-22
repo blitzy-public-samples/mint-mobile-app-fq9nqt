@@ -61,22 +61,13 @@ const CreateGoal: React.FC = () => {
    */
   const onSubmit = async (data: CreateGoalFormData) => {
     try {
-      // Validate amount constraints
-      if (data.currentAmount > data.targetAmount) {
-        setError('currentAmount', {
-          type: 'manual',
-          message: 'Current amount cannot exceed target amount'
-        });
-        return;
-      }
-
       // Format goal data
       const goalData: Omit<Goal, 'id'> = {
         name: data.name.trim(),
         type: data.type,
         targetAmount: Number(data.targetAmount),
         currentAmount: Number(data.currentAmount),
-        targetDate: data.targetDate.toISOString(),
+        targetDate: data.targetDate,
         status: data.currentAmount === 0 ? 'NOT_STARTED' : 'IN_PROGRESS',
         userId: '' // Will be set by the API based on authenticated user
       };
@@ -182,12 +173,9 @@ const CreateGoal: React.FC = () => {
               {...register('targetAmount', {
                 required: 'Target amount is required',
                 min: {
-                  value: 0.01,
+                  value: 1,
                   message: 'Target amount must be greater than 0'
                 },
-                validate: value =>
-                  value > (currentAmount || 0) ||
-                  'Target amount must be greater than current amount'
               })}
               aria-invalid={errors.targetAmount ? 'true' : 'false'}
             />
@@ -219,8 +207,8 @@ const CreateGoal: React.FC = () => {
                   message: 'Current amount cannot be negative'
                 },
                 validate: value =>
-                  value <= (targetAmount || 0) ||
-                  'Current amount cannot exceed target amount'
+                  Number(value) > (Number(targetAmount)) ?
+                    'Current amount cannot exceed target amount' : undefined
               })}
               aria-invalid={errors.currentAmount ? 'true' : 'false'}
             />
@@ -292,7 +280,7 @@ const CreateGoal: React.FC = () => {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => navigate('/dashboard/goals')}
+              onClick={() => navigate('/goals')}
               disabled={isLoading}
               className="w-full"
             >

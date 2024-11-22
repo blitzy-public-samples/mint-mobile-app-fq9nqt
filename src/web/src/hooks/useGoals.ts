@@ -108,6 +108,7 @@ export function useGoals(options: UseGoalsOptions = {}) {
         name: goalData.name,
         type: goalData.type,
         targetAmount: goalData.targetAmount,
+        currentAmount: goalData.currentAmount,
         targetDate: goalData.targetDate,
         // description: goalData.description
       });

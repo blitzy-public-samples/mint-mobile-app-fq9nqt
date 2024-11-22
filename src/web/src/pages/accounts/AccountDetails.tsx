@@ -147,21 +147,27 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
         <section className="account-summary">
           <div className="account-header">
             <h1>Account Details</h1>
-            <button
+            {/* <button
               onClick={handleSync}
               disabled={syncing}
               className="sync-button"
               aria-busy={syncing}
             >
               {syncing ? 'Syncing...' : 'Sync Account'}
-            </button>
+            </button> */}
           </div>
 
           <div className="account-info">
-            <div className="info-group">
-              <label>Account Type</label>
-              <span>{account.accountType}</span>
-            </div>
+            {/* <div className='flex flex-row '> */}
+              <div className="info-group">
+                <label>Institution</label>
+                <span>{account.institutionId}</span>
+              </div>
+              <div className="info-group">
+                <label>Account Type</label>
+                <span>{account.accountType}</span>
+              </div>
+            {/* </div> */}
             <div className="info-group">
               <label>Current Balance</label>
               <span className="balance">

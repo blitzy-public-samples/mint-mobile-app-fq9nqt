@@ -191,11 +191,11 @@ const TransactionList: React.FC<TransactionListProps> = ({
             color: var(--color-error);
           }
 
-          .category-cell {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-          }
+          // .category-cell {
+          //   display: flex;
+          //   align-items: center;
+          //   gap: 0.5rem;
+          // }
 
           .category-indicator {
             width: 12px;

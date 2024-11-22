@@ -57,17 +57,16 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
       const currentValue = investment.quantity * investment.currentPrice;
       const costBasis = investment.costBasis;
       const gainLoss = currentValue - costBasis;
-      const percentageReturn = costBasis > 0 ? (gainLoss / costBasis) * 100 : 0;
 
       return {
         totalValue: metrics.totalValue + currentValue,
         totalGainLoss: metrics.totalGainLoss + gainLoss,
-        percentageReturn: metrics.percentageReturn + percentageReturn,
+        totalCostBasis: metrics.totalCostBasis + costBasis,
       };
     }, {
       totalValue: 0,
       totalGainLoss: 0,
-      percentageReturn: 0,
+      totalCostBasis: 0,
     });
   }, []);
 
@@ -99,7 +98,17 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
   // Memoize portfolio metrics calculation
   const portfolioMetrics = useMemo(() => {
     if (!investments.length) return null;
-    return calculatePortfolioMetrics(investments);
+    const metrics = calculatePortfolioMetrics(investments);
+    
+    // Calculate the overall percentage return
+    const percentageReturn = metrics.totalCostBasis > 0 
+      ? (metrics.totalGainLoss / metrics.totalCostBasis) * 100 
+      : 0;
+    
+    return {
+      ...metrics,
+      percentageReturn,
+    };
   }, [investments, calculatePortfolioMetrics]);
 
   // Memoize asset allocation data preparation
@@ -202,7 +211,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
             <DonutChart
               data={allocationData}
               options={chartOptions}
-              height={300}
+              height={500}
               ariaLabel="Investment portfolio asset allocation chart"
             />
           </div>
@@ -273,7 +282,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
             flex: 1;
           }
         }
-      `}</style>
+      `} as any</style>
       </Card>
     </div>
   );

@@ -13,11 +13,11 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 // Internal imports
-import { Account, AccountType } from '../../types/models.types';
-import Card from '../common/Card';
-import { getAccounts } from '../../services/api/accounts.api';
-import { formatCurrency } from '../../utils/currency.utils';
-
+import { Account, AccountType } from '../../../types/models.types';
+import Card from '../../common/Card';
+import { getAccounts } from '../../../services/api/accounts.api';
+import { formatCurrency } from '../../../utils/currency.utils';
+import './accounts-summary.css';
 // Human tasks:
 // 1. Verify proper error tracking is configured
 // 2. Confirm accessibility color contrast ratios
@@ -113,9 +113,6 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
       textAlign: 'center' as const,
       margin: 'var(--spacing-4) 0',
     },
-    accountGroup: {
-      marginBottom: 'var(--spacing-4)',
-    },
     groupTitle: {
       fontSize: 'var(--font-size-md)',
       fontWeight: 'var(--font-weight-semibold)',
@@ -136,7 +133,7 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
       borderRadius: 'var(--border-radius-md)',
       cursor: 'pointer',
       transition: 'background-color 0.2s ease',
-      minHeight: '44px', // Minimum touch target size
+      minHeight: '44px',
     },
     accountName: {
       fontSize: 'var(--font-size-sm)',
@@ -165,50 +162,50 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
           height: '100%',
         }}
       > */}
-        <div style={styles.container}>
-          {error ? (
-            <div style={styles.error} role="alert">
-              Failed to load accounts. Please try again later.
+      <div style={styles.container}>
+        {error ? (
+          <div style={styles.error} role="alert">
+            Failed to load accounts. Please try again later.
+          </div>
+        ) : (
+          <>
+            <div style={styles.totalBalance}>
+              <div>Total Balance</div>
+              <div>{formatCurrency(totalBalance)}</div>
             </div>
-          ) : (
-            <>
-              <div style={styles.totalBalance}>
-                <div>Total Balance</div>
-                <div>{formatCurrency(totalBalance)}</div>
-              </div>
 
-              {Object.entries(groupedAccounts).map(([type, accounts]) => (
-                <div key={type} style={styles.accountGroup}>
-                  <h3 style={styles.groupTitle}>{type}</h3>
-                  <div style={styles.accountList}>
-                    {accounts.map((account) => (
-                      <div
-                        key={account.id}
-                        style={styles.accountItem}
-                        onClick={() => handleAccountClick(account.id)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            handleAccountClick(account.id);
-                          }
-                        }}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`${type} account with balance ${formatCurrency(account.balance)}`}
-                      >
-                        <span style={styles.accountName}>
-                          {account.institutionId}
-                        </span>
-                        <span style={styles.accountBalance}>
-                          {formatCurrency(account.balance, account.currency)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+            {Object.entries(groupedAccounts).map(([type, accounts]) => (
+              <div key={type} className="account-group">
+                <h3 style={styles.groupTitle}>{type}</h3>
+                <div style={styles.accountList}>
+                  {accounts.map((account) => (
+                    <div
+                      key={account.id}
+                      style={styles.accountItem}
+                      onClick={() => handleAccountClick(account.id)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          handleAccountClick(account.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${type} account with balance ${formatCurrency(account.balance)}`}
+                    >
+                      <span style={styles.accountName}>
+                        {account.institutionId}
+                      </span>
+                      <span style={styles.accountBalance}>
+                        {formatCurrency(account.balance, account.currency)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </>
-          )}
-        </div>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
       {/* </Card> */}
     </div>
   );

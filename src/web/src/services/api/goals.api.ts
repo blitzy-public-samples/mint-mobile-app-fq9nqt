@@ -30,6 +30,7 @@ interface CreateGoalParams {
   name: string;
   type: GoalType;
   targetAmount: number;
+  currentAmount: number;
   targetDate: Date;
   description?: string;
 }
@@ -149,8 +150,8 @@ export async function createGoal(goalData: CreateGoalParams): Promise<ApiRespons
         name: goalData.name,
         type: goalData.type,
         targetAmount: goalData.targetAmount,
-        currentAmount: 0,
-        targetDate: goalData.targetDate.toISOString(),
+        currentAmount: goalData.currentAmount,
+        targetDate: goalData.targetDate,
         status: 'NOT_STARTED'
       };
       mockGoals.push(newGoal);
@@ -218,7 +219,15 @@ export async function deleteGoal(id: string): Promise<ApiResponse<void>> {
       timeout: API_CONFIG.TIMEOUT
     });
 
-    const response = await api.delete(GOALS_API_ENDPOINTS.DELETE_GOAL.replace(':id', id));
+    const response = await api.delete(GOALS_API_ENDPOINTS.DELETE_GOAL.replace(':id', id)).catch((e) => {
+      console.error(e);
+      const goalIndex = mockGoals.findIndex(goal => goal.id === id);
+      if (goalIndex === -1 || !mockGoals[goalIndex]) {
+        throw new Error('Goal not found');
+      }
+      mockGoals.splice(goalIndex, 1);
+      return { data: null };
+    });
     return response.data;
   } catch (error) {
     throw handleApiError(error as AxiosError);

@@ -17,6 +17,7 @@ import { Transaction } from '../../types/models.types';
 import { Input } from '../common/Input';
 import { Button } from '../common/Button';
 import { formatCurrency, parseCurrencyString } from '../../utils/currency.utils';
+import { TransactionCategory } from '../../types/models.types';
 
 /**
  * Props interface for TransactionForm component
@@ -96,9 +97,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
     if (isNaN(numericValue)) {
       return 'Please enter a valid amount';
     }
-    if (numericValue <= 0) {
-      return 'Amount must be greater than zero';
-    }
+
     return true;
   };
 
@@ -131,7 +130,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
   });
 
   return (
-    <form 
+    <form
       onSubmit={onFormSubmit}
       className="transaction-form"
       aria-label="Transaction form"
@@ -141,7 +140,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
         <Controller
           name="description"
           control={control}
-          rules={{ 
+          rules={{
             required: 'Description is required',
             maxLength: {
               value: 100,
@@ -153,6 +152,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
               type="text"
               label="Description"
               required
+              disabled
               error={errors.description?.message}
               {...field}
             />
@@ -169,6 +169,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
             <Input
               type="text"
               label="Amount"
+              disabled
               required
               value={formatCurrency(value)}
               onChange={(val) => handleAmountChange(val, onChange)}
@@ -182,15 +183,38 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           name="categoryId"
           control={control}
           rules={{ required: 'Category is required' }}
-          render={({ field }) => (
-            <Input
-              type="text"
-              label="Category"
-              required
-              error={errors.categoryId?.message}
-              {...field}
-            />
-          )}
+          render={({ field }) => {
+            const options = ['INCOME', 'SHOPPING', 'GROCERIES', 'TRANSPORT', 'UTILITIES', 'ENTERTAINMENT', 'HEALTHCARE', 'OTHER'];
+            return (
+              <>
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Category
+                </label>
+                <select
+                  id="category"
+                  className="w-full px-4 py-2 border rounded-md"
+
+                  {...field}
+                >
+                  {options.map(option => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </>
+              // <Input
+              //   type="text"
+              //   label="Category"
+              //   required
+              //   error={errors.categoryId?.message}
+              //   {...field}
+              // />
+            );
+          }}
         />
 
         <Controller
@@ -199,8 +223,10 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({
           rules={{ required: 'Date is required' }}
           render={({ field: { value, onChange, ...field } }) => (
             <Input
+              className="w-full px-4 py-2 border rounded-md"
               type="date"
               label="Date"
+              disabled
               required
               value={value instanceof Date ? value.toISOString().split('T')[0] : value}
               onChange={(val) => onChange(new Date(val))}

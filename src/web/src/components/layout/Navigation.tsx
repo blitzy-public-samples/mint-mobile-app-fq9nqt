@@ -24,7 +24,7 @@ const NAVIGATION_ITEMS = [
   { path: '/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
   { path: '/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
   { path: '/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
-  { path: '/transactions', label: 'Transactions', icon: <TransactionIcon size={24} />, ariaLabel: 'Navigate to Transactions' }
+  { path: '/transactions', label: 'Transactions', icon: <TransactionIcon size={24} />, ariaLabel: 'Navigate to Transactions', hideOnMobile: true }
 ];
 
 /**
@@ -130,7 +130,7 @@ const Navigation: React.FC = () => {
     >
 
       <div className="flex justify-around items-center h-16">
-        {NAVIGATION_ITEMS.map((item) => (
+      {NAVIGATION_ITEMS.filter(item => !isMobile || !item.hideOnMobile).map((item) => (
             <Button
               key={item.path}
               variant="text"

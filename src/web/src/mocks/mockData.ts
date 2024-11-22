@@ -43,6 +43,26 @@ export const mockAccounts: Account[] = [
     currency: 'USD',
     lastSynced: new Date(),
     isActive: true
+  },
+  {
+    id: 'acc_investment_001',
+    userId: 'user_001',
+    accountType: 'INVESTMENT',
+    balance: 125750.85,
+    institutionId: 'Fidelity',
+    currency: 'USD',
+    lastSynced: new Date(),
+    isActive: true
+  },
+  {
+    id: 'acc_loan_001',
+    userId: 'user_001',
+    accountType: 'LOAN',
+    balance: -45000.00,
+    institutionId: 'SallieMae',
+    currency: 'USD',
+    lastSynced: new Date(),
+    isActive: true
   }
 ];
 
@@ -130,6 +150,42 @@ export let mockBudgets: Budget[] = [
         color: '#673AB7',
       }
     ]
+  },
+  {
+    id: 'budget_quarterly_maintenance',
+    userId: 'usr_01',
+    name: 'Home & Personal Development',
+    period: 'QUARTERLY',
+    amount: 3000,
+    spent: 1250,
+    startDate: new Date("2024-01-01T00:00:00.000Z"),
+    endDate: new Date("2024-03-31T23:59:59.999Z"),
+    categories: [
+      {
+        id: 'category_home_maintenance',
+        budgetId: 'budget_quarterly_maintenance',
+        name: 'Home Maintenance',
+        amount: 1500,
+        spent: 850,
+        color: '#795548',
+      },
+      {
+        id: 'category_education',
+        budgetId: 'budget_quarterly_maintenance',
+        name: 'Education & Courses',
+        amount: 1000,
+        spent: 300,
+        color: '#009688',
+      },
+      {
+        id: 'category_home_improvement',
+        budgetId: 'budget_quarterly_maintenance',
+        name: 'Home Improvement',
+        amount: 500,
+        spent: 100,
+        color: '#FF5722',
+      }
+    ]
   }
 ];
 
@@ -183,6 +239,74 @@ export const mockTransactions: Transaction[] = [
     categoryId: 'TRANSPORT',
     pending: false,
     metadata: {}
+  },
+  {
+    id: '507f1f77bcf86cd799439016',
+    accountId: 'acc_loan_001',
+    amount: -450.00,
+    date: new Date('2024-03-15'),
+    description: 'Student Loan Monthly Payment',
+    categoryId: 'LOAN_PAYMENT',
+    pending: false,
+    metadata: {
+      paymentType: 'scheduled',
+      principalAmount: 325.50,
+      interestAmount: 124.50
+    }
+  },
+  {
+    id: '507f1f77bcf86cd799439017',
+    accountId: 'acc_loan_001',
+    amount: -124.50,
+    date: new Date('2024-03-15'),
+    description: 'Loan Interest Charge',
+    categoryId: 'LOAN_INTEREST',
+    pending: false,
+    metadata: {
+      interestRate: '5.5%',
+      billingPeriod: '2024-02-15 to 2024-03-15'
+    }
+  },
+  {
+    id: '507f1f77bcf86cd799439018',
+    accountId: 'acc_loan_001',
+    amount: -450.00,
+    date: new Date('2024-02-15'),
+    description: 'Student Loan Monthly Payment',
+    categoryId: 'LOAN_PAYMENT',
+    pending: false,
+    metadata: {
+      paymentType: 'scheduled',
+      principalAmount: 323.75,
+      interestAmount: 126.25
+    }
+  },
+  {
+    id: '507f1f77bcf86cd799439019',
+    accountId: 'acc_loan_001',
+    amount: -126.25,
+    date: new Date('2024-02-15'),
+    description: 'Loan Interest Charge',
+    categoryId: 'LOAN_INTEREST',
+    pending: false,
+    metadata: {
+      interestRate: '5.5%',
+      billingPeriod: '2024-01-15 to 2024-02-15'
+    }
+  },
+  {
+    id: '507f1f77bcf86cd799439020',
+    accountId: 'acc_loan_001',
+    amount: -1000.00,
+    date: new Date('2024-02-01'),
+    description: 'Extra Loan Payment',
+    categoryId: 'LOAN_PAYMENT',
+    pending: false,
+    metadata: {
+      paymentType: 'extra',
+      principalAmount: 1000.00,
+      interestAmount: 0
+    }
   }
 ];
 

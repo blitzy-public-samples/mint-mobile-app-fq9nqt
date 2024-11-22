@@ -11,7 +11,7 @@ import {
   getBudgetSpending
 } from '../services/api/budgets.api';
 import { useNotifications } from '../contexts/NotificationContext';
-import { mockBudgets } from '@/mocks/mockData';
+import { mockBudgets, mockUser } from '@/mocks/mockData';
 
 /**
  * Human Tasks:
@@ -98,8 +98,12 @@ export default function useBudgets() {
         }, { spent: 0, remaining: 0, categories: [] });
 
         spendingAnalysis.categories.forEach(category => {
-          category.percentage = (category.spent / spendingAnalysis.spent) * 100;
+          category.percentage = spendingAnalysis.spent === 0
+            ? 0
+            : (category.spent / spendingAnalysis.spent) * 100;
         });
+
+        spendingAnalysis.categories.sort((a, b) => b.percentage - a.percentage);
 
         return ({
           ...prev,
@@ -136,15 +140,17 @@ export default function useBudgets() {
       }));
       notificationActions.fetchNotifications();
     } catch (error) {
-      const newBudgetId = new Date().toISOString();
+      console.error('Failed to create budget:', error);
+
+      const newBudgetId = Date.now().toString();
       const newBudget: Budget = {
         id: newBudgetId,
-        userId: '123',
+        userId: mockUser.id,
         name: data.name,
         period: data.period,
         amount: data.amount,
         categories: data.categories.map(({ name, amount }) => ({
-          id: new Date().toISOString(),
+          id: Date.now().toString(),
           budgetId: newBudgetId,
           name,
           amount,
@@ -166,7 +172,6 @@ export default function useBudgets() {
       //   error: 'Failed to create budget',
       //   isLoading: false
       // }));
-      throw error;
     }
   }, [notificationActions]);
 
@@ -211,12 +216,16 @@ export default function useBudgets() {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
       await deleteBudget(budgetId).then(() => {
-        mockBudgets = mockBudgets.filter(budget => budget.id !== budgetId);
         setState(prev => ({
           ...prev,
           budgets: prev.budgets.filter(budget => budget.id !== budgetId)
         }));
       }).catch(() => {
+        const budgetIndex = mockBudgets.findIndex(budget => budget.id === budgetId);
+        if (budgetIndex !== -1 && mockBudgets[budgetIndex]) {
+          mockBudgets.splice(budgetIndex, 1);
+        }
+
         setState(prev => ({
           ...prev,
           budgets: prev.budgets.filter(budget => budget.id !== budgetId)

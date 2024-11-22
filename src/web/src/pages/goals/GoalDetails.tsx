@@ -187,7 +187,7 @@ const GoalDetails: React.FC = () => {
   const ErrorDetails = state.error ? (
     <div
       role="alert"
-      className="p-3 text-sm text-red-700 bg-red-100 border border-red-300 rounded-md"
+      className="text-sm text-red-700"
     >
       {state.error}
     </div>
@@ -265,8 +265,9 @@ const GoalDetails: React.FC = () => {
                 onChange={e => setFormData(prev => ({ ...prev, targetDate: e.target.value as Date }))}
                 required
               />
+              {ErrorDetails}
             </div>
-            {ErrorDetails}
+            
             <div className="flex justify-end gap-4">
               {/* <Button type="submit" disabled={state.isLoading}>
                 Save Changes

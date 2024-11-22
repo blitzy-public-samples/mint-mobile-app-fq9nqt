@@ -129,46 +129,46 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
         </span>
       ),
     },
-    {
-      key: 'lastSynced',
-      header: 'Last Synced',
-      sortable: true,
-      width: '20%',
-      render: (account: Account) => (
-        <span>
-          {new Intl.DateTimeFormat('en-US', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-          }).format(new Date(account.lastSynced))}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      width: '20%',
-      render: (account: Account) => (
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAccountSync(account.id);
-            }}
-            disabled={!account.isActive || syncingAccounts.has(account.id)}
-            ariaLabel={`Sync ${account.institutionName} account`}
-          >
-            {syncingAccounts.has(account.id) ? 'Syncing...' : 'Sync'}
-          </Button>
-        </div>
-      ),
-    },
+    // {
+    //   key: 'lastSynced',
+    //   header: 'Last Synced',
+    //   sortable: true,
+    //   width: '20%',
+    //   render: (account: Account) => (
+    //     <span>
+    //       {new Intl.DateTimeFormat('en-US', {
+    //         dateStyle: 'medium',
+    //         timeStyle: 'short'
+    //       }).format(new Date(account.lastSynced))}
+    //     </span>
+    //   ),
+    // },
+    // {
+    //   key: 'actions',
+    //   header: 'Actions',
+    //   width: '20%',
+    //   render: (account: Account) => (
+    //     <div className="flex gap-2">
+    //       <Button
+    //         variant="secondary"
+    //         size="small"
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           handleAccountSync(account.id);
+    //         }}
+    //         disabled={!account.isActive || syncingAccounts.has(account.id)}
+    //         ariaLabel={`Sync ${account.institutionName} account`}
+    //       >
+    //         {syncingAccounts.has(account.id) ? 'Syncing...' : 'Sync'}
+    //       </Button>
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (
     <DashboardLayout>
-      <div className={`p-4 space-y-6 ${className}`}>
+      <div className={`mx-auto max-w-6xl space-y-6 ${className}`}>
         <div className="flex justify-between items-center flex-wrap gap-4">
           <h1 className="text-2xl font-semibold" id="accounts-heading">
             Financial Accounts

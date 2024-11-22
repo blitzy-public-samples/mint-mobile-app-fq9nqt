@@ -58,10 +58,10 @@ export async function getTransactions({
     return response.data;
   } catch (error) {
     console.warn('Using mock transaction data:', error);
-    
+
     // Filter transactions based on query parameters
     let filtered = [...mockTransactions];
-    
+
     if (accountId) {
       filtered = filtered.filter(t => t.accountId === accountId);
     }
@@ -132,7 +132,14 @@ export async function updateTransaction(
   const response = await apiRequest.put<ApiResponse<Transaction>>(
     `/transactions/${transactionId}`,
     updateData
-  );
+  ).catch(error => {
+    console.error(error);
+    const transactionIndex = mockTransactions.findIndex(t => t.id === transactionId);
+    if (transactionIndex !== -1 && mockTransactions[transactionIndex]) {
+      mockTransactions[transactionIndex] = { ...mockTransactions[transactionIndex], ...updateData };
+    }
+    return { data: { data: mockTransactions[transactionIndex], message: 'Transaction updated successfully', success: true, timestamp: new Date().toISOString(), correlationId: `updateTransaction-${new Date().toISOString()}` } };
+  });
   return response.data;
 }
 
