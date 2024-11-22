@@ -84,13 +84,18 @@ const InvestmentDetails: React.FC<InvestmentDetailsProps> = () => {
     if (!state.investment) return null;
 
     const currentValue = state.investment.quantity * state.investment.currentPrice;
-    const gainLoss = currentValue - state.investment.costBasis;
-    const returnRate = (gainLoss / state.investment.costBasis) * 100;
+    const costBasis = state.investment.costBasis;
+    const gainLoss = currentValue - costBasis;
+    
+    // Calculate return rate
+    const returnRate = costBasis > 0 
+      ? ((currentValue / costBasis) - 1) * 100  // Changed to use ratio method
+      : 0;
 
     return {
       currentValue,
       gainLoss,
-      returnRate
+      returnRate: Number(returnRate.toFixed(2))
     };
   };
 
