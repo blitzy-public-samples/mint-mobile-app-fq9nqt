@@ -74,7 +74,7 @@ const Goals: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto max-w-6xl">
+      <div className="mx-auto max-w-6xl">
         {/* Page header */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-semibold text-gray-900">

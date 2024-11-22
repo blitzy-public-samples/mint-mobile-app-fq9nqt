@@ -22,8 +22,6 @@ export type TransactionCategory =
   | 'HEALTHCARE' 
   | 'OTHER';
 
-export type TransactionCategoryOptions = keyof typeof TransactionCategory;
-
 // Type for budget tracking periods
 export type BudgetPeriod = 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
 
