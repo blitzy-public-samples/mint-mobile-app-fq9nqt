@@ -74,7 +74,7 @@ export async function getNotifications(params: NotificationQueryParams): Promise
       includeAuth: true,
       timeout: 10000,
       retryOnError: true,
-      maxRetries: 3
+      maxRetries: 0
     });
 
     // Validate and sanitize query parameters

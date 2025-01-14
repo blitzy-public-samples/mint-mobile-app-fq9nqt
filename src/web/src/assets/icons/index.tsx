@@ -40,30 +40,65 @@ export interface IconProps extends SVGProps<SVGSVGElement> {
 export type IconType = {
   size?: IconProps['size'];
   color?: IconProps['color'];
-};
-
-// Utility function to resolve icon size
+};// Utility function to resolve icon size
 // Ensures minimum touch target size of 44px for interactive icons
 export const getIconSize = (size?: IconProps['size']): number => {
   if (!size) return Number(DEFAULT_ICON_PROPS.size);
-  
+
   if (typeof size === 'string' && size in ICON_SIZES) {
     return Number(ICON_SIZES[size as keyof typeof ICON_SIZES]);
   }
-  
+
   const numericSize = Number(size);
   // Enforce minimum touch target size of 44px for interactive elements
   return numericSize >= 44 ? numericSize : Number(DEFAULT_ICON_PROPS.size);
 };
 
-// Addresses Technical Specification/8.1.1 Design System Key
-// Financial Icons
-export const AccountIcon: FC<IconProps> = ({
+export const DashboardIcon: React.FC<IconProps> = ({ 
+  className = '', 
+  size = 24 
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path
+      d="M4 5C4 4.44772 4.44772 4 5 4H9C9.55228 4 10 4.44772 10 5V9C10 9.55228 9.55228 10 9 10H5C4.44772 10 4 9.55228 4 9V5Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round" />
+    <path
+      d="M14 5C14 4.44772 14.4477 4 15 4H19C19.5523 4 20 4.44772 20 5V9C20 9.55228 19.5523 10 19 10H15C14.4477 10 14 9.55228 14 9V5Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round" />
+    <path
+      d="M4 15C4 14.4477 4.44772 14 5 14H9C9.55228 14 10 14.4477 10 15V19C10 19.5523 9.55228 20 9 20H5C4.44772 20 4 19.5523 4 19V15Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round" />
+    <path
+      d="M14 15C14 14.4477 14.4477 14 15 14H19C19.5523 14 20 14.4477 20 15V19C20 19.5523 19.5523 20 19 20H15C14.4477 20 14 19.5523 14 19V15Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round" />
+  </svg>
+);
+
+export const LogoutIcon: FC<IconProps> = ({
   size,
   color = DEFAULT_ICON_PROPS.color,
   role = DEFAULT_ICON_PROPS.role,
   focusable = DEFAULT_ICON_PROPS.focusable,
-  ariaLabel = 'Account',
+  ariaLabel = 'Logout',
   ...props
 }) => (
   <svg
@@ -78,13 +113,40 @@ export const AccountIcon: FC<IconProps> = ({
     {...props}
   >
     <path
-      d="M3 9h18M3 15h18"
+      d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
   </svg>
 );
+
+// Addresses Technical Specification/8.1.1 Design System Key
+// Financial Icons
+export const AccountIcon: FC<IconProps> = ({
+  size,
+  color = DEFAULT_ICON_PROPS.color,
+  role = DEFAULT_ICON_PROPS.role,
+  focusable = DEFAULT_ICON_PROPS.focusable,
+  ariaLabel = 'Account',
+  ...props
+}) => (<svg
+  width={getIconSize(size)}
+  height={getIconSize(size)}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke={color}
+  role={role}
+  focusable={focusable}
+  aria-label={ariaLabel}
+  {...props}
+>
+  <path
+    d="M3 9h18M3 15h18"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round" />
+</svg>)
 
 export const BudgetIcon: FC<IconProps> = ({
   size,

@@ -13,19 +13,20 @@ import {
   LoginCredentials, 
   RegisterCredentials, 
   User 
-} from '../../types/auth.types';
+} from '../types/auth.types';
 import { 
   login as loginApi, 
   register as registerApi, 
-  logout as logoutApi, 
+  logout as logoutApi,
   refreshToken as refreshTokenApi 
-} from '../../services/api/auth.api';
-import { SecureStorageService } from '../../services/storage/secureStorage.service';
+} from '../services/api/auth.api';
+import { SecureStorageService } from '../services/storage/secureStorage.service';
+import { mockUser } from '@/mocks/mockData';
 
 // Initial authentication state
 const INITIAL_AUTH_STATE: AuthState = {
-  isAuthenticated: false,
-  user: null,
+  isAuthenticated: true,
+  user: mockUser as unknown as User,
   accessToken: null,
   refreshToken: null,
 };

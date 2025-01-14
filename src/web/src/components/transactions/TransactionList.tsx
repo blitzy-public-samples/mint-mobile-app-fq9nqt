@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 // @version: classnames ^2.3.2
 import classNames from 'classnames';
 import { Transaction } from '../../types/models.types';
-import { Table, TableColumn } from '../common/Table';
+import Table, { TableColumn } from '../common/Table';
 import { useTransactions } from '../../hooks/useTransactions';
 
 // Human tasks:
@@ -35,8 +35,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
   ariaLabel = 'Transaction list',
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortKey, setSortKey] = useState<string>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const {
     transactions,
@@ -55,21 +53,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [accountId, startDate, endDate, categoryId]);
-
-  const handleSort = useCallback((key: string) => {
-    setSortKey(key);
-    setSortDirection(prev => {
-      const newDirection = key === sortKey ? (prev === 'asc' ? 'desc' : 'asc') : 'asc';
-      // Announce sort change to screen readers
-      const announcement = `Table sorted by ${key} ${newDirection === 'asc' ? 'ascending' : 'descending'}`;
-      const ariaLive = document.createElement('div');
-      ariaLive.setAttribute('aria-live', 'polite');
-      ariaLive.textContent = announcement;
-      document.body.appendChild(ariaLive);
-      setTimeout(() => document.body.removeChild(ariaLive), 1000);
-      return newDirection;
-    });
-  }, [sortKey]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -110,7 +93,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
       header: 'Amount',
       sortable: true,
       width: '20%',
-      align: 'right',
       render: (transaction: Transaction) => (
         <span 
           className={classNames('amount-cell', {
@@ -170,9 +152,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
         pageSize={pageSize}
         currentPage={currentPage}
         onPageChange={handlePageChange}
-        sortKey={sortKey}
-        sortDirection={sortDirection}
-        onSort={handleSort}
+        defaultSortKey='date'
+        defaultSortDirection='desc'
         onRowClick={onTransactionClick}
         ariaLabel={ariaLabel}
         summary="List of financial transactions with date, description, amount, and category"
@@ -210,11 +191,11 @@ const TransactionList: React.FC<TransactionListProps> = ({
             color: var(--color-error);
           }
 
-          .category-cell {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-          }
+          // .category-cell {
+          //   display: flex;
+          //   align-items: center;
+          //   gap: 0.5rem;
+          // }
 
           .category-indicator {
             width: 12px;

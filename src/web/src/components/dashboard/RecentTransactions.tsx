@@ -15,7 +15,7 @@ import React, { useMemo, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
 import { Transaction } from '../../types/models.types';
-import { Table, TableColumn } from '../common/Table';
+import Table, { TableColumn } from '../common/Table';
 import { useTransactions } from '../../hooks/useTransactions';
 
 // Human tasks:
@@ -27,7 +27,7 @@ import { useTransactions } from '../../hooks/useTransactions';
 interface RecentTransactionsProps {
   limit?: number;
   className?: string;
-  onTransactionClick?: (transaction: Transaction) => void;
+  onTransactionClick?: (transactionId: string) => void;
 }
 
 const formatAmount = (amount: number): React.ReactNode => {
@@ -93,7 +93,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
         <div className="description-cell">
           <span className="description">{transaction.description}</span>
           {transaction.categoryId && (
-            <span 
+            <span
               className="category-tag"
               aria-label={`Category: ${transaction.categoryId}`}
             >
@@ -132,13 +132,13 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
 
   // Handle row click with keyboard support
   const handleRowClick = useCallback((transaction: Transaction) => {
-    onTransactionClick?.(transaction);
+    onTransactionClick?.(transaction.id);
   }, [onTransactionClick]);
 
   if (error) {
     return (
-      <div 
-        className="error-container" 
+      <div
+        className="error-container"
         role="alert"
         aria-live="polite"
       >
@@ -170,7 +170,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
             cursor: pointer;
           }
           .retry-button:hover {
-            background-color: var(--color-error-dark);
+            background-color: var(--color-error-700);
           }
           .retry-button:focus {
             outline: 2px solid var(--color-error);
@@ -182,11 +182,14 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
   }
 
   return (
-    <div 
+    <div
       className={`recent-transactions ${className || ''}`}
       aria-busy={loading}
     >
+      <h2 className="text-xl font-semibold text-text-primary text-center">Recent Transactions</h2>
+
       <Table
+        className="p-6"
         data={transactions.slice(0, limit)}
         columns={columns}
         loading={loading}

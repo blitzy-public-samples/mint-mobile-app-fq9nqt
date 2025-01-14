@@ -4,7 +4,7 @@ import React, { useEffect, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 // framer-motion v6.0.0
 import { motion, AnimatePresence } from 'framer-motion';
-import { neutral } from '../../config/theme.config';
+import { colors }from '../../config/theme.config';
 
 /**
  * HUMAN TASKS:
@@ -144,7 +144,7 @@ export const Modal: React.FC<ModalProps> = ({
             variants={modalVariants}
             transition={{ duration: 0.3, type: 'spring', damping: 25 }}
             style={{
-              backgroundColor: neutral[50],
+              backgroundColor: colors.neutral[50],
               borderRadius: '0.5rem',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
               maxWidth: sizeConfig[size],
@@ -164,7 +164,7 @@ export const Modal: React.FC<ModalProps> = ({
               <div
                 style={{
                   padding: '1rem',
-                  borderBottom: `1px solid ${neutral[200]}`,
+                  borderBottom: `1px solid ${colors.neutral[200]}`,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center'
@@ -176,7 +176,7 @@ export const Modal: React.FC<ModalProps> = ({
                       margin: 0,
                       fontSize: '1.25rem',
                       fontWeight: 600,
-                      color: neutral[900]
+                      color: colors.neutral[900]
                     }}
                   >
                     {title}
@@ -190,7 +190,7 @@ export const Modal: React.FC<ModalProps> = ({
                       border: 'none',
                       padding: '0.5rem',
                       cursor: 'pointer',
-                      color: neutral[500],
+                      color: colors.neutral[500],
                       transition: 'color 0.2s'
                     }}
                     aria-label="Close modal"
@@ -217,7 +217,7 @@ export const Modal: React.FC<ModalProps> = ({
             <div
               style={{
                 padding: '1rem',
-                color: neutral[800]
+                color: colors.neutral[800]
               }}
             >
               {children}

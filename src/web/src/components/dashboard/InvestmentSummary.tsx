@@ -57,17 +57,16 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
       const currentValue = investment.quantity * investment.currentPrice;
       const costBasis = investment.costBasis;
       const gainLoss = currentValue - costBasis;
-      const percentageReturn = costBasis > 0 ? (gainLoss / costBasis) * 100 : 0;
 
       return {
         totalValue: metrics.totalValue + currentValue,
         totalGainLoss: metrics.totalGainLoss + gainLoss,
-        percentageReturn: metrics.percentageReturn + percentageReturn,
+        totalCostBasis: metrics.totalCostBasis + costBasis,
       };
     }, {
       totalValue: 0,
       totalGainLoss: 0,
-      percentageReturn: 0,
+      totalCostBasis: 0,
     });
   }, []);
 
@@ -77,14 +76,14 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
    */
   const prepareAssetAllocationData = useCallback((investments: Investment[]): AssetAllocationData[] => {
     // Calculate total portfolio value
-    const totalValue = investments.reduce((sum, inv) => 
+    const totalValue = investments.reduce((sum, inv) =>
       sum + (inv.quantity * inv.currentPrice), 0);
 
     // Group investments by symbol and calculate allocations
     const allocations = investments.reduce((acc, inv) => {
       const value = inv.quantity * inv.currentPrice;
       const percentage = (value / totalValue) * 100;
-      
+
       return [...acc, {
         label: inv.symbol,
         value: Number(percentage.toFixed(2)),
@@ -99,7 +98,17 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
   // Memoize portfolio metrics calculation
   const portfolioMetrics = useMemo(() => {
     if (!investments.length) return null;
-    return calculatePortfolioMetrics(investments);
+    const metrics = calculatePortfolioMetrics(investments);
+    
+    // Calculate the overall percentage return
+    const percentageReturn = metrics.totalCostBasis > 0 
+      ? (metrics.totalGainLoss / metrics.totalCostBasis) * 100 
+      : 0;
+    
+    return {
+      ...metrics,
+      percentageReturn,
+    };
   }, [investments, calculatePortfolioMetrics]);
 
   // Memoize asset allocation data preparation
@@ -126,6 +135,14 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
         },
       },
     },
+    scales: {
+      x: {
+        display: false,
+      },
+      y: {
+        display: false,
+      }
+    },
     responsive: true,
     maintainAspectRatio: false,
   };
@@ -151,54 +168,56 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
   }
 
   return (
-    <Card
-      title="Investment Summary"
-      className={className}
-      testId={testId}
-      loading={loading}
-    >
-      <div className="investment-summary">
-        {/* Portfolio Value Section */}
-        <div className="portfolio-metrics">
-          <div className="metric-item">
-            <h3>Total Portfolio Value</h3>
-            <span className="value">
-              {portfolioMetrics ? formatValue(portfolioMetrics.totalValue) : '$0.00'}
-            </span>
+    <div>
+      <h2 className="text-xl font-semibold mb-4 text-text-primary text-center">Investment Summary</h2>
+
+      <Card
+        className={className}
+        testId={testId}
+        loading={loading}
+      >
+        <div className="investment-summary">
+          {/* Portfolio Value Section */}
+          <div className="portfolio-metrics">
+            <div className="metric-item">
+              <h3>Total Portfolio Value</h3>
+              <span className="value">
+                {portfolioMetrics ? formatValue(portfolioMetrics.totalValue) : '$0.00'}
+              </span>
+            </div>
+
+            {portfolioMetrics && (
+              <>
+                <div className="metric-item">
+                  <h3>Total Gain/Loss</h3>
+                  <span className={`value ${portfolioMetrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
+                    {formatValue(portfolioMetrics.totalGainLoss)}
+                  </span>
+                </div>
+
+                <div className="metric-item">
+                  <h3>Return</h3>
+                  <span className={`value ${portfolioMetrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
+                    {portfolioMetrics.percentageReturn.toFixed(2)}%
+                  </span>
+                </div>
+              </>
+            )}
           </div>
-          
-          {portfolioMetrics && (
-            <>
-              <div className="metric-item">
-                <h3>Total Gain/Loss</h3>
-                <span className={`value ${portfolioMetrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
-                  {formatValue(portfolioMetrics.totalGainLoss)}
-                </span>
-              </div>
-              
-              <div className="metric-item">
-                <h3>Return</h3>
-                <span className={`value ${portfolioMetrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
-                  {portfolioMetrics.percentageReturn.toFixed(2)}%
-                </span>
-              </div>
-            </>
-          )}
+
+          {/* Asset Allocation Chart */}
+          <div className="allocation-chart">
+            <h3>Asset Allocation</h3>
+            <DonutChart
+              data={allocationData}
+              options={chartOptions}
+              height={500}
+              ariaLabel="Investment portfolio asset allocation chart"
+            />
+          </div>
         </div>
 
-        {/* Asset Allocation Chart */}
-        <div className="allocation-chart">
-          <h3>Asset Allocation</h3>
-          <DonutChart
-            data={allocationData}
-            options={chartOptions}
-            height={300}
-            ariaLabel="Investment portfolio asset allocation chart"
-          />
-        </div>
-      </div>
-
-      <style jsx>{`
+        <style jsx>{`
         .investment-summary {
           display: flex;
           flex-direction: column;
@@ -227,7 +246,7 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
         }
 
         .positive {
-          color: var(--color-success);
+          color: var(--color-success-400);
         }
 
         .negative {
@@ -263,8 +282,9 @@ const InvestmentSummary: React.FC<InvestmentSummaryProps> = React.memo(({
             flex: 1;
           }
         }
-      `}</style>
-    </Card>
+      `} as any</style>
+      </Card>
+    </div>
   );
 });
 

@@ -6,8 +6,8 @@ import {
   getInvestmentById, 
   getInvestmentPerformance, 
   syncInvestments 
-} from '../../services/api/investments.api';
-import { Investment } from '../../types/models.types';
+} from '../services/api/investments.api';
+import { Investment, InvestmentPerformanceData } from '../types/models.types';
 
 /**
  * Human Tasks:
@@ -23,14 +23,6 @@ interface InvestmentHookState {
   loading: boolean;
   error: Error | null;
   syncing: boolean;
-}
-
-// Interface for investment performance metrics
-interface InvestmentPerformanceData {
-  returnRate: number;
-  totalValue: number;
-  gainLoss: number;
-  lastUpdated: Date;
 }
 
 /**
@@ -93,7 +85,7 @@ export function useInvestments() {
    */
   const fetchPerformance = useCallback(async (
     id: string, 
-    period: string
+    period: '1d' | '1w' | '1m' | '3m' |  '6m' | '1y' | 'ytd' | 'all'
   ): Promise<InvestmentPerformanceData> => {
     if (!id || !period) {
       throw new Error('Investment ID and period are required');
@@ -102,10 +94,11 @@ export function useInvestments() {
     try {
       const response = await getInvestmentPerformance(id, period);
       return {
-        returnRate: response.data.returnRate,
-        totalValue: response.data.totalValue,
-        gainLoss: response.data.gainLoss,
-        lastUpdated: new Date(response.data.lastUpdated)
+        returnRate: response.returnRate,
+        totalValue: response.totalValue,
+        gainLoss: response.gainLoss,
+        lastUpdated: new Date(response.lastUpdated),
+        historicalData: response.historicalData
       };
     } catch (error) {
       throw error;

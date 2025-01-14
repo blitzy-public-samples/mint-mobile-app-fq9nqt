@@ -5,6 +5,7 @@ import Table, { TableColumn } from '../../components/common/Table';
 import Button from '../../components/common/Button';
 import PlaidLink from '../../components/plaid/PlaidLink';
 import { getAccounts, syncAccount } from '../../services/api/accounts.api';
+import DashboardLayout from '@/layouts/DashboardLayout';
 
 // Human tasks:
 // 1. Verify color contrast ratios meet WCAG 2.1 AA standards
@@ -103,7 +104,7 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
   // Define table columns with proper accessibility and responsive design
   const columns: TableColumn[] = [
     {
-      key: 'institutionName',
+      key: 'institutionId',
       header: 'Institution',
       sortable: true,
       width: '25%',
@@ -119,7 +120,6 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
       header: 'Balance',
       sortable: true,
       width: '20%',
-      align: 'right',
       render: (account: Account) => (
         <span className={account.balance < 0 ? 'text-error-500' : 'text-success-500'}>
           {new Intl.NumberFormat('en-US', {
@@ -129,82 +129,83 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
         </span>
       ),
     },
-    {
-      key: 'lastSynced',
-      header: 'Last Synced',
-      sortable: true,
-      width: '20%',
-      render: (account: Account) => (
-        <span>
-          {new Intl.DateTimeFormat('en-US', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-          }).format(new Date(account.lastSynced))}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      width: '20%',
-      render: (account: Account) => (
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAccountSync(account.id);
-            }}
-            disabled={!account.isActive || syncingAccounts.has(account.id)}
-            ariaLabel={`Sync ${account.institutionName} account`}
-          >
-            {syncingAccounts.has(account.id) ? 'Syncing...' : 'Sync'}
-          </Button>
-        </div>
-      ),
-    },
+    // {
+    //   key: 'lastSynced',
+    //   header: 'Last Synced',
+    //   sortable: true,
+    //   width: '20%',
+    //   render: (account: Account) => (
+    //     <span>
+    //       {new Intl.DateTimeFormat('en-US', {
+    //         dateStyle: 'medium',
+    //         timeStyle: 'short'
+    //       }).format(new Date(account.lastSynced))}
+    //     </span>
+    //   ),
+    // },
+    // {
+    //   key: 'actions',
+    //   header: 'Actions',
+    //   width: '20%',
+    //   render: (account: Account) => (
+    //     <div className="flex gap-2">
+    //       <Button
+    //         variant="secondary"
+    //         size="small"
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           handleAccountSync(account.id);
+    //         }}
+    //         disabled={!account.isActive || syncingAccounts.has(account.id)}
+    //         ariaLabel={`Sync ${account.institutionName} account`}
+    //       >
+    //         {syncingAccounts.has(account.id) ? 'Syncing...' : 'Sync'}
+    //       </Button>
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (
-    <div className={`p-4 space-y-6 ${className}`}>
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <h1 className="text-2xl font-semibold" id="accounts-heading">
-          Financial Accounts
-        </h1>
-        <PlaidLink
-          buttonText="Link New Account"
-          onSuccess={handlePlaidSuccess}
-          onExit={(err) => {
-            if (err) console.error('Plaid exit error:', err);
-          }}
-          className="min-w-[150px]"
-          ariaLabel="Link a new financial account"
-        />
-      </div>
-
-      {error && (
-        <div
-          role="alert"
-          className="bg-error-50 text-error-700 p-4 rounded-md border border-error-200"
-        >
-          Error loading accounts. Please try again later.
+    <DashboardLayout>
+      <div className={`mx-auto max-w-6xl space-y-6 ${className}`}>
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <h1 className="text-2xl font-semibold" id="accounts-heading">
+            Financial Accounts
+          </h1>
+          <PlaidLink
+            buttonText="Link New Account"
+            onSuccess={handlePlaidSuccess}
+            onExit={(err) => {
+              if (err) console.error('Plaid exit error:', err);
+            }}
+            className="min-w-[150px]"
+            ariaLabel="Link a new financial account"
+          />
         </div>
-      )}
 
-      <Table
-        data={accounts}
-        columns={columns}
-        loading={loading}
-        onRowClick={handleAccountClick}
-        className="w-full"
-        hoverable
-        striped
-        ariaLabel="Financial accounts table"
-        summary="List of your linked financial accounts with balances and sync status"
-      />
+        {error && (
+          <div
+            role="alert"
+            className="bg-error-50 text-error-700 p-4 rounded-md border border-error-200"
+          >
+            Error loading accounts. Please try again later.
+          </div>
+        )}
 
-      <style jsx>{`
+        <Table
+          data={accounts}
+          columns={columns}
+          loading={loading}
+          onRowClick={handleAccountClick}
+          className="w-full"
+          hoverable
+          striped
+          ariaLabel="Financial accounts table"
+          summary="List of your linked financial accounts with balances and sync status"
+        />
+
+        <style jsx>{`
         .account-row {
           cursor: pointer;
           transition: background-color 0.2s ease;
@@ -233,7 +234,8 @@ const AccountsPage: React.FC<AccountsPageProps> = ({ className }) => {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

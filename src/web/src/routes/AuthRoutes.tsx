@@ -11,10 +11,11 @@
 // @version: ^18.0.0
 import React from 'react';
 // @version: ^6.0.0
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 // Internal imports
-import { Login, handleLoginSuccess, handleLoginError } from '../pages/auth/Login';
+// import { Login, handleLoginSuccess, handleLoginError } from '../pages/auth/Login';
+import Login from '../pages/auth/Login';
 import { Register } from '../pages/auth/Register';
 import { AuthLayout } from '../layouts/AuthLayout';
 
@@ -37,54 +38,11 @@ const AUTH_ROUTES = {
  */
 const AuthRoutes: React.FC = () => {
   return (
-    <Routes>
+    // <Routes>
+    <>
       {/* Login route with email/password and biometric support */}
-      <Route
-        path={AUTH_ROUTES.LOGIN}
-        element={
-          <AuthLayout authMode="login">
-            <Login
-              onLoginSuccess={handleLoginSuccess}
-              onLoginError={handleLoginError}
-            />
-          </AuthLayout>
-        }
-      />
-
-      {/* Registration route with security controls */}
-      <Route
-        path={AUTH_ROUTES.REGISTER}
-        element={
-          <AuthLayout authMode="register">
-            <Register />
-          </AuthLayout>
-        }
-      />
-
-      {/* Password reset route */}
-      <Route
-        path={AUTH_ROUTES.RESET_PASSWORD}
-        element={
-          <AuthLayout authMode="reset">
-            {/* Reset password component will be implemented separately */}
-            <div>Reset Password</div>
-          </AuthLayout>
-        }
-      />
-
-      {/* Redirect unmatched auth routes to login */}
-      <Route
-        path="/auth/*"
-        element={
-          <AuthLayout authMode="login">
-            <Login
-              onLoginSuccess={handleLoginSuccess}
-              onLoginError={handleLoginError}
-            />
-          </AuthLayout>
-        }
-      />
-    </Routes>
+      
+    </>
   );
 };
 

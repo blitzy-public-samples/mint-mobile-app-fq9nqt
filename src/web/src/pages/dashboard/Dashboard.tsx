@@ -15,11 +15,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Internal components
-import { AccountsSummary } from '../../components/dashboard/AccountsSummary';
-import { BudgetOverview } from '../../components/dashboard/BudgetOverview';
-import { RecentTransactions } from '../../components/dashboard/RecentTransactions';
-import { DashboardLayout } from '../../layouts/DashboardLayout';
+import AccountsSummary from '../../components/dashboard/AccountsSummary/AccountsSummary';
+import BudgetOverview from '../../components/dashboard/BudgetOverview';
+import RecentTransactions from '../../components/dashboard/RecentTransactions';
+import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../hooks/useAuth';
+import InvestmentSummary from '../../components/dashboard/InvestmentSummary';
+import SpendingTrends from '@/components/dashboard/SpendingTrends';
 
 // Human tasks:
 // 1. Verify color contrast ratios meet WCAG 2.1 AA standards
@@ -30,17 +32,17 @@ import { useAuth } from '../../hooks/useAuth';
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Check authentication status on mount
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    setLoading(false);
-  }, [isAuthenticated, navigate]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate('/login');
+  //     return;
+  //   }
+  //   setLoading(false);
+  // }, [isAuthenticated, navigate]);
 
   // Handle account click navigation
   const handleAccountClick = (accountId: string) => {
@@ -57,7 +59,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div 
+        <div
           className="dashboard-loading"
           role="status"
           aria-busy="true"
@@ -72,13 +74,13 @@ const Dashboard: React.FC = () => {
   if (error) {
     return (
       <DashboardLayout>
-        <div 
+        <div
           className="dashboard-error"
           role="alert"
           aria-live="polite"
         >
           {error}
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="retry-button"
           >
@@ -91,14 +93,14 @@ const Dashboard: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div 
-        className="dashboard-container"
+      <div
+        className="dashboard-container mx-auto max-w-6xl"
         role="main"
         aria-label="Dashboard content"
       >
         {/* Welcome message with user's name */}
         <header className="dashboard-header">
-          <h1>Welcome, {user?.firstName || 'User'}</h1>
+          <h1 className='font-semibold'>Welcome, {user?.firstName || 'User'}</h1>
           <p className="last-updated">
             Last updated: {new Date().toLocaleString()}
           </p>
@@ -107,7 +109,7 @@ const Dashboard: React.FC = () => {
         {/* Main dashboard grid layout */}
         <div className="dashboard-grid">
           {/* Accounts summary section */}
-          <section 
+          <section
             className="dashboard-section"
             aria-label="Accounts section"
           >
@@ -117,7 +119,7 @@ const Dashboard: React.FC = () => {
           </section>
 
           {/* Budget overview section */}
-          <section 
+          <section
             className="dashboard-section"
             aria-label="Budget overview section"
           >
@@ -126,9 +128,8 @@ const Dashboard: React.FC = () => {
               maxItems={5}
             />
           </section>
-
           {/* Recent transactions section */}
-          <section 
+          <section
             className="dashboard-section"
             aria-label="Recent transactions section"
           >
@@ -137,24 +138,28 @@ const Dashboard: React.FC = () => {
               onTransactionClick={handleTransactionClick}
             />
           </section>
+          <section
+            className="dashboard-section"
+            aria-label="Investments section"
+          >
+            <InvestmentSummary />
+          </section>
+          {/* <section
+            className="dashboard-section"
+            aria-label="Spending trends section"
+          >
+            <SpendingTrends timeframe="monthly" />
+          </section> */}
         </div>
       </div>
 
       <style jsx>{`
-        .dashboard-container {
-          padding: var(--spacing-4);
-          max-width: 1200px;
-          margin: 0 auto;
-          min-height: 100vh;
-        }
-
         .dashboard-header {
           margin-bottom: var(--spacing-6);
         }
 
         .dashboard-header h1 {
           font-size: var(--font-size-2xl);
-          font-weight: var(--font-weight-bold);
           color: var(--color-text-primary);
           margin-bottom: var(--spacing-2);
         }
@@ -173,7 +178,7 @@ const Dashboard: React.FC = () => {
         .dashboard-section {
           background: var(--color-background-card);
           border-radius: var(--border-radius-lg);
-          box-shadow: var(--shadow-sm);
+          box-shadow: var(--shadow-md);
           overflow: hidden;
         }
 
@@ -197,7 +202,7 @@ const Dashboard: React.FC = () => {
           padding: var(--spacing-2) var(--spacing-4);
           min-height: 44px;
           min-width: 44px;
-          background-color: var(--color-primary);
+          background-color: var(--color-primary-400);
           color: var(--color-text-inverse);
           border: none;
           border-radius: var(--border-radius-md);
@@ -206,11 +211,11 @@ const Dashboard: React.FC = () => {
         }
 
         .retry-button:hover {
-          background-color: var(--color-primary-dark);
+          background-color: var(--color-primary-700);
         }
 
         .retry-button:focus {
-          outline: 2px solid var(--color-primary);
+          outline: 2px solid var(--color-primary-400);
           outline-offset: 2px;
         }
 
@@ -227,13 +232,13 @@ const Dashboard: React.FC = () => {
 
         /* Desktop breakpoint */
         @media (min-width: 1024px) {
-          .dashboard-container {
-            padding: var(--spacing-6);
-          }
+          // .dashboard-container {
+          //   padding: var(--spacing-6);
+          // }
 
-          .dashboard-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
+          // .dashboard-grid {
+          //   grid-template-columns: repeat(3, 1fr);
+          // }
 
           .dashboard-section:last-child {
             grid-column: 2 / -1;

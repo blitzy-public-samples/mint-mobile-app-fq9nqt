@@ -22,7 +22,7 @@ import { APP_CONFIG as APP_CONSTANTS } from '../constants/app.constants';
 export const API_CONFIG = {
   BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3000',
   TIMEOUT: 30000,
-  RETRY_ATTEMPTS: 3,
+  RETRY_ATTEMPTS: 0,
   RETRY_DELAY: 1000,
   VERSION: 'v1',
   MAX_BATCH_SIZE: 100,

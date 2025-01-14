@@ -29,7 +29,7 @@ HUMAN TASKS:
     <meta name="application-name" content="Mint Replica Lite">
     
     <!-- Security headers -->
-    <meta http-equiv="Content-Security-Policy" content="
+    <!-- <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval';
         style-src 'self' 'unsafe-inline';
@@ -44,11 +44,11 @@ HUMAN TASKS:
         form-action 'self';
         frame-ancestors 'none';
         upgrade-insecure-requests;
-    ">
+    "> -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
     
     <!-- Preconnect to API domain -->
-    <link rel="preconnect" href="https://api.mintreplica.com">
+    <!-- <link rel="preconnect" href="https://api.mintreplica.com"> -->
     
     <!-- PWA and favicon -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -63,7 +63,7 @@ HUMAN TASKS:
 
 <body>
     <!-- Main application container with ARIA landmarks -->
-    <div id="root" role="main" aria-label="Main application content"></div>
+    <div id="root" role="main" aria-label="Main application content" style="height: 100%;"></div>
     
     <!-- Fallback for disabled JavaScript -->
     <noscript>
@@ -74,12 +74,6 @@ HUMAN TASKS:
     
     <!-- Application entry point -->
     <script type="module" src="/src/main.tsx" defer crossorigin="anonymous"></script>
-    
-    <!-- Development mode Vite client - automatically removed in production -->
-    <script type="module">
-        // @version: ^4.0.0
-        import '@vite/client';
-    </script>
 </body>
 
 </html>

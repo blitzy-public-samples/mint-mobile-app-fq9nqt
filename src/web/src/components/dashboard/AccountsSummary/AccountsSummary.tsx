@@ -13,11 +13,11 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 // Internal imports
-import { Account, AccountType } from '../../types/models.types';
-import { Card } from '../common/Card';
-import { getAccounts } from '../../services/api/accounts.api';
-import { formatCurrency } from '../../utils/currency.utils';
-
+import { Account, AccountType } from '../../../types/models.types';
+import Card from '../../common/Card';
+import { getAccounts } from '../../../services/api/accounts.api';
+import { formatCurrency } from '../../../utils/currency.utils';
+import './accounts-summary.css';
 // Human tasks:
 // 1. Verify proper error tracking is configured
 // 2. Confirm accessibility color contrast ratios
@@ -66,7 +66,7 @@ const calculateTotalBalance = (accounts: Account[]): number => {
 // Helper function to group accounts by type
 const groupAccountsByType = (accounts: Account[]): Record<AccountType, Account[]> => {
   const activeAccounts = accounts.filter(account => account.isActive);
-  
+
   return activeAccounts.reduce((groups, account) => {
     const type = account.accountType;
     if (!groups[type]) {
@@ -113,9 +113,6 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
       textAlign: 'center' as const,
       margin: 'var(--spacing-4) 0',
     },
-    accountGroup: {
-      marginBottom: 'var(--spacing-4)',
-    },
     groupTitle: {
       fontSize: 'var(--font-size-md)',
       fontWeight: 'var(--font-weight-semibold)',
@@ -136,7 +133,7 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
       borderRadius: 'var(--border-radius-md)',
       cursor: 'pointer',
       transition: 'background-color 0.2s ease',
-      minHeight: '44px', // Minimum touch target size
+      minHeight: '44px',
     },
     accountName: {
       fontSize: 'var(--font-size-sm)',
@@ -155,11 +152,16 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
   };
 
   return (
-    <Card
-      title="Accounts Overview"
-      loading={loading}
-      testId="accounts-summary"
-    >
+    <div className="p-6">
+      <h2 className="text-xl font-semibold text-text-primary text-center">Accounts Summary</h2>
+
+      {/* <Card
+        loading={loading}
+        testId="accounts-summary"
+        style={{
+          height: '100%',
+        }}
+      > */}
       <div style={styles.container}>
         {error ? (
           <div style={styles.error} role="alert">
@@ -173,7 +175,7 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
             </div>
 
             {Object.entries(groupedAccounts).map(([type, accounts]) => (
-              <div key={type} style={styles.accountGroup}>
+              <div key={type} className="account-group">
                 <h3 style={styles.groupTitle}>{type}</h3>
                 <div style={styles.accountList}>
                   {accounts.map((account) => (
@@ -204,7 +206,8 @@ const AccountsSummary: React.FC<AccountsSummaryProps> = ({
           </>
         )}
       </div>
-    </Card>
+      {/* </Card> */}
+    </div>
   );
 };
 

@@ -16,6 +16,7 @@ import classNames from 'classnames';
 
 // Internal imports
 import { Button } from '../common/Button';
+import { AccountIcon, BudgetIcon, GoalIcon, InvestmentIcon } from '@/assets/icons';
 
 /**
  * Interface for Sidebar component props
@@ -40,10 +41,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isMobile }) =
   // Navigation items defined in specification
   const navigationItems = [
     { route: '/dashboard', label: 'Dashboard', icon: 'dashboard', ariaLabel: 'Navigate to Dashboard' },
-    { route: '/accounts', label: 'Accounts', icon: 'account_balance', ariaLabel: 'Navigate to Accounts' },
-    { route: '/budgets', label: 'Budgets', icon: 'pie_chart', ariaLabel: 'Navigate to Budgets' },
-    { route: '/goals', label: 'Goals', icon: 'flag', ariaLabel: 'Navigate to Goals' },
-    { route: '/investments', label: 'Investments', icon: 'trending_up', ariaLabel: 'Navigate to Investments' },
+    { route: '/accounts', label: 'Accounts', icon: <AccountIcon size={24} />, ariaLabel: 'Navigate to Accounts' },
+    { route: '/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
+    { route: '/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
+    { route: '/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
     { route: '/settings', label: 'Settings', icon: 'settings', ariaLabel: 'Navigate to Settings' }
   ];
 

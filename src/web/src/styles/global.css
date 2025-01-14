@@ -29,6 +29,7 @@
 /* Document level adjustments */
 html {
   font-size: 16px;
+  height: 100vh;
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -36,12 +37,16 @@ html {
 
 /* Base body styles */
 body {
-  min-height: 100vh;
+  height: 100%;
   background-color: var(--color-neutral-50);
   color: var(--color-neutral-900);
   font-family: var(--font-family-sans);
   line-height: var(--line-height-normal);
   text-rendering: optimizeLegibility;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }
 
 /* Media element defaults */
@@ -55,6 +60,7 @@ img, picture, video, canvas, svg {
 input, button, textarea, select {
   font: inherit;
   color: inherit;
+  background-color: inherit;
 }
 
 /* Link styles */

@@ -11,6 +11,7 @@ import {
   updateGoalProgress
 } from '../services/api/goals.api';
 import { useNotifications } from '../contexts/NotificationContext';
+import { mockGoals } from '@/mocks/mockData';
 
 /**
  * Human Tasks:
@@ -107,8 +108,9 @@ export function useGoals(options: UseGoalsOptions = {}) {
         name: goalData.name,
         type: goalData.type,
         targetAmount: goalData.targetAmount,
+        currentAmount: goalData.currentAmount,
         targetDate: goalData.targetDate,
-        description: goalData.description
+        // description: goalData.description
       });
 
       // Update local state optimistically
@@ -131,19 +133,19 @@ export function useGoals(options: UseGoalsOptions = {}) {
   const updateExistingGoal = useCallback(async (id: string, goalData: Partial<Goal>): Promise<Goal> => {
     try {
       // Optimistic update
-      setState(prev => ({
-        ...prev,
-        goals: prev.goals.map(goal =>
-          goal.id === id ? { ...goal, ...goalData } : goal
-        )
-      }));
-
+      // setState(prev => ({
+      //   ...prev,
+      //   goals: prev.goals.map(goal =>
+      //     goal.id === id ? { ...goal, ...goalData } : goal
+      //   )
+      // }));
+// 
       const response = await updateGoal(id, goalData);
       return response.data;
     } catch (error) {
       // Revert optimistic update on error
-      fetchGoals();
-      throw new Error('Failed to update goal');
+      // fetchGoals();
+      throw error;
     }
   }, [fetchGoals]);
 

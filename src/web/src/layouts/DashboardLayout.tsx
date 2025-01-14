@@ -16,7 +16,9 @@ import { Outlet } from 'react-router-dom';
 // Internal imports
 import { Header } from '../components/layout/Header';
 import { Sidebar } from '../components/layout/Sidebar';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import Navigation from '@/components/layout/Navigation';
+import './dashboard-layout.css';
 
 // Props interface
 interface DashboardLayoutProps {
@@ -31,13 +33,13 @@ interface DashboardLayoutProps {
  * - Mobile Responsive Considerations (Technical Specification/8.1.7)
  * - Accessibility Features (Technical Specification/8.1.8)
  */
-const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // Authentication state
   const { authState: { isAuthenticated, user } } = useAuth();
 
   // Sidebar state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | undefined>(window.matchMedia('(max-width: 768px)').matches);
 
   /**
    * Handle sidebar toggle with accessibility considerations
@@ -64,7 +66,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
    */
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
-    
+
     const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
       setIsMobile(e.matches);
       if (!e.matches && isSidebarOpen) {
@@ -97,39 +99,42 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
   }, [isSidebarOpen]);
 
   return (
-    <div 
+    <div
       className="dashboard-layout"
       role="main"
     >
       {/* Header component */}
-      <Header
+      {/* <Header
         isAuthenticated={isAuthenticated}
         user={user}
-      />
+      /> */}
 
       {/* Main content area with sidebar */}
       <div className="dashboard-content">
         {/* Sidebar navigation */}
-        <Sidebar
+        {/* <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           isMobile={isMobile}
-        />
+        /> */}
+
+        {isMobile === false && <Navigation />}
 
         {/* Main content with proper ARIA landmarks */}
-        <main 
+        <main
           className="main-content"
           role="region"
-          aria-label="Dashboard content"
-        >
+          aria-label="Dashboard content">
           {/* Render child routes */}
-          <Outlet />
+          {children}
         </main>
+
+        {isMobile === true && <Navigation />}
 
         {/* Mobile overlay */}
         {isMobile && isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-20"
+            className="inset-0 bg-black bg-opacity-50 z-20"
             onClick={() => setIsSidebarOpen(false)}
             aria-hidden="true"
           />
@@ -145,31 +150,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = () => {
       </a>
     </div>
   );
-};
-
-// CSS Modules
-const styles = {
-  '.dashboard-layout': {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-    backgroundColor: 'var(--color-background)'
-  },
-  '.dashboard-content': {
-    display: 'flex',
-    flex: '1',
-    marginTop: '64px'
-  },
-  '.main-content': {
-    flex: '1',
-    padding: 'var(--spacing-6)',
-    overflowY: 'auto'
-  },
-  '@media (max-width: 768px)': {
-    '.main-content': {
-      padding: 'var(--spacing-4)'
-    }
-  }
 };
 
 export default DashboardLayout;

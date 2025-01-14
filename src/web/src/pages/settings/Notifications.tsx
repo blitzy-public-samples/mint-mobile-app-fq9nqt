@@ -11,8 +11,8 @@
 // @version: react ^18.2.0
 import React, { useState, useCallback } from 'react';
 import { useNotifications } from '../../hooks/useNotifications';
-import { Card } from '../../components/common/Card';
-import { Table } from '../../components/common/Table';
+import Card from '../../components/common/Card';
+import Table from '../../components/common/Table';
 import type { NotificationPreference } from '../../types/models.types';
 
 // Human tasks:

@@ -145,26 +145,25 @@ export const CurrentUser = createParamDecorator(
 
 // Default export
 export default Auth;
-```
 
-This implementation:
 
-1. Creates a secure auth decorator that combines JWT authentication and role-based authorization
-2. Implements token extraction with Bearer scheme validation
-3. Validates JWT tokens using RS256 signing and 15-minute expiry
-4. Performs strict role-based access control checks
-5. Adds helpful code comments linking to requirements
-6. Includes human tasks for security configuration
-7. Provides a CurrentUser parameter decorator for convenience
-8. Uses proper error handling with specific exception types
-9. Follows NestJS best practices for decorators
-10. Implements proper type safety and validation
+// This implementation:
 
-The decorator can be used to protect endpoints like:
+// 1. Creates a secure auth decorator that combines JWT authentication and role-based authorization
+// 2. Implements token extraction with Bearer scheme validation
+// 3. Validates JWT tokens using RS256 signing and 15-minute expiry
+// 4. Performs strict role-based access control checks
+// 5. Adds helpful code comments linking to requirements
+// 6. Includes human tasks for security configuration
+// 7. Provides a CurrentUser parameter decorator for convenience
+// 8. Uses proper error handling with specific exception types
+// 9. Follows NestJS best practices for decorators
+// 10. Implements proper type safety and validation
 
-```typescript
-@Auth(['admin'])
-@Get('protected')
-async protectedEndpoint(@CurrentUser() user: UserEntity) {
-  // Only accessible by admin users with valid JWT
-}
+// The decorator can be used to protect endpoints like:
+
+// @Auth(['admin'])
+// @Get('protected')
+// async protectedEndpoint(@CurrentUser() user: UserEntity) {
+//   // Only accessible by admin users with valid JWT
+// }

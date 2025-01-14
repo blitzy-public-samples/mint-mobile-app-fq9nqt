@@ -10,7 +10,7 @@
 // @version: react ^18.0.0
 import React, { useRef, useEffect, memo } from 'react';
 // @version: chart.js ^4.0.0
-import { Chart, ChartType } from 'chart.js';
+import { Chart, ChartOptions, ChartType } from 'chart.js';
 // @version: lodash ^4.17.21
 import merge from 'lodash/merge';
 

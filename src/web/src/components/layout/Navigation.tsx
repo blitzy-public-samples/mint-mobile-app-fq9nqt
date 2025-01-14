@@ -15,14 +15,16 @@ import { useNavigate, useLocation } from 'react-router-dom';
 // Internal imports
 import { Button } from '../common/Button';
 import { useAuth } from '../../contexts/AuthContext';
+import { AccountIcon, BudgetIcon, DashboardIcon, GoalIcon, InvestmentIcon, LogoutIcon, TransactionIcon } from '@/assets/icons';
 
 // Navigation items constant from specification
 const NAVIGATION_ITEMS = [
-  { path: '/dashboard', label: 'Dashboard', icon: 'dashboard', ariaLabel: 'Navigate to Dashboard' },
-  { path: '/accounts', label: 'Accounts', icon: 'accounts', ariaLabel: 'Navigate to Accounts' },
-  { path: '/budgets', label: 'Budgets', icon: 'budgets', ariaLabel: 'Navigate to Budgets' },
-  { path: '/goals', label: 'Goals', icon: 'goals', ariaLabel: 'Navigate to Goals' },
-  { path: '/investments', label: 'Investments', icon: 'investments', ariaLabel: 'Navigate to Investments' }
+  { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon size={24} />, ariaLabel: 'Navigate to Dashboard' },
+  { path: '/accounts', label: 'Accounts', icon: <AccountIcon size={24} />, ariaLabel: 'Navigate to Accounts' },
+  { path: '/budgets', label: 'Budgets', icon: <BudgetIcon size={24} />, ariaLabel: 'Navigate to Budgets' },
+  { path: '/goals', label: 'Goals', icon: <GoalIcon size={24} />, ariaLabel: 'Navigate to Goals' },
+  { path: '/investments', label: 'Investments', icon: <InvestmentIcon size={24} />, ariaLabel: 'Navigate to Investments' },
+  { path: '/transactions', label: 'Transactions', icon: <TransactionIcon size={24} />, ariaLabel: 'Navigate to Transactions', hideOnMobile: true }
 ];
 
 /**
@@ -67,10 +69,10 @@ const Navigation: React.FC = () => {
       return;
     }
 
-    if (!authState.isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+    // if (!authState.isAuthenticated) {
+    //   navigate('/login');
+    //   return;
+    // }
 
     navigate(path);
   };
@@ -80,11 +82,11 @@ const Navigation: React.FC = () => {
    * Implements Technical Specification/8.1.8 Accessibility Features
    */
   const renderDesktopNav = () => (
-    <nav className="hidden md:flex flex-col w-64 h-screen bg-white shadow-lg" role="navigation">
+    <nav className="hidden md:flex flex-col w-64 bg-white shadow-lg" role="navigation">
       <div className="p-4">
         <h1 className="text-xl font-bold text-primary-900">MintReplica Lite</h1>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {NAVIGATION_ITEMS.map((item) => (
           <Button
@@ -108,7 +110,7 @@ const Navigation: React.FC = () => {
             onClick={() => handleNavigation('/logout')}
             ariaLabel="Log out of your account"
           >
-            <span className="material-icons mr-3">logout</span>
+            <span className="material-icons mr-3">{<LogoutIcon size={24} />}</span>
             Logout
           </Button>
         </div>
@@ -121,26 +123,28 @@ const Navigation: React.FC = () => {
    * Implements Technical Specification/8.1.7 Mobile Responsive Considerations
    */
   const renderMobileNav = () => (
-    <nav 
-      className="fixed bottom-0 left-0 right-0 bg-white shadow-lg md:hidden"
+    <nav
+      className="bottom-0 left-0 right-0 bg-white shadow-lg md:hidden z-10"
       role="navigation"
       aria-label="Mobile navigation"
     >
+
       <div className="flex justify-around items-center h-16">
-        {NAVIGATION_ITEMS.map((item) => (
-          <Button
-            key={item.path}
-            variant="text"
-            size="small"
-            className={`flex flex-col items-center py-2 px-4 ${
-              isActiveRoute(item.path) ? 'text-primary-500' : 'text-gray-500'
-            }`}
-            onClick={() => handleNavigation(item.path)}
-            ariaLabel={item.ariaLabel}
-          >
-            <span className="material-icons text-xl">{item.icon}</span>
-            <span className="text-xs mt-1">{item.label}</span>
-          </Button>
+      {NAVIGATION_ITEMS.filter(item => !isMobile || !item.hideOnMobile).map((item) => (
+            <Button
+              key={item.path}
+              variant="text"
+              size="small"
+              className={`flex flex-col items-center py-2 px-4`}
+              onClick={() => handleNavigation(item.path)}
+              ariaLabel={item.ariaLabel}
+              style={{
+                backgroundColor: isActiveRoute(item.path) ? 'var(--color-primary-100)' : 'transparent'
+              }}
+            >
+              <span className="material-icons text-xl">{item.icon}</span>
+              <span className="text-xs mt-1">{item.label}</span>
+            </Button>
         ))}
       </div>
     </nav>
@@ -150,9 +154,9 @@ const Navigation: React.FC = () => {
     <>
       {/* Render appropriate navigation based on screen size */}
       {isMobile ? renderMobileNav() : renderDesktopNav()}
-      
+
       {/* Mobile navigation offset to prevent content overlap */}
-      {isMobile && <div className="h-16" aria-hidden="true" />}
+      {/* {isMobile && <div className="h-16" aria-hidden="true" />} */}
     </>
   );
 };

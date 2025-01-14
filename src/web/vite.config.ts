@@ -6,6 +6,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import 'dotenv/config';
 import { API_CONFIG } from './src/config/api.config';
 
 /**
@@ -21,7 +22,7 @@ import { API_CONFIG } from './src/config/api.config';
 
 export default defineConfig(({ mode }) => {
   const isDevelopment = mode === 'development';
-  
+
   return {
     // Implements Technical Specification/5.3.1 Frontend Technologies
     plugins: [
@@ -36,7 +37,7 @@ export default defineConfig(({ mode }) => {
           ]
         }
       }),
-      
+
       // Progressive Web App configuration
       VitePWA({
         manifest: {
@@ -71,7 +72,7 @@ export default defineConfig(({ mode }) => {
           ]
         }
       }),
-      
+
       // TypeScript path aliases support
       tsconfigPaths()
     ],
@@ -93,7 +94,7 @@ export default defineConfig(({ mode }) => {
       },
       // Implements Technical Specification/9.3.1 API Security
       headers: {
-        'Content-Security-Policy': "default-src 'self'; connect-src 'self' https://*.plaid.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline';",
+        // 'Content-Security-Policy': "default-src 'self'; connect-src 'self' https://*.plaid.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline';",
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'X-XSS-Protection': '1; mode=block'
@@ -158,10 +159,11 @@ export default defineConfig(({ mode }) => {
 
     // Environment variables configuration
     envPrefix: 'VITE_',
-    
+
     // Global constants
     define: {
-      __APP_VERSION__: 'JSON.stringify(process.env.npm_package_version)'
+      // __APP_VERSION__: 'JSON.stringify(process.env.npm_package_version)'
+      'process.env': process.env
     }
   };
 });

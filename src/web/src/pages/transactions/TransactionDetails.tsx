@@ -16,6 +16,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Transaction } from '../../types/models.types';
 import { TransactionForm } from '../../components/transactions/TransactionForm';
 import { getTransactionById, updateTransaction } from '../../services/api/transactions.api';
+import { mockTransactions } from '@/mocks/mockData';
+import DashboardLayout from '@/layouts/DashboardLayout';
+import Spinner from '@/components/common/Spinner';
 
 /**
  * Interface for component state management
@@ -51,11 +54,25 @@ const useTransactionDetails = (transactionId: string) => {
           isLoading: false
         }));
       } catch (error) {
+        const transaction = mockTransactions.find(t => t.id === transactionId);
+        if (!transaction) {
+          setState(prev => ({
+            ...prev,
+            isLoading: false,
+            error: 'Transaction not found'
+          }));
+          return;
+        }
         setState(prev => ({
           ...prev,
-          isLoading: false,
-          error: 'Failed to load transaction details. Please try again.'
+          transaction,
+          isLoading: false
         }));
+        // setState(prev => ({
+        //   ...prev,
+        //   isLoading: false,
+        //   error: 'Failed to load transaction details. Please try again.'
+        // }));
       }
     };
 
@@ -70,6 +87,7 @@ const useTransactionDetails = (transactionId: string) => {
 
   return {
     ...state,
+    setState,
     setEditing
   };
 };
@@ -86,8 +104,9 @@ const TransactionDetails: React.FC = () => {
   const navigate = useNavigate();
   const {
     transaction,
-    isLoading,
+    setState,
     isEditing,
+    isLoading,
     error,
     setEditing
   } = useTransactionDetails(id);
@@ -106,7 +125,7 @@ const TransactionDetails: React.FC = () => {
         isLoading: false,
         isEditing: false
       }));
-      navigate('/transactions');
+      setEditing(false);
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -118,106 +137,116 @@ const TransactionDetails: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div 
-        className="loading-container"
-        role="alert"
-        aria-busy="true"
-      >
-        <span className="loading-text">Loading transaction details...</span>
-      </div>
+      <DashboardLayout>
+        <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+          <Spinner size="large" color="primary" ariaLabel="Loading transaction details" />
+        </div>
+      </DashboardLayout >
     );
   }
 
   if (error) {
     return (
-      <div 
-        className="error-container"
-        role="alert"
-        aria-live="polite"
-      >
-        <p className="error-message">{error}</p>
-        <button
-          onClick={() => navigate('/transactions')}
-          className="back-button"
-          aria-label="Return to transactions list"
+      <DashboardLayout>
+        <div
+          className="error-container"
+          role="alert"
+          aria-live="polite"
         >
-          Back to Transactions
-        </button>
-      </div>
+          <p className="error-message">{error}</p>
+          <button
+            onClick={() => navigate('/transactions')}
+            className="back-button"
+            aria-label="Return to transactions list"
+          >
+            Back to Transactions
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!transaction) {
     return (
-      <div 
-        className="not-found-container"
-        role="alert"
-      >
-        <p>Transaction not found</p>
-        <button
-          onClick={() => navigate('/transactions')}
-          className="back-button"
-          aria-label="Return to transactions list"
+      <DashboardLayout>
+        <div
+          className="not-found-container"
+          role="alert"
         >
-          Back to Transactions
-        </button>
-      </div>
+          <p>Transaction not found</p>
+          <button
+            onClick={() => navigate('/transactions')}
+            className="back-button"
+            aria-label="Return to transactions list"
+          >
+            Back to Transactions
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="transaction-details-container">
-      <header className="details-header">
-        <h1 id="page-title">Transaction Details</h1>
-        {!isEditing && (
-          <button
+    <DashboardLayout>
+      <div className="transaction-details-container">
+        <header className="details-header">
+          <h1 id="page-title">Transaction Details</h1>
+          {!isEditing && (
+            <button
             onClick={() => setEditing(true)}
-            className="edit-button"
-            aria-label="Edit transaction"
+            className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+            aria-label="Edit goal"
           >
             Edit
           </button>
+            // <button
+            //   onClick={() => setEditing(true)}
+            //   className="edit-button"
+            //   aria-label="Edit transaction"
+            // >
+            //   Edit
+            // </button>
+          )}
+        </header>
+
+        {isEditing ? (
+          <TransactionForm
+            initialData={transaction}
+            onSubmit={handleUpdateTransaction}
+            onCancel={() => setEditing(false)}
+            isLoading={isLoading}
+          />
+        ) : (
+          <div
+            className="details-view"
+            role="region"
+            aria-labelledby="page-title"
+          >
+            <dl className="details-list">
+              <div className="detail-item">
+                <dt>Description</dt>
+                <dd>{transaction.description}</dd>
+              </div>
+              <div className="detail-item">
+                <dt>Amount</dt>
+                <dd>{new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(transaction.amount)}</dd>
+              </div>
+              <div className="detail-item">
+                <dt>Date</dt>
+                <dd>{new Date(transaction.date).toLocaleDateString()}</dd>
+              </div>
+              <div className="detail-item">
+                <dt>Category</dt>
+                <dd>{transaction.categoryId}</dd>
+              </div>
+            </dl>
+          </div>
         )}
-      </header>
 
-      {isEditing ? (
-        <TransactionForm
-          initialData={transaction}
-          onSubmit={handleUpdateTransaction}
-          onCancel={() => setEditing(false)}
-          isLoading={isLoading}
-        />
-      ) : (
-        <div 
-          className="details-view"
-          role="region"
-          aria-labelledby="page-title"
-        >
-          <dl className="details-list">
-            <div className="detail-item">
-              <dt>Description</dt>
-              <dd>{transaction.description}</dd>
-            </div>
-            <div className="detail-item">
-              <dt>Amount</dt>
-              <dd>{new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-              }).format(transaction.amount)}</dd>
-            </div>
-            <div className="detail-item">
-              <dt>Date</dt>
-              <dd>{new Date(transaction.date).toLocaleDateString()}</dd>
-            </div>
-            <div className="detail-item">
-              <dt>Category</dt>
-              <dd>{transaction.categoryId}</dd>
-            </div>
-          </dl>
-        </div>
-      )}
-
-      <style jsx>{`
+        <style jsx>{`
         .transaction-details-container {
           max-width: 800px;
           margin: 0 auto;
@@ -248,7 +277,7 @@ const TransactionDetails: React.FC = () => {
         }
 
         .edit-button:hover {
-          background-color: var(--primary-color-dark);
+          background-color: var(--primary-color-700);
         }
 
         .edit-button:focus {
@@ -317,7 +346,8 @@ const TransactionDetails: React.FC = () => {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

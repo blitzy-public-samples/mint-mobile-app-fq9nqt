@@ -11,10 +11,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Account } from '../../types/models.types';
+import { Account, Transaction } from '../../types/models.types';
 import { getAccountById, syncAccount } from '../../services/api/accounts.api';
-import { TransactionList } from '../../components/transactions/TransactionList';
-import { AreaChart } from '../../components/charts/AreaChart';
+import TransactionList from '../../components/transactions/TransactionList';
+import AreaChart from '../../components/charts/AreaChart';
+import DashboardLayout from '@/layouts/DashboardLayout';
+import Spinner from '@/components/common/Spinner';
 
 // Human Tasks:
 // 1. Configure error monitoring service integration
@@ -23,7 +25,7 @@ import { AreaChart } from '../../components/charts/AreaChart';
 // 4. Test real-time sync performance with different network conditions
 // 5. Review and adjust error message content with UX team
 
-interface AccountDetailsProps {}
+interface AccountDetailsProps { }
 
 const AccountDetails: React.FC<AccountDetailsProps> = () => {
   const { accountId } = useParams<{ accountId: string }>();
@@ -45,7 +47,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
       setError(null);
       const response = await getAccountById(accountId);
       setAccount(response.data);
-      
+
       // Simulate balance history data (replace with actual API call)
       const today = new Date();
       const history = Array.from({ length: 30 }, (_, i) => ({
@@ -96,84 +98,96 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
   if (loading) {
     return (
-      <div className="account-details-loading" role="status">
-        <div className="loading-spinner" aria-hidden="true" />
-        <span>Loading account details...</span>
-      </div>
+      <DashboardLayout>
+        <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+          <Spinner size="large" color="primary" ariaLabel="Loading account details" />
+        </div>
+      </DashboardLayout >
     );
   }
 
   if (error) {
     return (
-      <div className="account-details-error" role="alert">
-        <h2>Error Loading Account</h2>
-        <p>{error}</p>
-        <button 
-          onClick={fetchAccountDetails}
-          className="retry-button"
-        >
-          Retry
-        </button>
-      </div>
+      <DashboardLayout>
+        <div className="account-details-error" role="alert">
+          <h2>Error Loading Account</h2>
+          <p>{error}</p>
+          <button
+            onClick={fetchAccountDetails}
+            className="retry-button"
+          >
+            Retry
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!account) {
     return (
-      <div className="account-details-not-found" role="alert">
-        <h2>Account Not Found</h2>
-        <p>The requested account could not be found.</p>
-        <button 
-          onClick={() => navigate('/accounts')}
-          className="back-button"
-        >
-          Back to Accounts
-        </button>
-      </div>
+      <DashboardLayout>
+        <div className="account-details-not-found" role="alert">
+          <h2>Account Not Found</h2>
+          <p>The requested account could not be found.</p>
+          <button
+            onClick={() => navigate('/accounts')}
+            className="back-button"
+          >
+            Back to Accounts
+          </button>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="account-details">
-      {/* Account Summary Section */}
-      <section className="account-summary">
-        <div className="account-header">
-          <h1>Account Details</h1>
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="sync-button"
-            aria-busy={syncing}
-          >
-            {syncing ? 'Syncing...' : 'Sync Account'}
-          </button>
-        </div>
+    <DashboardLayout>
+      <div className="account-details">
+        {/* Account Summary Section */}
+        <section className="account-summary">
+          <div className="account-header">
+            <h1>Account Details</h1>
+            {/* <button
+              onClick={handleSync}
+              disabled={syncing}
+              className="sync-button"
+              aria-busy={syncing}
+            >
+              {syncing ? 'Syncing...' : 'Sync Account'}
+            </button> */}
+          </div>
 
-        <div className="account-info">
-          <div className="info-group">
-            <label>Account Type</label>
-            <span>{account.accountType}</span>
+          <div className="account-info">
+            {/* <div className='flex flex-row '> */}
+              <div className="info-group">
+                <label>Institution</label>
+                <span>{account.institutionId}</span>
+              </div>
+              <div className="info-group">
+                <label>Account Type</label>
+                <span>{account.accountType}</span>
+              </div>
+            {/* </div> */}
+            <div className="info-group">
+              <label>Current Balance</label>
+              <span className="balance">
+                {account.balance.toLocaleString('en-US', {
+                  style: 'currency',
+                  currency: account.currency
+                })}
+              </span>
+            </div>
+            <div className="info-group">
+              <label>Last Synced</label>
+              <span>
+                {new Date(account.lastSynced).toLocaleString()}
+              </span>
+            </div>
           </div>
-          <div className="info-group">
-            <label>Current Balance</label>
-            <span className="balance">
-              {account.balance.toLocaleString('en-US', {
-                style: 'currency',
-                currency: account.currency
-              })}
-            </span>
-          </div>
-          <div className="info-group">
-            <label>Last Synced</label>
-            <span>
-              {new Date(account.lastSynced).toLocaleString()}
-            </span>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Balance History Chart */}
-      <section className="balance-history">
+        {/* Balance History Chart */}
+        {/* <section className="balance-history">
         <h2>Balance History</h2>
         <div className="chart-container">
           <AreaChart
@@ -221,21 +235,21 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
             lineColor="rgb(75, 192, 192)"
           />
         </div>
-      </section>
+      </section> */}
 
-      {/* Transactions Section */}
-      <section className="transactions">
-        <h2>Recent Transactions</h2>
-        <TransactionList
-          accountId={accountId}
-          pageSize={10}
-          onTransactionClick={handleTransactionClick}
-          className="transactions-list"
-          ariaLabel={`Recent transactions for ${account.accountType} account`}
-        />
-      </section>
+        {/* Transactions Section */}
+        <section className="transactions">
+          <h2>Recent Transactions</h2>
+          <TransactionList
+            accountId={accountId}
+            pageSize={10}
+            onTransactionClick={handleTransactionClick}
+            className="transactions-list"
+            ariaLabel={`Recent transactions for ${account.accountType} account`}
+          />
+        </section>
 
-      <style jsx>{`
+        <style jsx>{`
         .account-details {
           padding: 2rem;
           max-width: 1200px;
@@ -265,7 +279,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
         .sync-button {
           padding: 0.5rem 1rem;
-          background: var(--color-primary);
+          background: var(--color-primary-400);
           color: white;
           border: none;
           border-radius: 4px;
@@ -337,7 +351,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
 
         .loading-spinner {
           border: 4px solid var(--color-background);
-          border-top: 4px solid var(--color-primary);
+          border-top: 4px solid var(--color-primary-400);
           border-radius: 50%;
           width: 40px;
           height: 40px;
@@ -349,7 +363,7 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
         .back-button {
           margin-top: 1rem;
           padding: 0.5rem 1rem;
-          background: var(--color-primary);
+          background: var(--color-primary-400);
           color: white;
           border: none;
           border-radius: 4px;
@@ -394,7 +408,8 @@ const AccountDetails: React.FC<AccountDetailsProps> = () => {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

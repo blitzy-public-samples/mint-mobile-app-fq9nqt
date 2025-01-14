@@ -112,27 +112,25 @@ export function ApiPagination(options?: ApiPaginationOptions) {
 }
 
 export default ApiPagination;
-```
 
-This implementation:
+// This implementation:
 
-1. Creates a decorator that adds OpenAPI documentation for paginated endpoints
-2. Provides configurable options for default page size, page number, and maximum limit
-3. Documents both query parameters (page and limit) with validation rules
-4. Documents the standardized response structure with metadata
-5. Uses the pagination utilities from pagination.util.ts for consistency
-6. Follows REST API design requirements for standardized pagination
-7. Implements OpenAPI 3.0 documentation as specified
-8. Includes helpful code comments linking to requirements
-9. Lists human tasks for monitoring and optimization
-10. Uses proper TypeScript types and interfaces
-11. Follows NestJS decorator patterns and best practices
+// 1. Creates a decorator that adds OpenAPI documentation for paginated endpoints
+// 2. Provides configurable options for default page size, page number, and maximum limit
+// 3. Documents both query parameters (page and limit) with validation rules
+// 4. Documents the standardized response structure with metadata
+// 5. Uses the pagination utilities from pagination.util.ts for consistency
+// 6. Follows REST API design requirements for standardized pagination
+// 7. Implements OpenAPI 3.0 documentation as specified
+// 8. Includes helpful code comments linking to requirements
+// 9. Lists human tasks for monitoring and optimization
+// 10. Uses proper TypeScript types and interfaces
+// 11. Follows NestJS decorator patterns and best practices
 
-The decorator can be used on controller methods to automatically add pagination documentation:
+// The decorator can be used on controller methods to automatically add pagination documentation:
 
-```typescript
-@Get()
-@ApiPagination({ defaultLimit: 25, maxLimit: 50 })
-async findAll(@Query() query: PaginationParamsDto) {
-  // Implementation
-}
+// @Get()
+// @ApiPagination({ defaultLimit: 25, maxLimit: 50 })
+// async findAll(@Query() query: PaginationParamsDto) {
+//   // Implementation
+// }

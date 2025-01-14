@@ -12,7 +12,7 @@
  */
 
 // @version: react ^18.0.0
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 // @version: classnames ^2.3.2
 import classNames from 'classnames';
 import { formatCurrency } from '../../utils/currency.utils';
@@ -44,9 +44,8 @@ export interface TableProps {
   pageSize?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
-  sortKey?: string;
-  sortDirection?: 'asc' | 'desc';
-  onSort?: (key: string) => void;
+  defaultSortKey?: string;
+  defaultSortDirection?: 'asc' | 'desc';
   ariaLabel?: string;
   summary?: string;
 }
@@ -85,13 +84,12 @@ const renderTableHeader = (
                 <button
                   className="sort-button"
                   onClick={() => onSort?.(column.key)}
-                  aria-label={`Sort by ${column.header} ${
-                    isSorted
+                  aria-label={`Sort by ${column.header} ${isSorted
                       ? sortDirection === 'asc'
                         ? 'descending'
                         : 'ascending'
                       : ''
-                  }`.trim()}
+                    }`.trim()}
                 >
                   {column.header}
                   {isSorted && (
@@ -139,8 +137,8 @@ const renderTableBody = (
             const cellContent = column.render
               ? column.render(item)
               : typeof cellValue === 'number'
-              ? formatCurrency(cellValue)
-              : cellValue;
+                ? formatCurrency(cellValue)
+                : cellValue;
 
             return (
               <td
@@ -171,18 +169,58 @@ const Table: React.FC<TableProps> = ({
   pageSize,
   currentPage = 1,
   onPageChange,
-  sortKey,
-  sortDirection,
-  onSort,
+  defaultSortKey,
+  defaultSortDirection,
   ariaLabel,
   summary,
 }) => {
+  // State for table sorting
+  const [sortKey, setSortKey] = useState<string>(defaultSortKey ?? '');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSortDirection ?? 'desc');
+
+  /**
+   * Handles table sorting
+   * Implements requirement: Budget Management UI - Data Organization
+   */
+  function handleSort (key: string) {
+    setSortDirection(prev =>
+      sortKey === key ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'
+    );
+    setSortKey(key);
+  };
+
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+
+    return [...data].sort((a, b) => {
+      const aValue = a[sortKey];
+      const bValue = b[sortKey];
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      if (aValue instanceof Date && bValue instanceof Date) {
+        return sortDirection === 'asc'
+          ? aValue.getTime() - bValue.getTime()
+          : bValue.getTime() - aValue.getTime();
+      }
+
+      const aString = String(aValue);
+      const bString = String(bValue);
+      return sortDirection === 'asc'
+        ? aString.localeCompare(bString)
+        : bString.localeCompare(aString);
+    });
+  }, [data, sortKey, sortDirection]);
+
   // Calculate paginated data
   const paginatedData = useMemo(() => {
-    if (!pageSize) return data;
+    if (!pageSize) return sortedData;
+
     const startIndex = (currentPage - 1) * pageSize;
-    return data.slice(startIndex, startIndex + pageSize);
-  }, [data, pageSize, currentPage]);
+    return sortedData.slice(startIndex, startIndex + pageSize);
+  }, [sortedData, pageSize, currentPage]);
 
   // Calculate total pages
   const totalPages = pageSize ? Math.ceil(data.length / pageSize) : 0;
@@ -205,7 +243,7 @@ const Table: React.FC<TableProps> = ({
         summary={summary}
         aria-busy={loading}
       >
-        {renderTableHeader(columns, sortKey, sortDirection, onSort)}
+        {renderTableHeader(columns, sortKey, sortDirection, handleSort)}
         {renderTableBody(paginatedData, columns, onRowClick)}
       </table>
 
@@ -273,11 +311,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .table-hoverable .table-row:hover {
-            background-color: var(--color-background-hover);
-          }
-
-          .table-striped .table-row:nth-child(even) {
-            background-color: var(--color-background-alternate);
+            background-color: var(--color-neutral-100);
           }
 
           .table-row.clickable {
@@ -285,7 +319,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .table-row.clickable:focus {
-            outline: 2px solid var(--color-primary);
+            outline: 2px solid var(--color-primary-400);
             outline-offset: -2px;
           }
 
@@ -304,7 +338,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .sort-button:focus {
-            outline: 2px solid var(--color-primary);
+            outline: 2px solid var(--color-primary-400);
             outline-offset: 2px;
           }
 
@@ -349,7 +383,7 @@ const Table: React.FC<TableProps> = ({
           }
 
           .pagination-button:focus {
-            outline: 2px solid var(--color-primary);
+            outline: 2px solid var(--color-primary-400);
             outline-offset: 2px;
           }
 

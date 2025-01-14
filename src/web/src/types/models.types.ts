@@ -41,6 +41,9 @@ export type GoalStatus =
   | 'AT_RISK' 
   | 'COMPLETED';
 
+// Type for different kinds of assets
+export type AssetType = 'STOCK' | 'ETF' | 'MUTUAL_FUND' | 'BOND' | 'CRYPTO' | 'OTHER';
+
 // Interface representing a user in the system with complete profile and security information
 export interface User {
   id: string;
@@ -48,6 +51,7 @@ export interface User {
   firstName: string;
   lastName: string;
   passwordHash: string;
+  avatar?: string;
   createdAt: Date;
   updatedAt: Date;
   preferences: Record<string, any>;
@@ -108,7 +112,7 @@ export interface Goal {
   type: GoalType;
   targetAmount: number;
   currentAmount: number;
-  targetDate: Date;
+  targetDate: string;
   status: GoalStatus;
 }
 
@@ -121,4 +125,16 @@ export interface Investment {
   costBasis: number;
   currentPrice: number;
   lastUpdated: Date;
+  assetType: AssetType;
+  currentValue: number;
+  return: number;
+}
+
+// Interface for investment performance metrics
+export interface InvestmentPerformanceData {
+  returnRate: number;
+  totalValue: number;
+  gainLoss: number;
+  lastUpdated: Date;
+  historicalData: Array<{ x: string; y: number }>;
 }

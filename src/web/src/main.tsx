@@ -16,6 +16,8 @@ import ReactDOM from 'react-dom/client';
 // Internal imports
 import App from './App';
 import './styles/global.css';
+import './styles/components.css';
+import './styles/tailwind.css';
 
 /**
  * Initializes and renders the React application with strict mode and security configurations
@@ -40,7 +42,7 @@ import './styles/global.css';
 const renderApp = (): void => {
   // Get root element with type checking
   const rootElement = document.getElementById('root') as HTMLElement;
-  
+
   if (!rootElement) {
     throw new Error('Failed to find root element');
   }

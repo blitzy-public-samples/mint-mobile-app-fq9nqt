@@ -92,5 +92,5 @@ export const useThemeContext = (): ThemeContextType => {
 };
 
 // Export theme provider component and context hook
-export { ThemeMode };
+// export { ThemeMode };
 export type { ThemePreferences, ThemeContextType };

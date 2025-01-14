@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Goal, GoalType, GoalStatus } from '../../types/models.types';
 import { useGoals } from '../../hooks/useGoals';
 import { Button } from '../../components/common/Button';
+import DashboardLayout from '@/layouts/DashboardLayout';
 
 /**
  * HUMAN TASKS:
@@ -60,29 +61,20 @@ const CreateGoal: React.FC = () => {
    */
   const onSubmit = async (data: CreateGoalFormData) => {
     try {
-      // Validate amount constraints
-      if (data.currentAmount > data.targetAmount) {
-        setError('currentAmount', {
-          type: 'manual',
-          message: 'Current amount cannot exceed target amount'
-        });
-        return;
-      }
-
       // Format goal data
       const goalData: Omit<Goal, 'id'> = {
         name: data.name.trim(),
         type: data.type,
         targetAmount: Number(data.targetAmount),
         currentAmount: Number(data.currentAmount),
-        targetDate: new Date(data.targetDate),
+        targetDate: data.targetDate,
         status: data.currentAmount === 0 ? 'NOT_STARTED' : 'IN_PROGRESS',
         userId: '' // Will be set by the API based on authenticated user
       };
 
       // Create new goal
       await createNewGoal(goalData);
-      
+
       // Navigate to goals list on success
       navigate('/goals');
     } catch (err) {
@@ -94,211 +86,210 @@ const CreateGoal: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Create New Goal</h1>
+    <DashboardLayout>
+      <div className="max-w-2xl mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-6">Create New Goal</h1>
 
-      <form 
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-6"
-        noValidate
-      >
-        {/* Goal Name Field */}
-        <div>
-          <label 
-            htmlFor="name"
-            className="block text-sm font-medium mb-1"
-          >
-            Goal Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            className="w-full px-4 py-2 border rounded-md"
-            {...register('name', {
-              required: 'Goal name is required',
-              minLength: {
-                value: 3,
-                message: 'Goal name must be at least 3 characters'
-              },
-              maxLength: {
-                value: 50,
-                message: 'Goal name cannot exceed 50 characters'
-              }
-            })}
-            aria-invalid={errors.name ? 'true' : 'false'}
-          />
-          {errors.name && (
-            <p className="text-red-500 text-sm mt-1" role="alert">
-              {errors.name.message}
-            </p>
-          )}
-        </div>
-
-        {/* Goal Type Field */}
-        <div>
-          <label 
-            htmlFor="type"
-            className="block text-sm font-medium mb-1"
-          >
-            Goal Type
-          </label>
-          <select
-            id="type"
-            className="w-full px-4 py-2 border rounded-md"
-            {...register('type', {
-              required: 'Please select a goal type'
-            })}
-            aria-invalid={errors.type ? 'true' : 'false'}
-          >
-            <option value="SAVINGS">Savings</option>
-            <option value="DEBT_PAYMENT">Debt Payment</option>
-            <option value="INVESTMENT">Investment</option>
-            <option value="EMERGENCY_FUND">Emergency Fund</option>
-            <option value="CUSTOM">Custom</option>
-          </select>
-          {errors.type && (
-            <p className="text-red-500 text-sm mt-1" role="alert">
-              {errors.type.message}
-            </p>
-          )}
-        </div>
-
-        {/* Target Amount Field */}
-        <div>
-          <label 
-            htmlFor="targetAmount"
-            className="block text-sm font-medium mb-1"
-          >
-            Target Amount
-          </label>
-          <input
-            id="targetAmount"
-            type="number"
-            className="w-full px-4 py-2 border rounded-md"
-            min="0"
-            step="0.01"
-            {...register('targetAmount', {
-              required: 'Target amount is required',
-              min: {
-                value: 0.01,
-                message: 'Target amount must be greater than 0'
-              },
-              validate: value => 
-                value > (currentAmount || 0) || 
-                'Target amount must be greater than current amount'
-            })}
-            aria-invalid={errors.targetAmount ? 'true' : 'false'}
-          />
-          {errors.targetAmount && (
-            <p className="text-red-500 text-sm mt-1" role="alert">
-              {errors.targetAmount.message}
-            </p>
-          )}
-        </div>
-
-        {/* Current Amount Field */}
-        <div>
-          <label 
-            htmlFor="currentAmount"
-            className="block text-sm font-medium mb-1"
-          >
-            Current Amount
-          </label>
-          <input
-            id="currentAmount"
-            type="number"
-            className="w-full px-4 py-2 border rounded-md"
-            min="0"
-            step="0.01"
-            {...register('currentAmount', {
-              required: 'Current amount is required',
-              min: {
-                value: 0,
-                message: 'Current amount cannot be negative'
-              },
-              validate: value => 
-                value <= (targetAmount || 0) || 
-                'Current amount cannot exceed target amount'
-            })}
-            aria-invalid={errors.currentAmount ? 'true' : 'false'}
-          />
-          {errors.currentAmount && (
-            <p className="text-red-500 text-sm mt-1" role="alert">
-              {errors.currentAmount.message}
-            </p>
-          )}
-        </div>
-
-        {/* Target Date Field */}
-        <div>
-          <label 
-            htmlFor="targetDate"
-            className="block text-sm font-medium mb-1"
-          >
-            Target Date
-          </label>
-          <input
-            id="targetDate"
-            type="date"
-            className="w-full px-4 py-2 border rounded-md"
-            {...register('targetDate', {
-              required: 'Target date is required',
-              validate: value => 
-                new Date(value) > new Date() || 
-                'Target date must be in the future'
-            })}
-            aria-invalid={errors.targetDate ? 'true' : 'false'}
-          />
-          {errors.targetDate && (
-            <p className="text-red-500 text-sm mt-1" role="alert">
-              {errors.targetDate.message}
-            </p>
-          )}
-        </div>
-
-        {/* Form Error Message */}
-        {errors.root && (
-          <div 
-            className="p-4 bg-red-50 border border-red-200 rounded-md"
-            role="alert"
-          >
-            <p className="text-red-500">{errors.root.message}</p>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+          noValidate
+        >
+          {/* Goal Name Field */}
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium mb-1"
+            >
+              Goal Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              className="w-full px-4 py-2 border rounded-md"
+              {...register('name', {
+                required: 'Goal name is required',
+                minLength: {
+                  value: 3,
+                  message: 'Goal name must be at least 3 characters'
+                },
+                maxLength: {
+                  value: 50,
+                  message: 'Goal name cannot exceed 50 characters'
+                }
+              })}
+              aria-invalid={errors.name ? 'true' : 'false'}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1" role="alert">
+                {errors.name.message}
+              </p>
+            )}
           </div>
-        )}
 
-        {/* API Error Message */}
-        {error && (
-          <div 
-            className="p-4 bg-red-50 border border-red-200 rounded-md"
-            role="alert"
-          >
-            <p className="text-red-500">{error}</p>
+          {/* Goal Type Field */}
+          <div>
+            <label
+              htmlFor="type"
+              className="block text-sm font-medium mb-1"
+            >
+              Goal Type
+            </label>
+            <select
+              id="type"
+              className="w-full px-4 py-2 border rounded-md"
+              {...register('type', {
+                required: 'Please select a goal type'
+              })}
+              aria-invalid={errors.type ? 'true' : 'false'}
+            >
+              <option value="SAVINGS">Savings</option>
+              <option value="DEBT_PAYMENT">Debt Payment</option>
+              <option value="INVESTMENT">Investment</option>
+              <option value="EMERGENCY_FUND">Emergency Fund</option>
+              <option value="CUSTOM">Custom</option>
+            </select>
+            {errors.type && (
+              <p className="text-red-500 text-sm mt-1" role="alert">
+                {errors.type.message}
+              </p>
+            )}
           </div>
-        )}
 
-        {/* Form Actions */}
-        <div className="flex gap-4">
-          <Button
-            type="submit"
-            variant="primary"
-            isLoading={isLoading}
-            disabled={isLoading}
-            className="w-full"
-          >
-            Create Goal
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => navigate('/goals')}
-            disabled={isLoading}
-            className="w-full"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </div>
+          {/* Target Amount Field */}
+          <div>
+            <label
+              htmlFor="targetAmount"
+              className="block text-sm font-medium mb-1"
+            >
+              Target Amount
+            </label>
+            <input
+              id="targetAmount"
+              type="number"
+              className="w-full px-4 py-2 border rounded-md"
+              min={0}
+              step={1}
+              {...register('targetAmount', {
+                required: 'Target amount is required',
+                min: {
+                  value: 1,
+                  message: 'Target amount must be greater than 0'
+                },
+              })}
+              aria-invalid={errors.targetAmount ? 'true' : 'false'}
+            />
+            {errors.targetAmount && (
+              <p className="text-red-500 text-sm mt-1" role="alert">
+                {errors.targetAmount.message}
+              </p>
+            )}
+          </div>
+
+          {/* Current Amount Field */}
+          <div>
+            <label
+              htmlFor="currentAmount"
+              className="block text-sm font-medium mb-1"
+            >
+              Current Amount
+            </label>
+            <input
+              id="currentAmount"
+              type="number"
+              className="w-full px-4 py-2 border rounded-md"
+              min={0}
+              step={1}
+              {...register('currentAmount', {
+                required: 'Current amount is required',
+                min: {
+                  value: 0,
+                  message: 'Current amount cannot be negative'
+                },
+                validate: value =>
+                  Number(value) > (Number(targetAmount)) ?
+                    'Current amount cannot exceed target amount' : undefined
+              })}
+              aria-invalid={errors.currentAmount ? 'true' : 'false'}
+            />
+            {errors.currentAmount && (
+              <p className="text-red-500 text-sm mt-1" role="alert">
+                {errors.currentAmount.message}
+              </p>
+            )}
+          </div>
+
+          {/* Target Date Field */}
+          <div>
+            <label
+              htmlFor="targetDate"
+              className="block text-sm font-medium mb-1"
+            >
+              Target Date
+            </label>
+            <input
+              id="targetDate"
+              type="date"
+              className="w-full px-4 py-2 border rounded-md"
+              {...register('targetDate', {
+                required: 'Target date is required',
+                validate: value =>
+                  new Date(value) > new Date() ||
+                  'Target date must be in the future'
+              })}
+              aria-invalid={errors.targetDate ? 'true' : 'false'}
+            />
+            {errors.targetDate && (
+              <p className="text-red-500 text-sm mt-1" role="alert">
+                {errors.targetDate.message}
+              </p>
+            )}
+          </div>
+
+          {/* Form Error Message */}
+          {errors.root && (
+            <div
+              className="p-4 bg-red-50 border border-red-200 rounded-md"
+              role="alert"
+            >
+              <p className="text-red-500">{errors.root.message}</p>
+            </div>
+          )}
+
+          {/* API Error Message */}
+          {error && (
+            <div
+              className="p-4 bg-red-50 border border-red-200 rounded-md"
+              role="alert"
+            >
+              <p className="text-red-500">{error}</p>
+            </div>
+          )}
+
+          {/* Form Actions */}
+          <div className="flex gap-4">
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isLoading}
+              disabled={isLoading}
+              className="w-full"
+            >
+              Create Goal
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate('/goals')}
+              disabled={isLoading}
+              className="w-full"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </div>
+    </DashboardLayout>
   );
 };
 

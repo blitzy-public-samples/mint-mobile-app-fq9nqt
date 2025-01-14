@@ -10,19 +10,36 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import useInvestments from '../../hooks/useInvestments';
+import { useInvestments } from '../../hooks/useInvestments';
 import DonutChart from '../../components/charts/DonutChart';
 import Spinner from '../../components/common/Spinner';
+import { Investment } from '@/types/models.types';
+import DashboardLayout from '@/layouts/DashboardLayout';
+import { useNavigate } from 'react-router-dom';
+import Table, { TableColumn } from '@/components/common/Table';
 
 // Asset allocation color mapping
 const ASSET_COLORS = {
-  stocks: '#4CAF50',
+  stock: '#4CAF50',
   bonds: '#2196F3',
   cash: '#FFC107',
   realEstate: '#9C27B0',
   commodities: '#FF5722',
+  etf: '#FF9800',
+  crypto: '#E91E63',
   other: '#607D8B'
 };
+
+const INVESTMENT_COLUMNS: TableColumn[] = [
+  { key: 'symbol', header: 'Asset', sortable: true },
+  { key: 'assetType', header: 'Type', sortable: true, },
+  { key: 'currentValue', header: 'Value', sortable: true, render: (investment: Investment) => investment.currentValue.toLocaleString() },
+  { key: 'return', header: 'Return', sortable: true, render: (investment: Investment) => {
+    const isPositive = investment.return >= 0;
+    const Icon = <span style={{ color: isPositive ? 'var(--color-success-400)' : 'var(--color-error-400)' }}>{isPositive ? ' ▲' : ' ▼'}</span>;
+    return (<div>{investment.return.toFixed(2)}% {Icon}</div>);
+  } }
+];
 
 // Interface for portfolio metrics
 interface PortfolioMetrics {
@@ -47,9 +64,11 @@ interface AssetAllocationData {
  * - User Interface Design (Technical Specification/8.1 User Interface Design)
  */
 const Investments: React.FC = () => {
+  const navigate = useNavigate();
+
   // Initialize investment data and operations
   const { investments, loading, error, syncing, fetchInvestments, syncInvestments } = useInvestments();
-  
+
   // Local state for portfolio metrics
   const [metrics, setMetrics] = useState<PortfolioMetrics>({
     totalValue: 0,
@@ -80,7 +99,7 @@ const Investments: React.FC = () => {
    * Transform investment data into chart-compatible format
    * Implements User Interface Design requirement
    */
-  const prepareAssetAllocationData = (investments: any[]): AssetAllocationData[] => {
+  const prepareAssetAllocationData = (investments: Investment[]): AssetAllocationData[] => {
     // Group investments by asset type
     const groupedByType = investments.reduce((acc, inv) => {
       const type = inv.assetType.toLowerCase();
@@ -94,18 +113,23 @@ const Investments: React.FC = () => {
     // Calculate total value for percentage calculation
     const total = Object.values(groupedByType).reduce((sum, value) => sum + value, 0);
 
-    // Transform into chart data format
-    return Object.entries(groupedByType)
-      .map(([type, value]) => ({
-        label: type.charAt(0).toUpperCase() + type.slice(1),
-        value: total > 0 ? (value / total) * 100 : 0,
-        color: ASSET_COLORS[type as keyof typeof ASSET_COLORS] || ASSET_COLORS.other
-      }))
+    const chartData = Object.entries(groupedByType)
+      .map(([type, value]) => {
+        const chartValue = total > 0 ? (value / total) * 100 : 0;
+        return ({
+          label: type.charAt(0).toUpperCase() + type.slice(1),
+          value: +chartValue.toFixed(1),
+          color: ASSET_COLORS[type as keyof typeof ASSET_COLORS] || ASSET_COLORS.other
+        });
+      })
       .sort((a, b) => b.value - a.value);
+
+    // Transform into chart data format
+    return chartData;
   };
 
   // Memoized asset allocation data
-  const assetAllocationData = useMemo(() => 
+  const assetAllocationData = useMemo(() =>
     prepareAssetAllocationData(investments),
     [investments]
   );
@@ -122,143 +146,134 @@ const Investments: React.FC = () => {
     }
   }, [investments]);
 
-  // Handle sync button click
-  const handleSync = async () => {
-    try {
-      await syncInvestments();
-    } catch (error) {
-      console.error('Investment sync failed:', error);
-    }
-  };
-
-  // Render loading state
-  if (loading) {
-    return (
-      <div className="investments-loading" role="status">
-        <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
-      </div>
-    );
+  function handleInvestmentClick(id: string) {
+    navigate(`/investments/${id}`);
   }
 
-  // Render error state
-  if (error) {
-    return (
-      <div className="investments-error" role="alert">
+  // Handle sync button click
+  // const handleSync = async () => {
+  //   try {
+  //     await syncInvestments();
+  //   } catch (error) {
+  //     console.error('Investment sync failed:', error);
+  //   }
+  // };
+
+  const MainContent = <div className="mx-auto max-w-6xl space-y-6">
+    {/* Portfolio Overview Section */}
+    <section className="portfolio-overview" aria-label="Portfolio Overview">
+      <div className="portfolio-header">
+        <h1 className="text-2xl font-semibold mb-6">Investment Portfolio</h1>
+        {/* <button
+        onClick={handleSync}
+        disabled={syncing}
+        className="mt-4 px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
+        aria-label={syncing ? "Syncing investments" : "Sync investments"}
+      >
+        {syncing ? <Spinner size="small" color="white" /> : 'Sync'}
+      </button> */}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-medium">Total Value</h3>
+          <p className="value">${metrics.totalValue.toLocaleString()}</p>
+        </div>
+        <div>
+          <h3 className="font-medium">Total Gain/Loss</h3>
+          <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
+            ${Math.abs(metrics.totalGainLoss).toLocaleString()}
+            {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
+          </p>
+        </div>
+        <div>
+          <h3 className="font-medium">Return</h3>
+          <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
+            {metrics.percentageReturn.toFixed(2)}%
+            {metrics.percentageReturn >= 0 ? ' ▲' : ' ▼'}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* Asset Allocation Section */}
+    <section className="asset-allocation" aria-label="Asset Allocation">
+      <div className="chart-container">
+        <DonutChart
+          data={assetAllocationData}
+          height={400}
+          options={{
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  font: {
+                    size: 16
+                  },
+                  padding: 20,
+                  usePointStyle: true,
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context: any) => {
+                    const value = context.raw as number;
+                    return `${context.label}: ${value.toFixed(1)}%`;
+                  }
+                }
+              },
+            },
+            scales: {
+              x: {
+                display: false,
+              },
+              y: {
+                display: false,
+              }
+            },
+          }}
+          ariaLabel="Asset allocation donut chart"
+        />
+      </div>
+    </section>
+
+    {/* Holdings List Section */}
+    <section className="space-y-4" aria-label="Investment Holdings">
+      <Table
+        data={investments}
+        columns={INVESTMENT_COLUMNS}
+        defaultSortKey="currentValue"
+        defaultSortDirection="desc"
+        onRowClick={(investment) => handleInvestmentClick(investment.id)}
+      />
+    </section>
+
+    {/* Last Updated Information */}
+    <footer className="investments-footer">
+      <p className="last-updated">
+        Last updated: {metrics.lastUpdated.toLocaleString()}
+      </p>
+    </footer>
+  </div>;
+
+  const Content = loading
+    ? (<div className="w-full h-full flex justify-center items-center" role="status">
+      <Spinner size="large" color="primary" ariaLabel="Loading investment data" />
+    </div>)
+    : error
+      ? (<div className="investments-error" role="alert">
         <h2>Error Loading Investments</h2>
         <p>{error.message}</p>
         <button onClick={fetchInvestments} className="retry-button">
           Retry
         </button>
-      </div>
-    );
-  }
+      </div>)
+      : MainContent;
 
   return (
-    <div className="investments-container">
-      {/* Portfolio Overview Section */}
-      <section className="portfolio-overview" aria-label="Portfolio Overview">
-        <div className="portfolio-header">
-          <h1>Investment Portfolio</h1>
-          <button 
-            onClick={handleSync} 
-            disabled={syncing}
-            className="sync-button"
-            aria-label={syncing ? "Syncing investments" : "Sync investments"}
-          >
-            {syncing ? <Spinner size="small" color="white" /> : 'Sync'}
-          </button>
-        </div>
-
-        <div className="portfolio-metrics">
-          <div className="metric-card">
-            <h3>Total Value</h3>
-            <p className="value">${metrics.totalValue.toLocaleString()}</p>
-          </div>
-          <div className="metric-card">
-            <h3>Total Gain/Loss</h3>
-            <p className={`value ${metrics.totalGainLoss >= 0 ? 'positive' : 'negative'}`}>
-              ${Math.abs(metrics.totalGainLoss).toLocaleString()}
-              {metrics.totalGainLoss >= 0 ? ' ▲' : ' ▼'}
-            </p>
-          </div>
-          <div className="metric-card">
-            <h3>Return</h3>
-            <p className={`value ${metrics.percentageReturn >= 0 ? 'positive' : 'negative'}`}>
-              {metrics.percentageReturn.toFixed(2)}%
-              {metrics.percentageReturn >= 0 ? ' ▲' : ' ▼'}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Asset Allocation Section */}
-      <section className="asset-allocation" aria-label="Asset Allocation">
-        <h2>Asset Allocation</h2>
-        <div className="chart-container">
-          <DonutChart
-            data={assetAllocationData}
-            height={300}
-            options={{
-              plugins: {
-                legend: {
-                  position: 'bottom',
-                  labels: {
-                    padding: 20,
-                    usePointStyle: true
-                  }
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (context: any) => {
-                      const value = context.raw as number;
-                      return `${context.label}: ${value.toFixed(1)}%`;
-                    }
-                  }
-                }
-              }
-            }}
-            ariaLabel="Asset allocation donut chart"
-          />
-        </div>
-      </section>
-
-      {/* Holdings List Section */}
-      <section className="holdings-list" aria-label="Investment Holdings">
-        <h2>Holdings</h2>
-        <div className="holdings-table">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Asset</th>
-                <th scope="col">Type</th>
-                <th scope="col">Value</th>
-                <th scope="col">Return</th>
-              </tr>
-            </thead>
-            <tbody>
-              {investments.map((investment) => (
-                <tr key={investment.id}>
-                  <td>{investment.name}</td>
-                  <td>{investment.assetType}</td>
-                  <td>${investment.currentValue.toLocaleString()}</td>
-                  <td className={investment.return >= 0 ? 'positive' : 'negative'}>
-                    {investment.return.toFixed(2)}%
-                    {investment.return >= 0 ? ' ▲' : ' ▼'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Last Updated Information */}
-      <footer className="investments-footer">
-        <p className="last-updated">
-          Last updated: {metrics.lastUpdated.toLocaleString()}
-        </p>
-      </footer>
-    </div>
+    <DashboardLayout>
+      {Content}
+    </DashboardLayout>
   );
 };
 

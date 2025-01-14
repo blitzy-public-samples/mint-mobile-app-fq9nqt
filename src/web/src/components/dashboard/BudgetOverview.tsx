@@ -11,6 +11,7 @@ import React from 'react';
 import { ProgressBar } from '../common/ProgressBar';
 import { Budget } from '../../types/models.types';
 import useBudgets from '../../hooks/useBudgets';
+import Spinner from '../common/Spinner';
 
 interface BudgetOverviewProps {
   className?: string;
@@ -74,14 +75,8 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
   // Early return for loading state
   if (isLoading) {
     return (
-      <div 
-        className={`budget-overview ${className}`}
-        aria-busy="true"
-        aria-label="Loading budget information"
-      >
-        <div className="budget-overview__loading">
-          Loading budgets...
-        </div>
+      <div className="w-full h-full flex justify-center items-center" role="alert" aria-busy="true">
+        <Spinner size="large" color="primary" ariaLabel="Loading budget overview" />
       </div>
     );
   }
@@ -124,7 +119,7 @@ const BudgetOverview: React.FC<BudgetOverviewProps> = ({
     >
       {/* Overall spending summary */}
       <div className="budget-overview__summary">
-        <h2 className="budget-overview__title">Budget Overview</h2>
+        <h2 className="text-xl font-semibold mb-4 text-text-primary text-center">Budget Overview</h2>
         <div className="budget-overview__total">
           <span>Total Spent: ${spendingAnalysis.spent.toLocaleString()}</span>
           <span>Remaining: ${spendingAnalysis.remaining.toLocaleString()}</span>

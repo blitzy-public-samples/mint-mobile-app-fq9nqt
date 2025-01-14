@@ -7,7 +7,7 @@
 
 import React from 'react'; // @version ^18.2.0
 import { Navigate } from 'react-router-dom'; // @version ^6.8.0
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Interface for PrivateRoute component props

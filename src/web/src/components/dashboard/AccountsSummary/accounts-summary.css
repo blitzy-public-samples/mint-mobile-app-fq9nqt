@@ -1,0 +1,7 @@
+.account-group {
+    border-bottom: 1px solid lightgrey;
+}
+
+.account-group:last-child {
+    border-bottom: none;
+}
